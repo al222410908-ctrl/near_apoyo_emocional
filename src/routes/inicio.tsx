@@ -152,104 +152,72 @@ function Dashboard() {
         : "Silencioso";
 
   return (
-    <div className="space-y-3.5 bg-sanctuary px-4 pt-3 pb-4">
+    <div className="space-y-3.5 bg-sanctuary px-4 pt-3 pb-28">
       {/* =====================================================================
-          1. MENÚ SUPERIOR ÚNICO Y ESTÁTICO (Sin duplicados abajo)
+          1. ENCABEZADO SUPERIOR ESTÁTICO (Logo + Racha + XP + Nivel + SOS)
          ===================================================================== */}
-      <div className="sticky top-2 z-30 space-y-2">
-        <header className="flex items-center justify-between gap-2 rounded-2xl border border-b-[3px] border-border/90 border-b-neutral-300 bg-surface/95 px-3 py-2 shadow-sm backdrop-blur-xl dark:border-b-neutral-800">
-          <div className="flex items-center gap-2">
-            <div className="grid size-8 place-items-center rounded-xl bg-primary-tint">
-              <NearMark className="size-5" />
-            </div>
-            <div className="leading-none">
-              <span className="block font-display text-sm font-extrabold tracking-tight text-heading">Near</span>
-              <span className="text-[9px] font-bold text-emerald-700 dark:text-emerald-400">IA Preventiva</span>
-            </div>
+      <header className="sticky top-2 z-30 flex items-center justify-between gap-2 rounded-2xl border border-b-[3px] border-border/90 border-b-neutral-300 bg-surface/95 px-3 py-2 shadow-sm backdrop-blur-xl dark:border-b-neutral-800">
+        <div className="flex items-center gap-2">
+          <div className="grid size-8 place-items-center rounded-xl bg-primary-tint">
+            <NearMark className="size-5" />
           </div>
-
-          <div className="flex items-center gap-1.5">
-            <button
-              type="button"
-              onClick={() => {
-                setActiveModule("perfil");
-                setPerfilSubTab("racha");
-              }}
-              className="inline-flex items-center gap-1 rounded-xl border border-amber-300/90 bg-amber-50/90 px-2 py-1 text-[11px] font-bold text-amber-800 dark:border-amber-800 dark:bg-amber-950/60 dark:text-amber-300"
-              title="Ver Racha de Calma"
-            >
-              <Flame className="size-3.5 fill-amber-500 text-amber-600" />
-              <span>{streak}d</span>
-            </button>
-
-            <motion.button
-              type="button"
-              key={xp}
-              initial={{ scale: 1.12 }}
-              animate={{ scale: 1 }}
-              onClick={() => setActiveModule("perfil")}
-              className="inline-flex items-center gap-1 rounded-xl border border-emerald-300/90 bg-emerald-50/90 px-2 py-1 text-[11px] font-bold text-emerald-800 dark:border-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300"
-              title="Puntos de Bienestar (XP)"
-            >
-              <Sprout className="size-3.5 text-emerald-600 dark:text-emerald-400" />
-              <span>{xp} XP</span>
-            </motion.button>
-
-            <button
-              type="button"
-              onClick={() => setActiveModule("perfil")}
-              className="inline-flex items-center gap-1 rounded-xl border border-border bg-background px-2 py-1 text-[11px] font-bold text-heading"
-              title={`Nivel ${level}`}
-            >
-              <Crown className="size-3.5 text-primary" />
-              <span>Nv.{level}</span>
-            </button>
-
-            <SosDialog
-              trigger={
-                <motion.button
-                  whileTap={{ scale: 0.94 }}
-                  type="button"
-                  className="inline-flex items-center gap-1 rounded-xl border border-b-[2px] border-rose-700 border-b-rose-900 bg-sos px-2.5 py-1 text-[11px] font-extrabold tracking-wider text-sos-foreground shadow-2xs"
-                >
-                  <ShieldAlert className="size-3.5" />
-                  <span>SOS</span>
-                </motion.button>
-              }
-            />
+          <div className="leading-none">
+            <span className="block font-display text-sm font-extrabold tracking-tight text-heading">Near</span>
+            <span className="text-[9px] font-bold text-emerald-700 dark:text-emerald-400">IA Preventiva</span>
           </div>
-        </header>
+        </div>
 
-        {/* NAVEGADOR DIDÁCTICO PRINCIPAL POR MÓDULOS TEMÁTICOS */}
-        <nav
-          aria-label="Módulos temáticos principales"
-          className="grid grid-cols-4 gap-1.5 rounded-2xl border border-b-[3px] border-border/90 border-b-neutral-300 bg-surface/95 p-1.5 shadow-sm backdrop-blur-xl dark:border-b-neutral-800"
-        >
-          {THEMATIC_MODULES.map((mod) => {
-            const isSelected = activeModule === mod.id;
-            const Icon = mod.icon;
-            return (
-              <button
-                key={mod.id}
+        <div className="flex items-center gap-1.5">
+          <button
+            type="button"
+            onClick={() => {
+              setActiveModule("perfil");
+              setPerfilSubTab("racha");
+            }}
+            className="inline-flex items-center gap-1 rounded-xl border border-amber-300/90 bg-amber-50/90 px-2 py-1 text-[11px] font-bold text-amber-800 dark:border-amber-800 dark:bg-amber-950/60 dark:text-amber-300"
+            title="Ver Racha de Calma"
+          >
+            <Flame className="size-3.5 fill-amber-500 text-amber-600" />
+            <span>{streak}d</span>
+          </button>
+
+          <motion.button
+            type="button"
+            key={xp}
+            initial={{ scale: 1.12 }}
+            animate={{ scale: 1 }}
+            onClick={() => setActiveModule("perfil")}
+            className="inline-flex items-center gap-1 rounded-xl border border-emerald-300/90 bg-emerald-50/90 px-2 py-1 text-[11px] font-bold text-emerald-800 dark:border-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300"
+            title="Puntos de Bienestar (XP)"
+          >
+            <Sprout className="size-3.5 text-emerald-600 dark:text-emerald-400" />
+            <span>{xp} XP</span>
+          </motion.button>
+
+          <button
+            type="button"
+            onClick={() => setActiveModule("perfil")}
+            className="inline-flex items-center gap-1 rounded-xl border border-border bg-background px-2 py-1 text-[11px] font-bold text-heading"
+            title={`Nivel ${level}`}
+          >
+            <Crown className="size-3.5 text-primary" />
+            <span>Nv.{level}</span>
+          </button>
+
+          <SosDialog
+            trigger={
+              <motion.button
+                whileTap={{ scale: 0.94 }}
                 type="button"
-                onClick={() => setActiveModule(mod.id)}
-                className={cn(
-                  "flex flex-col items-center justify-center gap-0.5 rounded-xl px-1.5 py-2 text-center transition-all",
-                  isSelected
-                    ? cn("border border-b-[3px] shadow-xs", mod.activeColor)
-                    : "text-muted-foreground hover:bg-surface-2 hover:text-heading",
-                )}
+                className="inline-flex items-center gap-1 rounded-xl border border-b-[2px] border-rose-700 border-b-rose-900 bg-sos px-2.5 py-1 text-[11px] font-extrabold tracking-wider text-sos-foreground shadow-2xs"
               >
-                <Icon className={cn("size-4", isSelected && "stroke-[2.3]")} />
-                <span className="block text-[11px] font-extrabold leading-tight">{mod.label}</span>
-                <span className={cn("block text-[9px] leading-none", isSelected ? "opacity-90" : "opacity-70")}>
-                  {mod.subtitle}
-                </span>
-              </button>
-            );
-          })}
-        </nav>
-      </div>
+                <ShieldAlert className="size-3.5" />
+                <span>SOS</span>
+              </motion.button>
+            }
+          />
+        </div>
+      </header>
 
       {/* =====================================================================
           2. VISTAS MODULARES LIMPIAS (Una sola actividad enfocada a la vez)
@@ -684,6 +652,40 @@ function Dashboard() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* =====================================================================
+          3. MENÚ DE NAVEGACIÓN FIJO ABAJO (Fixed Bottom Dock)
+         ===================================================================== */}
+      <div className="pointer-events-none fixed bottom-0 left-1/2 z-40 w-full max-w-md -translate-x-1/2 px-3 pb-3 pb-safe">
+        <nav
+          aria-label="Módulos temáticos principales"
+          className="pointer-events-auto grid grid-cols-4 gap-1.5 rounded-3xl border border-b-[4px] border-border/90 border-b-neutral-300 bg-surface/95 p-1.5 shadow-2xl backdrop-blur-2xl dark:border-b-neutral-800"
+        >
+          {THEMATIC_MODULES.map((mod) => {
+            const isSelected = activeModule === mod.id;
+            const Icon = mod.icon;
+            return (
+              <button
+                key={mod.id}
+                type="button"
+                onClick={() => setActiveModule(mod.id)}
+                className={cn(
+                  "flex flex-col items-center justify-center gap-0.5 rounded-2xl px-1.5 py-2 text-center transition-all",
+                  isSelected
+                    ? cn("border border-b-[3px] shadow-xs", mod.activeColor)
+                    : "text-muted-foreground hover:bg-surface-2 hover:text-heading",
+                )}
+              >
+                <Icon className={cn("size-4.5", isSelected && "stroke-[2.3]")} />
+                <span className="block text-[11px] font-extrabold leading-tight">{mod.label}</span>
+                <span className={cn("block text-[9px] leading-none", isSelected ? "opacity-90" : "opacity-70")}>
+                  {mod.subtitle}
+                </span>
+              </button>
+            );
+          })}
+        </nav>
+      </div>
 
       {/* Modal de Cápsula Interactiva */}
       <AnimatePresence>

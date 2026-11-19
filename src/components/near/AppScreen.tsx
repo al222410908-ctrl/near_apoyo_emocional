@@ -86,14 +86,11 @@ export function AppScreen({
         />
       </div>
 
-      {/* Menú Superior Estático Principal en vistas secundarias */}
-      {nav && <BottomNav />}
-
       <motion.main
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3, ease: "easeOut" }}
-        className={cn("relative z-10 flex-1 pb-6", className)}
+        className={cn("relative z-10 flex-1", nav ? "pb-28" : "pb-24", className)}
       >
         {children}
         {emergency && (
@@ -102,6 +99,9 @@ export function AppScreen({
           </div>
         )}
       </motion.main>
+
+      {/* Menú Principal Fijo Abajo en vistas secundarias */}
+      {nav && <BottomNav />}
     </div>
   );
 }
