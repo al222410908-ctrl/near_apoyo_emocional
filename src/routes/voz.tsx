@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "framer-motion";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Lock, Mic, MicOff, X } from "lucide-react";
+import { Lock, MessageCircleHeart, Mic, MicOff, Sparkles, X } from "lucide-react";
 import { toast } from "sonner";
 import { AppScreen } from "@/components/near/AppScreen";
 import { SafetyCard } from "@/components/near/SafetyCard";
@@ -14,10 +14,10 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/voz")({
   head: () => ({
     meta: [
-      { title: "Modo de Voz · Near Apoyo Emocional" },
-      { name: "description", content: "Habla con Near en voz alta, como en un diálogo real, en un espacio sereno." },
-      { property: "og:title", content: "Modo de Voz · Near Apoyo Emocional" },
-      { property: "og:description", content: "Habla con Near en voz alta, como en un diálogo real, en un espacio sereno." },
+      { title: "Modo de Voz IA · Near Apoyo Emocional" },
+      { name: "description", content: "Habla con Near IA en voz alta, como en un diálogo real, en un espacio sereno." },
+      { property: "og:title", content: "Modo de Voz IA · Near Apoyo Emocional" },
+      { property: "og:description", content: "Habla con Near IA en voz alta, como en un diálogo real, en un espacio sereno." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -31,21 +31,28 @@ export const Route = createFileRoute("/voz")({
 
 type Phase = "idle" | "listening" | "thinking" | "speaking";
 
-const DEMO_PHRASES = ["Siento mucha presión por mis exámenes finales", "Hoy me siento muy cansada", "Necesito calmarme un poco"];
+const DEMO_PHRASES = [
+  "Siento mucha presión por mis exámenes finales",
+  "Hoy me siento muy cansado y sin foco",
+  "Necesito calmarme un poco antes de clase",
+];
 
 const PHASE_LABEL: Record<Phase, string> = {
-  idle: "Toca el micrófono para hablar",
-  listening: "Te escucho…",
-  thinking: "Near está pensando con cuidado…",
-  speaking: "Near te responde",
+  idle: "Toca el micrófono o elige una frase para hablar",
+  listening: "Escuchando tu voz…",
+  thinking: "Near IA está procesando…",
+  speaking: "Near IA te responde",
 };
 
 function VoiceScreen() {
-  const { settings, addMessage } = useNear();
+  const { settings, addMessage, addXp, showPill } = useNear();
   const [phase, setPhase] = useState<Phase>("idle");
   const [userLine, setUserLine] = useState("");
-  const [nearLine, setNearLine] = useState("Hola. Estoy aquí para escucharte. Cuando quieras, cuéntame cómo te sientes.");
+  const [nearLine, setNearLine] = useState(
+    "Hola. Estoy aquí para escucharte en voz alta. Cuando quieras, cuéntame cómo te sientes hoy.",
+  );
   const [crisis, setCrisis] = useState(false);
+  const [rewarded, setRewarded] = useState(false);
   const timers = useRef<number[]>([]);
   const demoIdx = useRef(0);
   const tts = useSpeechSynthesis(settings.voiceRate);
@@ -54,6 +61,18 @@ function VoiceScreen() {
     (heard: string) => {
       setUserLine(heard);
       addMessage({ role: "user", text: heard });
+
+      if (!rewarded) {
+        setRewarded(true);
+        addXp(20);
+        showPill({
+          emoji: "🎙️",
+          title: "Sesión de Voz con Near IA",
+          subtitle: "+20 XP de Bienestar Preventivo",
+          tone: "primary",
+        });
+      }
+
       if (detectCrisis(heard)) {
         setCrisis(true);
         setPhase("idle");
@@ -70,21 +89,20 @@ function VoiceScreen() {
       }, 1100);
       timers.current.push(t);
     },
-    [addMessage, settings.companionStyle, tts],
+    [addMessage, addXp, rewarded, settings.companionStyle, showPill, tts],
   );
 
   const fallbackRef = useRef<() => void>(() => {});
   const stt = useSpeechRecognition({
     onFinal: respond,
     onError: () => {
-      toast("No pudimos usar tu micrófono", { description: "Te mostramos una conversación de ejemplo." });
+      toast("Simulando entrada de voz", { description: "Te mostramos la respuesta de voz de Near IA." });
       fallbackRef.current();
     },
   });
 
   useEffect(() => {
     if (!stt.listening && phase === "listening" && !stt.interim) {
-      // Recognition ended without speech
       const t = window.setTimeout(() => setPhase((p) => (p === "listening" ? "idle" : p)), 300);
       return () => window.clearTimeout(t);
     }
@@ -93,17 +111,18 @@ function VoiceScreen() {
 
   useEffect(() => () => timers.current.forEach((t) => window.clearTimeout(t)), []);
 
-  const startDemo = () => {
-    const phrase = DEMO_PHRASES[demoIdx.current++ % DEMO_PHRASES.length] ?? "Necesito calmarme un poco";
+  const triggerSimulatedPhrase = (customPhrase?: string) => {
+    const phrase =
+      customPhrase ?? DEMO_PHRASES[demoIdx.current++ % DEMO_PHRASES.length] ?? "Necesito calmarme un poco";
     setPhase("listening");
     setUserLine("");
     phrase.split(" ").forEach((_, i, arr) => {
-      timers.current.push(window.setTimeout(() => setUserLine(arr.slice(0, i + 1).join(" ")), 250 * (i + 1)));
+      timers.current.push(window.setTimeout(() => setUserLine(arr.slice(0, i + 1).join(" ")), 180 * (i + 1)));
     });
-    timers.current.push(window.setTimeout(() => respond(phrase), 250 * phrase.split(" ").length + 600));
+    timers.current.push(window.setTimeout(() => respond(phrase), 180 * phrase.split(" ").length + 450));
   };
 
-  fallbackRef.current = startDemo;
+  fallbackRef.current = () => triggerSimulatedPhrase();
 
   const toggleMic = () => {
     if (phase === "speaking") {
@@ -120,89 +139,162 @@ function VoiceScreen() {
     if (stt.supported && stt.start()) {
       setUserLine("");
       setPhase("listening");
-    } else startDemo();
+    } else triggerSimulatedPhrase();
   };
 
   const liveUser = phase === "listening" && stt.interim ? stt.interim : userLine;
   const active = phase === "listening" || phase === "speaking";
 
   return (
-    <div className="relative flex min-h-screen flex-col overflow-hidden bg-voice px-6 pt-6 pb-10">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-1.5 rounded-full bg-background/60 px-3 py-1.5 text-xs text-muted-foreground backdrop-blur">
-          <Lock className="size-3" /> Modo de Voz · Privado
+    <div className="relative flex min-h-screen flex-col justify-between overflow-hidden bg-voice px-5 pt-5 pb-8">
+      {/* Top Tactile Controls */}
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-1.5 rounded-xl border border-b-[3px] border-border bg-surface/85 px-3 py-1.5 text-xs font-bold text-heading backdrop-blur">
+          <Lock className="size-3.5 text-emerald-600" />
+          <span>Near Voz IA · Privado</span>
         </div>
-        <Link to="/chat" className="grid size-11 place-items-center rounded-full bg-background/70 text-heading backdrop-blur" aria-label="Volver al chat">
-          <X className="size-5" />
-        </Link>
+
+        <div className="flex items-center gap-2">
+          <Link
+            to="/chat"
+            className="flex items-center gap-1.5 rounded-xl border border-b-[3px] border-border bg-surface/85 px-3 py-1.5 text-xs font-bold text-heading backdrop-blur transition-transform active:translate-y-0.5"
+          >
+            <MessageCircleHeart className="size-3.5 text-primary" />
+            <span>Ir a Chat</span>
+          </Link>
+          <Link
+            to="/inicio"
+            className="grid size-9 place-items-center rounded-xl border border-b-[3px] border-border bg-surface/85 text-heading backdrop-blur transition-transform active:translate-y-0.5"
+            aria-label="Cerrar modo de voz"
+          >
+            <X className="size-4.5" />
+          </Link>
+        </div>
       </div>
 
-      <div className="relative flex flex-1 items-center justify-center">
+      {/* Center Breathing AI Sphere */}
+      <div className="relative my-auto flex items-center justify-center py-8">
         <motion.div
-          className="absolute size-80 rounded-full bg-sphere opacity-50 blur-3xl"
-          animate={{ scale: phase === "speaking" ? [1, 1.25, 1.05, 1.2, 1] : phase === "listening" ? [1, 1.12, 1] : [0.95, 1.03, 0.95] }}
-          transition={{ duration: phase === "speaking" ? 1.6 : phase === "listening" ? 1.2 : 6, repeat: Infinity, ease: "easeInOut" }}
-        />
-        <motion.div
-          className="relative size-56 rounded-full bg-sphere shadow-glow"
+          className="absolute size-72 rounded-full bg-sphere opacity-45 blur-3xl"
           animate={{
-            scale: phase === "speaking" ? [1, 1.08, 0.98, 1.06, 1] : phase === "listening" ? [1, 1.05, 1] : phase === "thinking" ? [1, 0.96, 1] : [0.97, 1.02, 0.97],
-            rotate: phase === "thinking" ? 360 : 0,
+            scale:
+              phase === "speaking"
+                ? [1, 1.24, 1.05, 1.18, 1]
+                : phase === "listening"
+                  ? [1, 1.12, 1]
+                  : [0.95, 1.03, 0.95],
           }}
           transition={{
-            scale: { duration: phase === "speaking" ? 0.9 : phase === "listening" ? 1.1 : 5, repeat: Infinity, ease: "easeInOut" },
-            rotate: { duration: 4, repeat: phase === "thinking" ? Infinity : 0, ease: "linear" },
+            duration: phase === "speaking" ? 1.5 : phase === "listening" ? 1.2 : 5,
+            repeat: Infinity,
+            ease: "easeInOut",
           }}
+        />
+        <motion.button
+          type="button"
+          onClick={toggleMic}
+          className="relative size-48 rounded-full border-2 border-white/30 bg-sphere shadow-glow"
+          animate={{
+            scale:
+              phase === "speaking"
+                ? [1, 1.08, 0.98, 1.06, 1]
+                : phase === "listening"
+                  ? [1, 1.05, 1]
+                  : phase === "thinking"
+                    ? [1, 0.95, 1]
+                    : [0.97, 1.02, 0.97],
+          }}
+          transition={{
+            scale: {
+              duration: phase === "speaking" ? 0.9 : phase === "listening" ? 1.1 : 4.5,
+              repeat: Infinity,
+              ease: "easeInOut",
+            },
+          }}
+          aria-label="Núcleo de voz Near IA"
         >
           <span className="absolute inset-6 rounded-full bg-background/20 blur-md" />
-          <span className="absolute top-10 left-12 size-14 rounded-full bg-background/40 blur-xl" />
-        </motion.div>
+          <span className="absolute top-8 left-10 size-12 rounded-full bg-background/40 blur-xl" />
+        </motion.button>
         {active &&
           [0, 1].map((i) => (
             <motion.span
               key={i}
-              className="absolute size-56 rounded-full border-2 border-primary-soft/50"
+              className="pointer-events-none absolute size-48 rounded-full border-2 border-primary-soft/50"
               initial={{ scale: 1, opacity: 0.6 }}
-              animate={{ scale: 1.7, opacity: 0 }}
-              transition={{ duration: 2.2, repeat: Infinity, delay: i * 1.1, ease: "easeOut" }}
+              animate={{ scale: 1.65, opacity: 0 }}
+              transition={{ duration: 2, repeat: Infinity, delay: i * 1, ease: "easeOut" }}
             />
           ))}
       </div>
 
-      <div className="min-h-36 space-y-3 text-center">
-        <p className="text-xs font-semibold tracking-widest text-muted-foreground uppercase">{PHASE_LABEL[phase]}</p>
-        <AnimatePresence mode="wait">
-          {crisis ? (
-            <motion.div key="crisis" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-left">
-              <SafetyCard />
-            </motion.div>
-          ) : (
-            <motion.div key={phase === "listening" ? "u" : "n"} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
-              {phase === "listening" || phase === "thinking" ? (
-                <p className="font-display text-xl leading-snug text-heading">{liveUser || "…"}</p>
-              ) : (
-                <p className="font-display text-lg leading-snug text-heading">{nearLine}</p>
-              )}
-              {phase !== "listening" && phase !== "thinking" && userLine && <p className="mt-2 text-sm text-muted-foreground">Tú: “{userLine}”</p>}
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
+      {/* Transcript Card & Controls */}
+      <div className="space-y-4">
+        <div className="rounded-3xl border border-b-[4px] border-border border-b-neutral-300 bg-surface/90 p-4 text-center shadow-sm backdrop-blur-md dark:border-b-neutral-800">
+          <p className="text-[11px] font-extrabold tracking-widest text-primary uppercase">
+            {PHASE_LABEL[phase]}
+          </p>
+          <AnimatePresence mode="wait">
+            {crisis ? (
+              <motion.div key="crisis" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-3 text-left">
+                <SafetyCard />
+              </motion.div>
+            ) : (
+              <motion.div
+                key={phase === "listening" ? "u" : "n"}
+                initial={{ opacity: 0, y: 5 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                className="mt-2"
+              >
+                {phase === "listening" || phase === "thinking" ? (
+                  <p className="font-display text-lg font-bold leading-snug text-heading">{liveUser || "…"}</p>
+                ) : (
+                  <p className="font-display text-base font-semibold leading-snug text-heading">“{nearLine}”</p>
+                )}
+                {phase !== "listening" && phase !== "thinking" && userLine && (
+                  <p className="mt-1.5 text-xs text-muted-foreground">Dijiste: “{userLine}”</p>
+                )}
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
 
-      <div className="mt-8 flex flex-col items-center gap-3">
-        <motion.button
-          type="button"
-          whileTap={{ scale: 0.92 }}
-          onClick={toggleMic}
-          className={cn(
-            "grid size-20 place-items-center rounded-full shadow-lift transition-colors",
-            phase === "listening" ? "bg-secondary text-secondary-foreground" : "bg-clay text-primary-foreground",
-          )}
-          aria-label={phase === "listening" ? "Dejar de hablar" : phase === "speaking" ? "Interrumpir a Near" : "Hablar"}
-        >
-          {phase === "listening" ? <MicOff className="size-8" /> : <Mic className="size-8" />}
-        </motion.button>
-        {!stt.supported && <p className="text-center text-[11px] text-muted-foreground">Tu navegador no admite reconocimiento de voz: usaremos frases de ejemplo.</p>}
+        {/* Quick Voice Prompt Chips for Instant Testing */}
+        <div className="no-scrollbar flex gap-1.5 overflow-x-auto pb-1">
+          {DEMO_PHRASES.map((phrase) => (
+            <button
+              key={phrase}
+              type="button"
+              disabled={phase === "listening" || phase === "thinking"}
+              onClick={() => triggerSimulatedPhrase(phrase)}
+              className="shrink-0 rounded-xl border border-b-[3px] border-border bg-surface/90 px-3 py-1.5 text-xs font-semibold text-heading transition-all hover:border-primary/40 active:translate-y-0.5 disabled:opacity-40"
+            >
+              <Sparkles className="mr-1 inline size-3 text-primary" />
+              {phrase}
+            </button>
+          ))}
+        </div>
+
+        <div className="flex flex-col items-center gap-2">
+          <motion.button
+            type="button"
+            whileTap={{ scale: 0.92 }}
+            onClick={toggleMic}
+            className={cn(
+              "grid size-18 place-items-center rounded-3xl border-2 border-b-[5px] shadow-lg transition-all active:translate-y-0.5",
+              phase === "listening"
+                ? "border-secondary border-b-slate-900 bg-secondary text-secondary-foreground"
+                : "border-primary border-b-[#693222] bg-clay text-primary-foreground",
+            )}
+            aria-label={phase === "listening" ? "Detener micrófono" : "Hablar con Near"}
+          >
+            {phase === "listening" ? <MicOff className="size-7" /> : <Mic className="size-7" />}
+          </motion.button>
+          <span className="text-[11px] font-semibold text-muted-foreground">
+            {phase === "speaking" ? "Toca para interrumpir" : "Toca para hablar o usa un tema rápido arriba"}
+          </span>
+        </div>
       </div>
     </div>
   );

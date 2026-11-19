@@ -6,31 +6,31 @@ import { cn } from "@/lib/utils";
 const tabs = [
   {
     to: "/inicio",
-    label: "Camino",
+    label: "Inicio",
     icon: Compass,
-    activeClass: "border-amber-500 border-b-amber-700 bg-amber-400 text-amber-950 shadow-amber-500/25",
-    labelClass: "text-amber-700 dark:text-amber-400",
+    activeClass: "border-primary/40 border-b-primary bg-primary-tint text-primary",
+    labelClass: "text-primary",
   },
   {
     to: "/chat",
-    label: "Chat IA",
+    label: "Near IA",
     icon: MessageCircleHeart,
-    activeClass: "border-rose-500 border-b-rose-700 bg-rose-500 text-white shadow-rose-500/25",
-    labelClass: "text-rose-600 dark:text-rose-400",
+    activeClass: "border-primary border-b-[#693222] bg-clay text-primary-foreground",
+    labelClass: "text-primary",
   },
   {
     to: "/calma",
     label: "Calma",
     icon: Leaf,
-    activeClass: "border-emerald-500 border-b-emerald-700 bg-emerald-500 text-white shadow-emerald-500/25",
+    activeClass: "border-emerald-400/70 border-b-emerald-600 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300",
     labelClass: "text-emerald-700 dark:text-emerald-400",
   },
   {
     to: "/perfil",
     label: "Perfil",
     icon: UserRound,
-    activeClass: "border-violet-500 border-b-violet-700 bg-violet-500 text-white shadow-violet-500/25",
-    labelClass: "text-violet-700 dark:text-violet-400",
+    activeClass: "border-secondary/40 border-b-secondary bg-secondary-tint text-secondary",
+    labelClass: "text-secondary",
   },
 ] as const;
 
@@ -39,7 +39,7 @@ export function BottomNav() {
 
   return (
     <nav
-      className="border-t-2 border-border bg-surface/95 px-3 pt-2 pb-safe shadow-2xl backdrop-blur-xl"
+      className="border-t border-border bg-surface/95 px-3 pt-2 pb-safe shadow-lg backdrop-blur-xl"
       aria-label="Navegación principal"
     >
       <ul className="grid grid-cols-4 gap-1.5 pb-2">
@@ -55,21 +55,21 @@ export function BottomNav() {
                 className="group flex w-full flex-col items-center gap-1 rounded-2xl py-1 transition-all"
               >
                 <motion.span
-                  whileTap={{ scale: 0.88 }}
-                  animate={isActive ? { y: -2 } : { y: 0 }}
+                  whileTap={{ scale: 0.9 }}
+                  animate={isActive ? { y: -1 } : { y: 0 }}
                   className={cn(
-                    "grid h-10 w-14 place-items-center rounded-2xl transition-all",
+                    "grid h-9 w-13 place-items-center rounded-xl transition-all",
                     isActive
-                      ? cn("border-2 border-b-4 shadow-md", activeClass)
-                      : "border-2 border-transparent text-muted-foreground group-hover:bg-surface-2 group-hover:text-foreground",
+                      ? cn("border border-b-[3px] shadow-xs", activeClass)
+                      : "border border-transparent text-muted-foreground group-hover:bg-surface-2 group-hover:text-foreground",
                   )}
                 >
-                  <Icon className={cn("size-5 transition-transform", isActive && "scale-110 stroke-[2.5]")} />
+                  <Icon className={cn("size-4.5 transition-transform", isActive && "scale-105 stroke-[2.3]")} />
                 </motion.span>
                 <span
                   className={cn(
                     "text-[11px] tracking-tight transition-colors",
-                    isActive ? cn("font-black", labelClass) : "font-semibold text-muted-foreground",
+                    isActive ? cn("font-extrabold", labelClass) : "font-medium text-muted-foreground",
                   )}
                 >
                   {label}

@@ -1,6 +1,7 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { Check, CheckCircle2, Flame, Lightbulb, Sparkles, Trophy, Volume2, X, XCircle } from "lucide-react";
 import { useState } from "react";
+import { NearMark } from "@/components/near/Logo";
 import { useNear } from "@/context/NearContext";
 import type { InteractiveLesson } from "@/services/lessonsData";
 import { cn } from "@/lib/utils";
@@ -193,18 +194,18 @@ export function InteractiveLessonModal({ lesson, onClose }: InteractiveLessonMod
                   {lesson.title}
                 </h2>
 
-                {/* Near Character Dialogue Bubble */}
-                <div className="flex items-start gap-3.5 rounded-3xl border-2 border-b-4 border-primary/25 bg-primary-tint/50 p-4">
+                {/* Near AI Companion Dialogue Bubble */}
+                <div className="flex items-start gap-3.5 rounded-3xl border border-b-[4px] border-border bg-surface p-4">
                   <motion.div
-                    animate={{ y: [0, -5, 0], rotate: [0, -4, 4, 0] }}
+                    animate={{ scale: [1, 1.05, 1] }}
                     transition={{ duration: 3.5, repeat: Infinity }}
-                    className="grid size-14 shrink-0 place-items-center rounded-2xl border-2 border-b-4 border-amber-600 bg-gradient-to-br from-amber-400 to-orange-500 text-2xl shadow-md"
+                    className="grid size-13 shrink-0 place-items-center rounded-2xl border border-border bg-background shadow-sm"
                   >
-                    🦊
+                    <NearMark className="size-8" />
                   </motion.div>
                   <div className="flex-1">
                     <p className="text-[11px] font-extrabold uppercase tracking-wider text-primary">
-                      Near · Tu Guía
+                      Near · IA Preventiva
                     </p>
                     <p className="mt-0.5 text-sm font-medium leading-relaxed text-heading">
                       “{lesson.storyStep.mascotQuote}”

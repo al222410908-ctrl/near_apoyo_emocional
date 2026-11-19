@@ -1,126 +1,129 @@
+import { Link } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "framer-motion";
-import { Crown, Flame, Sparkles, Sprout } from "lucide-react";
+import { AudioLines, Crown, Flame, MessageCircleHeart, Sparkles, Sprout } from "lucide-react";
 import { useState } from "react";
+import { NearMark } from "@/components/near/Logo";
 import { SosDialog } from "@/components/near/SosDialog";
 import { useNear } from "@/context/NearContext";
 import type { MoodId } from "@/types";
 
-const MASCOT_TIPS = [
-  "¡Tócame cuando necesites un recordatorio amable! Hoy no tienes que poder con todo a la vez. 🌿",
-  "¿Sabías que exhalar más lento de lo que inhalas engaña a tu cerebro para apagar el estrés? 🌬️",
-  "Un semestre se gana paso a paso, no en una sola madrugada sin dormir. ¡Cuida tu descanso! 🌙",
-  "Si hoy solo avanzaste un 10% en tu proyecto, ese 10% ya es victoria. ¡Estoy orgulloso de ti! ✨",
-  "Tu calificación mide un examen, nunca tu inteligencia ni lo lejos que vas a llegar. 🏆",
+const AI_INSIGHTS = [
+  "Estoy listo para escucharte por texto o voz. Si sientes saturación por entregas, podemos dividir tu día en pasos simples.",
+  "Recuerda: exhalar más lento de lo que inhalas reduce la activación fisiológica del estrés en menos de 90 segundos.",
+  "Tu rendimiento académico depende de tu descanso. Hacer una pausa preventiva a tiempo protege tu enfoque.",
+  "Puedes cambiar mi estilo de acompañamiento (Cálido, Directo o Silencioso) en cualquier momento según lo que necesites hoy.",
 ];
 
-function getMoodMessage(name: string, mood?: MoodId) {
+function getContextualAiGreeting(name: string, mood?: MoodId) {
   const n = name ? `, ${name}` : "";
   if (mood === "ansioso") {
-    return `Siento que hoy hay nervios${n}. Respira conmigo, vamos a bajar el ruido mental juntos.`;
+    return `Noté que hoy registraste ansiedad${n}. Hablemos un momento o hagamos una pausa guiada para bajar el ritmo mental.`;
   }
   if (mood === "abrumado") {
-    return `Cuando todo se junta en la uni se siente pesado${n}. Hoy solo elijamos una cosa pequeña.`;
+    return `Cuando se acumulan proyectos todo parece urgente${n}. Si quieres, escríbeme y ordenamos juntos una sola prioridad.`;
   }
   if (mood === "cansado") {
-    return `Tu cuerpo pide pausa${n}. Se vale bajar la velocidad sin sentir culpa.`;
+    return `Hoy tu energía está baja${n}. No te exijas de más; estoy aquí si necesitas desahogarte sin filtros.`;
   }
   if (mood === "esperanzado") {
-    return `¡Me encanta ver esa chispa hoy${n}! Aprovecha esta energía bonita a tu propio ritmo.`;
+    return `Qué gusto ver que hoy te sientes con ánimo${n}. Aprovechemos esa claridad para fortalecer tu racha.`;
   }
   if (mood === "calmado") {
-    return `¡Qué paz se siente hoy${n}! Guardemos este momento en tu racha de bienestar.`;
+    return `Excelente equilibrio hoy${n}. Mantengamos esa serenidad durante el resto de tus actividades.`;
   }
 
   const h = new Date().getHours();
-  if (h >= 5 && h < 12) return `¡Buen día${n}! ☀️ ¿Listo para conquistar tus clases sin descuidar tu paz?`;
-  if (h >= 12 && h < 19) return `¡Hola${n}! 🌤️ Hagamos una pausa de 2 minutos para recargar tu batería mental.`;
-  return `¡Buenas noches${n}! 🌙 Suelta la mochila escolar, aquí estás en tu refugio seguro.`;
+  if (h >= 5 && h < 12) return `Buen día${n}. Soy Near, tu IA de acompañamiento preventivo. ¿Cómo arrancamos tu jornada hoy?`;
+  if (h >= 12 && h < 19) return `Buenas tardes${n}. Estoy activo por si necesitas despejar la mente entre clases o entregas.`;
+  return `Buenas noches${n}. Es momento de soltar la carga académica; conversemos si traes algo en mente.`;
 }
 
 export function NearMascotHero() {
-  const { displayName, streak, xp, todayMood, addXp, showPill } = useNear();
-  const [tapIndex, setTapIndex] = useState<number | null>(null);
-  const [pettedToday, setPettedToday] = useState(false);
-  const [jumping, setJumping] = useState(false);
+  const { displayName, streak, xp, todayMood, settings, addXp, showPill } = useNear();
+  const [tipIndex, setTipIndex] = useState<number | null>(null);
+  const [interactedToday, setInteractedToday] = useState(false);
+  const [pulsing, setPulsing] = useState(false);
 
   const level = Math.floor(xp / 100) + 1;
   const levelProgress = xp % 100;
 
-  const handleTapMascot = () => {
-    setJumping(true);
-    window.setTimeout(() => setJumping(false), 600);
-
-    setTapIndex((prev) => (prev === null ? 0 : (prev + 1) % MASCOT_TIPS.length));
+  const handlePulseOrb = () => {
+    setPulsing(true);
+    window.setTimeout(() => setPulsing(false), 600);
+    setTipIndex((prev) => (prev === null ? 0 : (prev + 1) % AI_INSIGHTS.length));
 
     if (typeof window !== "undefined" && "vibrate" in navigator) {
       try {
-        navigator.vibrate([30, 50, 40]);
+        navigator.vibrate(30);
       } catch {
         // Ignore
       }
     }
 
-    if (!pettedToday) {
-      setPettedToday(true);
+    if (!interactedToday) {
+      setInteractedToday(true);
       addXp(5);
       showPill({
-        emoji: "🦊",
-        title: "¡Near se alegra de verte!",
-        subtitle: "+5 Semillas de Calma por saludar a tu guía",
-        tone: "gold",
+        emoji: "✨",
+        title: "Sincronizado con Near IA",
+        subtitle: "+5 XP de Bienestar Preventivo",
+        tone: "primary",
       });
     }
   };
 
-  const bubbleText = tapIndex !== null ? MASCOT_TIPS[tapIndex] : getMoodMessage(displayName, todayMood?.mood);
+  const activeMessage = tipIndex !== null ? AI_INSIGHTS[tipIndex] : getContextualAiGreeting(displayName, todayMood?.mood);
+  const styleLabel =
+    settings.companionStyle === "calido"
+      ? "Cálido"
+      : settings.companionStyle === "directo"
+        ? "Directo"
+        : "Silencioso";
 
   return (
-    <div className="space-y-4">
-      {/* Top Gamified Duolingo-Style HUD Bar */}
+    <div className="space-y-3.5">
+      {/* Top Mature Gamified HUD Bar */}
       <div className="flex items-center justify-between gap-2">
-        <div className="flex flex-wrap items-center gap-2">
-          {/* Streak 3D Pill */}
+        <div className="flex flex-wrap items-center gap-1.5">
+          {/* Streak Pill */}
           <motion.div
-            whileHover={{ y: -2 }}
-            whileTap={{ scale: 0.94 }}
-            className="inline-flex items-center gap-1.5 rounded-2xl border-2 border-b-4 border-orange-300 border-b-orange-500 bg-orange-50 px-3 py-1.5 text-xs font-black text-orange-600 shadow-xs dark:border-orange-700 dark:border-b-orange-900 dark:bg-orange-950/70 dark:text-orange-300"
-            title="Tu Racha de Calma"
+            whileHover={{ y: -1 }}
+            className="inline-flex items-center gap-1.5 rounded-xl border border-b-[3px] border-amber-300/90 border-b-amber-500 bg-amber-50/90 px-2.5 py-1 text-xs font-bold text-amber-800 dark:border-amber-800 dark:border-b-amber-950 dark:bg-amber-950/60 dark:text-amber-300"
+            title="Racha de Calma"
           >
-            <Flame className="size-4 fill-orange-500 text-orange-500" />
-            <span>{streak}</span>
+            <Flame className="size-3.5 fill-amber-500 text-amber-600" />
+            <span>{streak}d</span>
           </motion.div>
 
-          {/* Seeds XP 3D Pill */}
+          {/* XP Seeds Pill */}
           <motion.div
             key={xp}
-            initial={{ scale: 1.18 }}
+            initial={{ scale: 1.12 }}
             animate={{ scale: 1 }}
-            whileHover={{ y: -2 }}
-            className="inline-flex items-center gap-1.5 rounded-2xl border-2 border-b-4 border-emerald-300 border-b-emerald-500 bg-emerald-50 px-3 py-1.5 text-xs font-black text-emerald-700 shadow-xs dark:border-emerald-700 dark:border-b-emerald-900 dark:bg-emerald-950/70 dark:text-emerald-300"
-            title="Semillas de Calma (XP)"
+            className="inline-flex items-center gap-1.5 rounded-xl border border-b-[3px] border-emerald-300/90 border-b-emerald-500 bg-emerald-50/90 px-2.5 py-1 text-xs font-bold text-emerald-800 dark:border-emerald-800 dark:border-b-emerald-950 dark:bg-emerald-950/60 dark:text-emerald-300"
+            title="Puntos de Bienestar (XP)"
           >
-            <Sprout className="size-4 text-emerald-600 dark:text-emerald-400" />
+            <Sprout className="size-3.5 text-emerald-600 dark:text-emerald-400" />
             <span>{xp} XP</span>
           </motion.div>
 
-          {/* Level 3D Pill */}
-          <motion.div
-            whileHover={{ y: -2 }}
-            className="inline-flex items-center gap-1.5 rounded-2xl border-2 border-b-4 border-violet-300 border-b-violet-500 bg-violet-50 px-3 py-1.5 text-xs font-black text-violet-700 shadow-xs dark:border-violet-700 dark:border-b-violet-900 dark:bg-violet-950/70 dark:text-violet-300"
-            title="Nivel de Bienestar"
+          {/* Level Pill */}
+          <div
+            className="inline-flex items-center gap-1 rounded-xl border border-b-[3px] border-slate-300 border-b-slate-400 bg-surface px-2.5 py-1 text-xs font-bold text-heading dark:border-slate-700 dark:border-b-slate-900"
+            title={`Nivel ${level} (${levelProgress}/100 XP)`}
           >
-            <Crown className="size-3.5 fill-violet-500 text-violet-600 dark:text-violet-300" />
+            <Crown className="size-3.5 text-primary" />
             <span>Nv. {level}</span>
-          </motion.div>
+          </div>
         </div>
 
-        {/* 3D SOS Button */}
+        {/* SOS Button */}
         <SosDialog
           trigger={
             <motion.button
-              whileTap={{ scale: 0.92 }}
+              whileTap={{ scale: 0.94 }}
               type="button"
-              className="rounded-2xl border-2 border-b-4 border-rose-700 border-b-rose-900 bg-rose-600 px-3.5 py-1.5 text-xs font-black tracking-wider text-white shadow-md shadow-rose-500/25 transition-all active:translate-y-0.5 active:border-b-2"
+              className="rounded-xl border border-b-[3px] border-rose-700 border-b-rose-900 bg-sos px-3 py-1 text-xs font-extrabold tracking-wider text-sos-foreground shadow-xs transition-all active:translate-y-0.5"
             >
               SOS
             </motion.button>
@@ -128,142 +131,110 @@ export function NearMascotHero() {
         />
       </div>
 
-      {/* Main Colorful Mascot Sanctuary Card */}
-      <div className="relative overflow-hidden rounded-[30px] border-2 border-b-[6px] border-amber-400/90 border-b-amber-600 bg-gradient-to-br from-amber-400 via-orange-400 to-rose-500 p-5 text-white shadow-xl shadow-orange-500/20">
-        {/* Decorative Background Circles & Sparkles */}
-        <div className="pointer-events-none absolute -top-12 -right-12 size-44 rounded-full bg-white/15 blur-xl" />
-        <div className="pointer-events-none absolute -bottom-14 -left-10 size-40 rounded-full bg-yellow-300/25 blur-xl" />
+      {/* Protagonist AI Companion Hub Card */}
+      <section className="relative overflow-hidden rounded-[28px] border border-b-[5px] border-slate-700/80 border-b-slate-950 bg-gradient-to-br from-slate-900 via-[#1E293B] to-[#2C3E50] p-5 text-white shadow-xl">
+        {/* Sophisticated Ambient Glows */}
+        <div className="pointer-events-none absolute -top-16 -right-12 size-48 rounded-full bg-primary-soft/25 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-16 -left-12 size-48 rounded-full bg-sky-400/20 blur-3xl" />
 
-        <div className="relative z-10 flex items-center gap-4">
-          {/* Interactive SVG Mascot Character */}
-          <div className="relative shrink-0">
-            <motion.button
-              type="button"
-              onClick={handleTapMascot}
-              animate={
-                jumping
-                  ? { y: [0, -18, 0, -8, 0], scale: [1, 1.12, 0.95, 1.05, 1], rotate: [0, -8, 8, 0] }
-                  : { y: [0, -5, 0] }
-              }
-              transition={
-                jumping
-                  ? { duration: 0.55 }
-                  : { duration: 3.2, repeat: Infinity, ease: "easeInOut" }
-              }
-              className="group relative grid size-24 place-items-center rounded-[28px] border-2 border-b-4 border-white/60 border-b-amber-800/40 bg-white/25 p-2 shadow-lg backdrop-blur-md transition-transform active:scale-95"
-              aria-label="Interactuar con Near"
-            >
-              {/* Custom Adorable Animated SVG Spirit Companion */}
-              <svg viewBox="0 0 120 120" className="size-20 overflow-visible drop-shadow-md">
-                <defs>
-                  <radialGradient id="nearBodyGrad" cx="35%" cy="30%" r="70%">
-                    <stop offset="0%" stopColor="#FFF7ED" />
-                    <stop offset="45%" stopColor="#FDBA74" />
-                    <stop offset="100%" stopColor="#EA580C" />
-                  </radialGradient>
-                  <linearGradient id="leafGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stopColor="#34D399" />
-                    <stop offset="100%" stopColor="#059669" />
-                  </linearGradient>
-                </defs>
-
-                {/* Little Sprout Leaf on Top */}
-                <g className="origin-bottom animate-bounce" style={{ animationDuration: "3s" }}>
-                  <path d="M60 22 Q60 10 72 8 Q74 20 60 22 Z" fill="url(#leafGrad)" />
-                  <path d="M60 22 Q58 12 48 12 Q48 22 60 22 Z" fill="#10B981" />
-                </g>
-
-                {/* Cute Ears / Horns */}
-                <circle cx="32" cy="36" r="11" fill="#EA580C" />
-                <circle cx="32" cy="36" r="6" fill="#FED7AA" />
-                <circle cx="88" cy="36" r="11" fill="#EA580C" />
-                <circle cx="88" cy="36" r="6" fill="#FED7AA" />
-
-                {/* Main Cozy Spirit Body */}
-                <rect x="20" y="24" width="80" height="76" rx="38" fill="url(#nearBodyGrad)" stroke="#FFFFFF" strokeWidth="3" />
-
-                {/* Rosy Cheeks */}
-                <ellipse cx="36" cy="68" rx="7" ry="4.5" fill="#F43F5E" opacity="0.55" />
-                <ellipse cx="84" cy="68" rx="7" ry="4.5" fill="#F43F5E" opacity="0.55" />
-
-                {/* Expressive Eyes */}
-                {jumping ? (
-                  <>
-                    {/* Happy ^ ^ eyes when tapped */}
-                    <path d="M38 56 Q44 48 50 56" fill="none" stroke="#1C1917" strokeWidth="4" strokeLinecap="round" />
-                    <path d="M70 56 Q76 48 82 56" fill="none" stroke="#1C1917" strokeWidth="4" strokeLinecap="round" />
-                  </>
-                ) : (
-                  <>
-                    <circle cx="44" cy="56" r="6.5" fill="#1C1917" />
-                    <circle cx="42" cy="53.5" r="2.2" fill="#FFFFFF" />
-                    <circle cx="76" cy="56" r="6.5" fill="#1C1917" />
-                    <circle cx="74" cy="53.5" r="2.2" fill="#FFFFFF" />
-                  </>
-                )}
-
-                {/* Warm Smile */}
-                <path
-                  d={jumping ? "M50 66 Q60 77 70 66" : "M52 67 Q60 74 68 67"}
-                  fill="none"
-                  stroke="#1C1917"
-                  strokeWidth="3.8"
-                  strokeLinecap="round"
-                />
-
-                {/* Little Paws */}
-                <circle cx="24" cy="76" r="7" fill="#FB923C" stroke="#FFF" strokeWidth="2" />
-                <circle cx="96" cy="76" r="7" fill="#FB923C" stroke="#FFF" strokeWidth="2" />
-              </svg>
-
-              <span className="absolute -bottom-2 rounded-full border border-amber-300 bg-white px-2 py-0.5 text-[10px] font-black text-orange-600 shadow">
-                ¡Tócame! ✨
-              </span>
-            </motion.button>
+        {/* AI Header Status */}
+        <div className="relative z-10 flex items-center justify-between gap-2">
+          <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-[11px] font-semibold tracking-wide text-white/90 backdrop-blur-md">
+            <span className="relative flex size-2">
+              <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+              <span className="relative inline-flex size-2 rounded-full bg-emerald-400" />
+            </span>
+            <span>Near IA · Modo {styleLabel}</span>
           </div>
 
-          {/* Speech Bubble & Greeting */}
-          <div className="min-w-0 flex-1 space-y-2">
-            <div className="flex items-center gap-1.5">
-              <span className="inline-flex items-center gap-1 rounded-full bg-black/20 px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wider text-white backdrop-blur-xs">
-                <Sparkles className="size-3 text-yellow-200" /> Compañero Near
-              </span>
-            </div>
+          <span className="text-[11px] font-semibold text-white/60">
+            Nv. {level} · {levelProgress}%
+          </span>
+        </div>
 
+        {/* Living AI Core Orb + Contextual Dialogue */}
+        <div className="relative z-10 mt-4 flex items-center gap-4">
+          <motion.button
+            type="button"
+            onClick={handlePulseOrb}
+            animate={
+              pulsing
+                ? { scale: [1, 1.12, 0.96, 1.04, 1] }
+                : { scale: [1, 1.04, 1] }
+            }
+            transition={
+              pulsing
+                ? { duration: 0.5 }
+                : { duration: 4, repeat: Infinity, ease: "easeInOut" }
+            }
+            className="group relative grid size-20 shrink-0 place-items-center rounded-3xl border border-white/25 bg-white/10 shadow-inner backdrop-blur-md"
+            aria-label="Sincronizar con Near IA"
+            title="Toca el núcleo de Near para otro consejo preventivo"
+          >
+            <div className="absolute inset-1.5 rounded-2xl bg-sphere opacity-85 blur-xs transition-opacity group-hover:opacity-100" />
+            <div className="relative grid size-14 place-items-center rounded-2xl bg-background/95 shadow-md">
+              <NearMark className="size-9" />
+            </div>
+            <span className="absolute -bottom-1.5 rounded-full border border-white/20 bg-slate-900/90 px-2 py-0.5 text-[9px] font-bold tracking-wider text-amber-300 uppercase">
+              IA Viva
+            </span>
+          </motion.button>
+
+          <div className="min-w-0 flex-1">
             <AnimatePresence mode="wait">
-              <motion.div
-                key={bubbleText}
-                initial={{ opacity: 0, y: 6 }}
+              <motion.p
+                key={activeMessage}
+                initial={{ opacity: 0, y: 5 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -6 }}
-                className="relative rounded-2xl border-2 border-white/80 bg-white/95 p-3 text-neutral-900 shadow-md"
+                exit={{ opacity: 0, y: -5 }}
+                className="text-sm font-medium leading-relaxed text-white/95"
               >
-                <p className="text-xs font-bold leading-snug text-neutral-800">
-                  {bubbleText}
-                </p>
-              </motion.div>
+                “{activeMessage}”
+              </motion.p>
             </AnimatePresence>
           </div>
         </div>
 
-        {/* Bottom Level XP Progress Bar inside Hero */}
-        <div className="relative z-10 mt-4 flex items-center gap-3 rounded-2xl bg-black/20 px-3.5 py-2 backdrop-blur-xs">
-          <span className="text-[11px] font-extrabold uppercase tracking-wider text-white/95">
-            Nivel {level}
-          </span>
-          <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-black/25 p-0.5">
-            <motion.div
-              className="h-full rounded-full bg-gradient-to-r from-yellow-300 to-emerald-300"
-              initial={{ width: 0 }}
-              animate={{ width: `${Math.max(12, levelProgress)}%` }}
-              transition={{ duration: 0.6 }}
-            />
-          </div>
-          <span className="text-[11px] font-black tabular-nums text-yellow-200">
-            {levelProgress}/100 XP
-          </span>
+        {/* Primary AI Action Buttons (Chat IA & Voice IA first!) */}
+        <div className="relative z-10 mt-5 grid grid-cols-2 gap-2.5">
+          <Link
+            to="/chat"
+            className="group flex items-center justify-center gap-2 rounded-2xl border border-b-[4px] border-amber-400/90 border-b-amber-700 bg-gradient-to-r from-[#C86D51] to-[#914A36] px-4 py-3 text-xs font-extrabold tracking-wide text-white shadow-md transition-all hover:brightness-110 active:translate-y-0.5 active:border-b-2"
+          >
+            <MessageCircleHeart className="size-4.5 shrink-0 transition-transform group-hover:scale-110" />
+            <span>Chat con Near IA</span>
+          </Link>
+
+          <Link
+            to="/voz"
+            className="group flex items-center justify-center gap-2 rounded-2xl border border-b-[4px] border-white/25 border-b-slate-950 bg-white/12 px-4 py-3 text-xs font-extrabold tracking-wide text-white backdrop-blur-md transition-all hover:bg-white/20 active:translate-y-0.5 active:border-b-2"
+          >
+            <AudioLines className="size-4.5 shrink-0 text-sky-300 transition-transform group-hover:scale-110" />
+            <span>Hablar por Voz</span>
+          </Link>
         </div>
-      </div>
+
+        {/* Quick-Start AI Topic Prompts */}
+        <div className="relative z-10 mt-3.5 flex items-center gap-1.5 overflow-x-auto no-scrollbar pt-1">
+          <span className="shrink-0 text-[10px] font-bold text-white/55 uppercase">
+            Iniciar con:
+          </span>
+          {[
+            "Presión por exámenes",
+            "Necesito despejarme",
+            "Organizar mi día",
+          ].map((topic) => (
+            <Link
+              key={topic}
+              to="/chat"
+              className="shrink-0 rounded-full border border-white/15 bg-white/8 px-2.5 py-1 text-[11px] font-medium text-white/85 transition-colors hover:bg-white/20"
+            >
+              <Sparkles className="mr-1 inline size-2.5 text-amber-300" />
+              {topic}
+            </Link>
+          ))}
+        </div>
+      </section>
     </div>
   );
 }

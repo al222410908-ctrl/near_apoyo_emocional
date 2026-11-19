@@ -118,6 +118,17 @@ npm run test:watch
 
 ---
 
+## ☁️ Despliegue en Vercel (Listo para compartir con el Equipo)
+
+El proyecto está preconfigurado con `vercel.json` y **Nitro Build Output API v3** para desplegarse automáticamente en **Vercel**:
+
+1. Entra a [vercel.com/new](https://vercel.com/new) e inicia sesión con tu cuenta de **GitHub**.
+2. Selecciona el repositorio **`al222410908-ctrl/near_apoyo_emocional`**.
+3. Deja la configuración por defecto (`Build Command: npm run build`, `Install Command: npm install`).
+4. Haz clic en **Deploy** y en ~45 segundos tendrás tu URL pública `https://near-apoyo-emocional.vercel.app` lista para abrir desde cualquier celular o computadora.
+
+---
+
 ## 📱 Conversión a Aplicación Móvil (Android / iOS)
 
 Para empaquetar este frontend en una aplicación nativa móvil utilizando **Capacitor**:

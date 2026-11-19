@@ -3,11 +3,12 @@ import { AnimatePresence, motion } from "framer-motion";
 import {
   BookHeart,
   Check,
+  ChevronDown,
+  Compass,
   Crown,
+  Flame,
   Gift,
   Heart,
-  MessageCircleHeart,
-  Mic,
   Play,
   Sparkles,
   Target,
@@ -29,9 +30,9 @@ export const Route = createFileRoute("/inicio")({
   head: () => ({
     meta: [
       { title: "Inicio · Near Apoyo Emocional" },
-      { name: "description", content: "Tu camino interactivo de calma, misiones diarias, registro de ánimo y apoyo emocional." },
+      { name: "description", content: "IA de apoyo emocional preventivo, misiones diarias y cápsulas interactivas para universitarios." },
       { property: "og:title", content: "Inicio · Near Apoyo Emocional" },
-      { property: "og:description", content: "Tu camino interactivo de calma, misiones diarias y apoyo emocional." },
+      { property: "og:description", content: "IA de apoyo emocional preventivo, misiones diarias y cápsulas interactivas." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -43,23 +44,20 @@ export const Route = createFileRoute("/inicio")({
   ),
 });
 
-const fade = (i: number) => ({
-  initial: { opacity: 0, y: 14 },
-  animate: { opacity: 1, y: 0 },
-  transition: { delay: 0.04 * i, duration: 0.35 },
-});
-
-const PATH_OFFSETS = ["translate-x-0", "translate-x-3", "-translate-x-2", "translate-x-2", "translate-x-0"];
+type DashboardSection = "misiones" | "ruta" | "racha";
 
 function Dashboard() {
-  const { favorites, toggleFavorite, todayMood, completedLessons, messages } = useNear();
+  const { favorites, toggleFavorite, todayMood, completedLessons, messages, streak } = useNear();
+  const [activeTab, setActiveTab] = useState<DashboardSection>("misiones");
   const [activeLesson, setActiveLesson] = useState<InteractiveLesson | null>(null);
+  const [quoteExpanded, setQuoteExpanded] = useState(false);
+
   const quote = quoteOfTheDay();
   const fav = favorites.includes(quote.id);
 
-  // Determine the next recommended active lesson
-  const nextActiveLessonId =
-    WELLNESS_LESSONS.find((l) => !completedLessons.includes(l.id))?.id ?? WELLNESS_LESSONS[0]!.id;
+  // Recommended next lesson
+  const recommendedLesson =
+    WELLNESS_LESSONS.find((l) => !completedLessons.includes(l.id)) ?? WELLNESS_LESSONS[0]!;
 
   // Daily Quests calculation
   const quest1Done = Boolean(todayMood);
@@ -68,380 +66,359 @@ function Dashboard() {
   const questsDoneCount = [quest1Done, quest2Done, quest3Done].filter(Boolean).length;
 
   return (
-    <div className="space-y-6 bg-sanctuary px-4 pt-5 pb-6">
-      {/* 1. Gamified HUD + Interactive Animated Mascot Hero */}
-      <motion.div {...fade(0)}>
-        <NearMascotHero />
-      </motion.div>
+    <div className="space-y-4 bg-sanctuary px-4 pt-4 pb-6">
+      {/* 1. PROTAGONISTA: Near AI Companion Hub */}
+      <NearMascotHero />
 
-      {/* 2. Tactile 3D Colorful Mood Check-in */}
-      <motion.section
-        {...fade(1)}
-        className="rounded-[28px] border-2 border-b-[6px] border-border border-b-neutral-300 bg-surface p-4 shadow-md dark:border-b-neutral-800"
-      >
-        <div className="mb-3 flex items-center justify-between">
-          <div>
-            <h2 className="font-display text-lg font-extrabold text-heading">¿Cómo llega tu mente hoy?</h2>
-            <p className="text-xs font-medium text-muted-foreground">Tu refugio adapta sus colores a lo que sientes</p>
-          </div>
-          <span className="rounded-xl bg-amber-500/15 px-2.5 py-1 text-[11px] font-black text-amber-700 dark:text-amber-300">
-            Check-in Diario
+      {/* 2. Registro Rápido de Ánimo */}
+      <section className="rounded-3xl border border-b-[4px] border-border border-b-neutral-300 bg-surface p-4 shadow-xs dark:border-b-neutral-800">
+        <div className="mb-2.5 flex items-center justify-between">
+          <h2 className="font-display text-base font-bold text-heading">¿Cómo te sientes en este momento?</h2>
+          <span className="rounded-lg bg-primary-tint px-2 py-0.5 text-[10px] font-bold text-primary">
+            Check-in · +15 XP
           </span>
         </div>
         <MoodChips />
-      </motion.section>
+      </section>
 
-      {/* 3. Duolingo-Style Winding Interactive Wellness Path */}
-      <motion.section
-        {...fade(2)}
-        className="relative overflow-hidden rounded-[30px] border-2 border-b-[6px] border-emerald-400/80 border-b-emerald-600 bg-gradient-to-b from-emerald-50/90 via-surface to-sky-50/70 p-5 shadow-lg dark:border-emerald-800 dark:border-b-emerald-950 dark:from-emerald-950/30 dark:via-surface dark:to-sky-950/20"
-      >
-        {/* Section Header Banner */}
-        <div className="mb-5 flex items-center justify-between rounded-2xl border-2 border-b-4 border-emerald-600 border-b-emerald-800 bg-gradient-to-r from-emerald-500 to-teal-600 p-3.5 text-white shadow-md">
-          <div>
-            <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wider text-emerald-100">
-              <Sparkles className="size-3" /> Ruta Preventiva Universitaria
-            </span>
-            <h2 className="font-display text-lg font-black leading-tight text-white">
-              Camino de Calma
-            </h2>
-          </div>
-          <div className="rounded-xl bg-black/20 px-3 py-1.5 text-center backdrop-blur-xs">
-            <span className="block font-display text-base font-black leading-none text-yellow-300">
-              {completedLessons.length}/{WELLNESS_LESSONS.length}
-            </span>
-            <span className="text-[9px] font-bold uppercase text-white/90">Unidades</span>
-          </div>
-        </div>
-
-        <p className="mb-5 text-center text-xs font-semibold text-muted-foreground">
-          Toca cualquier isla para iniciar una cápsula interactiva de 2 min 👇
-        </p>
-
-        {/* Winding Nodes Trail */}
-        <div className="relative space-y-4">
-          {/* Vertical Connecting Trail Line */}
-          <div className="pointer-events-none absolute top-8 bottom-8 left-10 w-1.5 rounded-full bg-gradient-to-b from-emerald-400 via-sky-400 to-rose-400 opacity-35" />
-
-          {WELLNESS_LESSONS.map((lesson, idx) => {
-            const isCompleted = completedLessons.includes(lesson.id);
-            const isCurrent = lesson.id === nextActiveLessonId;
-
+      {/* 3. Menú Estratégico por Secciones (Evita saturación visual) */}
+      <div className="space-y-3">
+        <div
+          role="tablist"
+          aria-label="Secciones de bienestar"
+          className="grid grid-cols-3 gap-1.5 rounded-2xl border border-b-[3px] border-border bg-surface-2/90 p-1.5"
+        >
+          {[
+            {
+              id: "misiones" as const,
+              label: "Misiones",
+              badge: `${questsDoneCount}/3`,
+              icon: Target,
+            },
+            {
+              id: "ruta" as const,
+              label: "Cápsulas",
+              badge: `${completedLessons.length}/${WELLNESS_LESSONS.length}`,
+              icon: Compass,
+            },
+            {
+              id: "racha" as const,
+              label: "Racha & Kit",
+              badge: `${streak}d`,
+              icon: Flame,
+            },
+          ].map((tab) => {
+            const isSelected = activeTab === tab.id;
+            const Icon = tab.icon;
             return (
-              <motion.div
-                key={lesson.id}
-                whileHover={{ y: -3, scale: 1.01 }}
-                whileTap={{ scale: 0.97 }}
-                className={cn("relative z-10 transition-transform", PATH_OFFSETS[idx])}
-              >
-                {isCurrent && (
-                  <motion.div
-                    animate={{ y: [0, -5, 0] }}
-                    transition={{ duration: 1.6, repeat: Infinity }}
-                    className="mb-1.5 ml-3 inline-flex items-center gap-1 rounded-full border-2 border-amber-400 bg-amber-400 px-3 py-0.5 text-[10px] font-black uppercase tracking-wider text-amber-950 shadow-md"
-                  >
-                    <Play className="size-2.5 fill-current" /> ¡Siguiente Cápsula Recomendada!
-                  </motion.div>
+              <button
+                key={tab.id}
+                type="button"
+                role="tab"
+                aria-selected={isSelected}
+                onClick={() => setActiveTab(tab.id)}
+                className={cn(
+                  "flex items-center justify-center gap-1.5 rounded-xl py-2.5 text-xs font-bold transition-all",
+                  isSelected
+                    ? "border border-b-[3px] border-border border-b-neutral-300 bg-background text-heading shadow-xs dark:border-b-neutral-700"
+                    : "text-muted-foreground hover:text-heading",
                 )}
-
-                <button
-                  type="button"
-                  onClick={() => setActiveLesson(lesson)}
+              >
+                <Icon className={cn("size-3.5", isSelected ? "text-primary" : "text-muted-foreground")} />
+                <span>{tab.label}</span>
+                <span
                   className={cn(
-                    "group flex w-full items-center gap-3.5 rounded-3xl border-2 border-b-[6px] p-3.5 text-left transition-all active:translate-y-1 active:border-b-2",
-                    isCurrent
-                      ? "border-sky-400 border-b-sky-600 bg-white shadow-xl ring-4 ring-sky-400/25 dark:bg-neutral-900"
-                      : isCompleted
-                        ? "border-emerald-300 border-b-emerald-500 bg-white/95 shadow-md dark:border-emerald-800 dark:border-b-emerald-950 dark:bg-neutral-900/90"
-                        : "border-border border-b-neutral-300 bg-surface/95 shadow-sm hover:border-primary/40 dark:border-b-neutral-800",
+                    "rounded-md px-1.5 py-0.2 text-[10px] font-extrabold",
+                    isSelected ? "bg-primary-tint text-primary" : "bg-surface text-muted-foreground",
                   )}
                 >
-                  {/* 3D Island Node Circle */}
-                  <div
-                    className={cn(
-                      "relative grid size-15 shrink-0 place-items-center rounded-2xl border-2 border-b-[5px] text-2xl text-white shadow-md transition-transform group-hover:scale-105",
-                      lesson.palette.bg,
-                      lesson.palette.border,
-                      lesson.palette.lip,
-                    )}
-                  >
-                    <span>{lesson.emoji}</span>
-                    {isCompleted && (
-                      <span className="absolute -top-2 -right-2 grid size-6 place-items-center rounded-full border-2 border-white bg-amber-400 text-amber-950 shadow">
-                        <Crown className="size-3.5 fill-current" />
-                      </span>
-                    )}
-                  </div>
-
-                  {/* Lesson Details */}
-                  <div className="min-w-0 flex-1">
-                    <div className="flex flex-wrap items-center gap-1.5">
-                      <span
-                        className={cn(
-                          "rounded-lg px-2 py-0.5 text-[10px] font-black uppercase",
-                          isCompleted
-                            ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"
-                            : "bg-neutral-100 text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300",
-                        )}
-                      >
-                        Unidad {lesson.unitNumber}
-                      </span>
-                      <span className="text-[10px] font-extrabold text-amber-600 dark:text-amber-400">
-                        +{lesson.xpReward} XP
-                      </span>
-                      <span className="text-[10px] font-medium text-muted-foreground">
-                        • {lesson.duration}
-                      </span>
-                    </div>
-
-                    <h3 className="mt-1 truncate font-display text-base font-extrabold text-heading">
-                      {lesson.title}
-                    </h3>
-                    <p className="truncate text-xs text-muted-foreground">
-                      {lesson.subtitle}
-                    </p>
-                  </div>
-
-                  {/* Action Pill */}
-                  <div
-                    className={cn(
-                      "grid size-10 shrink-0 place-items-center rounded-2xl border-2 border-b-4 font-black transition-transform group-hover:scale-105",
-                      isCompleted
-                        ? "border-emerald-400 border-b-emerald-600 bg-emerald-50 text-emerald-600 dark:bg-emerald-950 dark:text-emerald-300"
-                        : "border-amber-500 border-b-amber-700 bg-amber-400 text-amber-950",
-                    )}
-                  >
-                    {isCompleted ? <Check className="size-5 stroke-[3]" /> : <Play className="size-4 fill-current" />}
-                  </div>
-                </button>
-              </motion.div>
+                  {tab.badge}
+                </span>
+              </button>
             );
           })}
         </div>
-      </motion.section>
 
-      {/* 4. Daily Quests / Misiones del Día (Duolingo Quests Style) */}
-      <motion.section
-        {...fade(3)}
-        className="rounded-[28px] border-2 border-b-[6px] border-amber-300 border-b-amber-500 bg-gradient-to-br from-amber-50/90 via-surface to-orange-50/60 p-5 shadow-md dark:border-amber-800 dark:border-b-amber-950 dark:from-amber-950/30 dark:via-surface dark:to-orange-950/20"
-      >
-        <div className="mb-4 flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <span className="grid size-10 place-items-center rounded-2xl border-2 border-b-4 border-amber-600 bg-amber-400 text-amber-950 shadow-xs">
-              <Target className="size-5" />
-            </span>
-            <div>
-              <h2 className="font-display text-lg font-extrabold text-heading">Misiones del Día</h2>
-              <p className="text-xs font-medium text-muted-foreground">
-                Completa tus 3 micro-hábitos para abrir el cofre
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center gap-1.5 rounded-2xl border-2 border-amber-400 bg-amber-100/80 px-3 py-1.5 text-xs font-black text-amber-900 dark:bg-amber-950 dark:text-amber-200">
-            <Gift className="size-4 text-amber-600" />
-            <span>{questsDoneCount}/3</span>
-          </div>
-        </div>
-
-        <div className="space-y-3">
-          {[
-            {
-              id: "q1",
-              title: "Escucha tu interior",
-              subtitle: "Registra tu estado de ánimo de hoy",
-              xp: "+15 XP",
-              done: quest1Done,
-              emoji: "😌",
-            },
-            {
-              id: "q2",
-              title: "Mente preventiva",
-              subtitle: "Completa una cápsula interactiva del Camino",
-              xp: "+30 XP",
-              done: quest2Done,
-              emoji: "🎓",
-            },
-            {
-              id: "q3",
-              title: "Suelta la carga",
-              subtitle: "Platica con Near en el chat o por voz",
-              xp: "+20 XP",
-              done: quest3Done,
-              emoji: "💬",
-            },
-          ].map((q) => (
-            <div
-              key={q.id}
-              className={cn(
-                "flex items-center gap-3 rounded-2xl border-2 border-b-4 p-3 transition-all",
-                q.done
-                  ? "border-emerald-400 border-b-emerald-600 bg-emerald-50/90 dark:bg-emerald-950/40"
-                  : "border-border border-b-neutral-300 bg-background/90 dark:border-b-neutral-800",
-              )}
+        {/* Contenido Dinámico Debajo del Menú */}
+        <AnimatePresence mode="wait">
+          {activeTab === "misiones" && (
+            <motion.section
+              key="tab-misiones"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.2 }}
+              className="space-y-3"
             >
-              <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-surface-2 text-lg">
-                {q.emoji}
-              </span>
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center justify-between">
-                  <p className="truncate text-xs font-extrabold text-heading">{q.title}</p>
-                  <span className="text-[11px] font-black text-amber-600 dark:text-amber-400">{q.xp}</span>
+              {/* Misiones del Día Card */}
+              <div className="rounded-3xl border border-b-[4px] border-border border-b-neutral-300 bg-surface p-4 shadow-xs dark:border-b-neutral-800">
+                <div className="mb-3 flex items-center justify-between">
+                  <div>
+                    <h3 className="font-display text-base font-bold text-heading">Misiones del Día</h3>
+                    <p className="text-xs text-muted-foreground">Micro-hábitos preventivos para tu jornada</p>
+                  </div>
+                  <span className="inline-flex items-center gap-1 rounded-xl border border-amber-300/80 bg-amber-50 px-2.5 py-1 text-xs font-bold text-amber-800 dark:border-amber-800 dark:bg-amber-950/60 dark:text-amber-300">
+                    <Gift className="size-3.5 text-amber-600" /> {questsDoneCount}/3
+                  </span>
                 </div>
-                <p className="truncate text-[11px] text-muted-foreground">{q.subtitle}</p>
-                <div className="mt-1.5 h-2 w-full overflow-hidden rounded-full bg-surface-2">
-                  <motion.div
-                    className={cn("h-full rounded-full", q.done ? "bg-emerald-500" : "bg-amber-400")}
-                    initial={{ width: 0 }}
-                    animate={{ width: q.done ? "100%" : "20%" }}
-                  />
+
+                <div className="space-y-2.5">
+                  {[
+                    {
+                      id: "q1",
+                      title: "Registro emocional",
+                      subtitle: "Selecciona cómo te sientes hoy arriba",
+                      xp: "+15 XP",
+                      done: quest1Done,
+                    },
+                    {
+                      id: "q2",
+                      title: "Conversa con Near IA",
+                      subtitle: "Desahógate o pide organizar tus pendientes",
+                      xp: "+20 XP",
+                      done: quest3Done,
+                    },
+                    {
+                      id: "q3",
+                      title: "Cápsula preventiva",
+                      subtitle: "Completa 1 unidad interactiva de 2 min",
+                      xp: "+30 XP",
+                      done: quest2Done,
+                    },
+                  ].map((q) => (
+                    <div
+                      key={q.id}
+                      className={cn(
+                        "flex items-center gap-3 rounded-2xl border border-b-[3px] p-3 transition-all",
+                        q.done
+                          ? "border-emerald-300 border-b-emerald-500 bg-emerald-50/70 dark:border-emerald-800 dark:bg-emerald-950/30"
+                          : "border-border border-b-neutral-200 bg-background dark:border-b-neutral-800",
+                      )}
+                    >
+                      <div
+                        className={cn(
+                          "grid size-7 shrink-0 place-items-center rounded-xl border text-xs font-bold",
+                          q.done
+                            ? "border-emerald-600 bg-emerald-500 text-white"
+                            : "border-border bg-surface-2 text-muted-foreground",
+                        )}
+                      >
+                        {q.done ? <Check className="size-4 stroke-[3]" /> : "•"}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center justify-between">
+                          <p className="truncate text-xs font-bold text-heading">{q.title}</p>
+                          <span className="text-[11px] font-extrabold text-primary">{q.xp}</span>
+                        </div>
+                        <p className="truncate text-[11px] text-muted-foreground">{q.subtitle}</p>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
-              <div
-                className={cn(
-                  "grid size-7 shrink-0 place-items-center rounded-full border-2",
-                  q.done
-                    ? "border-emerald-600 bg-emerald-500 text-white"
-                    : "border-border bg-surface text-muted-foreground",
-                )}
+
+              {/* Acceso Rápido a la Siguiente Cápsula Recomendada */}
+              <button
+                type="button"
+                onClick={() => setActiveLesson(recommendedLesson)}
+                className="group flex w-full items-center gap-3.5 rounded-3xl border border-b-[4px] border-border border-b-neutral-300 bg-surface p-4 text-left shadow-xs transition-all hover:border-primary/40 active:translate-y-0.5 dark:border-b-neutral-800"
               >
-                {q.done && <Check className="size-4 stroke-[3]" />}
-              </div>
-            </div>
-          ))}
-        </div>
-      </motion.section>
-
-      {/* 5. Streak Widget */}
-      <motion.div {...fade(4)}>
-        <StreakWidget />
-      </motion.div>
-
-      {/* 6. Vibrant Multi-Color 3D Action Arcade (Chat, Voice, Breathing, Sounds) */}
-      <motion.section {...fade(5)} className="space-y-3">
-        <div className="flex items-center justify-between px-1">
-          <h2 className="font-display text-lg font-extrabold text-heading">Cabina de Apoyo Directo</h2>
-          <span className="text-xs font-bold text-primary">24/7 Confidencial</span>
-        </div>
-
-        <div className="grid grid-cols-2 gap-3">
-          {/* Chat IA 3D Card */}
-          <motion.div whileHover={{ y: -3 }} whileTap={{ scale: 0.96 }}>
-            <Link
-              to="/chat"
-              className="group relative flex h-full flex-col justify-between gap-4 overflow-hidden rounded-3xl border-2 border-b-[6px] border-rose-600 border-b-rose-800 bg-gradient-to-br from-rose-500 to-orange-500 p-4 text-white shadow-lg shadow-rose-500/20 transition-all active:translate-y-1 active:border-b-2"
-            >
-              <div className="pointer-events-none absolute -top-6 -right-6 size-24 rounded-full bg-white/15 blur-lg" />
-              <span className="grid size-12 place-items-center rounded-2xl border-2 border-white/40 bg-white/20 text-white shadow-xs transition-transform group-hover:scale-110">
-                <MessageCircleHeart className="size-6" />
-              </span>
-              <div>
-                <span className="inline-block rounded-md bg-black/20 px-2 py-0.5 text-[10px] font-black uppercase">
-                  IA Empática
+                <div
+                  className={cn(
+                    "grid size-12 shrink-0 place-items-center rounded-2xl border border-b-[3px] text-xl text-white shadow-xs",
+                    recommendedLesson.palette.bg,
+                    recommendedLesson.palette.border,
+                    recommendedLesson.palette.lip,
+                  )}
+                >
+                  {recommendedLesson.emoji}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <span className="text-[10px] font-extrabold uppercase tracking-wider text-primary">
+                    Cápsula Sugerida · {recommendedLesson.duration}
+                  </span>
+                  <h4 className="truncate font-display text-sm font-bold text-heading">
+                    U{recommendedLesson.unitNumber}: {recommendedLesson.title}
+                  </h4>
+                  <p className="truncate text-xs text-muted-foreground">{recommendedLesson.subtitle}</p>
+                </div>
+                <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-primary-tint text-primary transition-transform group-hover:scale-105">
+                  <Play className="size-4 fill-current" />
                 </span>
-                <span className="mt-1 block font-display text-lg font-black leading-tight">Chatear</span>
-                <span className="block text-xs text-white/90">Desahógate sin juicios</span>
-              </div>
-            </Link>
-          </motion.div>
+              </button>
+            </motion.section>
+          )}
 
-          {/* Voice IA 3D Card */}
-          <motion.div whileHover={{ y: -3 }} whileTap={{ scale: 0.96 }}>
-            <Link
-              to="/voz"
-              className="group relative flex h-full flex-col justify-between gap-4 overflow-hidden rounded-3xl border-2 border-b-[6px] border-indigo-600 border-b-indigo-800 bg-gradient-to-br from-indigo-500 to-violet-600 p-4 text-white shadow-lg shadow-indigo-500/20 transition-all active:translate-y-1 active:border-b-2"
+          {activeTab === "ruta" && (
+            <motion.section
+              key="tab-ruta"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.2 }}
+              className="rounded-3xl border border-b-[4px] border-border border-b-neutral-300 bg-surface p-4 shadow-xs dark:border-b-neutral-800"
             >
-              <div className="pointer-events-none absolute -top-6 -right-6 size-24 rounded-full bg-white/15 blur-lg" />
-              <span className="grid size-12 place-items-center rounded-2xl border-2 border-white/40 bg-white/20 text-white shadow-xs transition-transform group-hover:scale-110">
-                <Mic className="size-6" />
-              </span>
-              <div>
-                <span className="inline-block rounded-md bg-black/20 px-2 py-0.5 text-[10px] font-black uppercase">
-                  Modo Voz
+              <div className="mb-3 flex items-center justify-between">
+                <div>
+                  <h3 className="font-display text-base font-bold text-heading">Ruta de Cápsulas Preventivas</h3>
+                  <p className="text-xs text-muted-foreground">Entrenamiento práctico de 2 minutos por unidad</p>
+                </div>
+                <span className="rounded-xl bg-emerald-500/15 px-2.5 py-1 text-xs font-bold text-emerald-700 dark:text-emerald-300">
+                  {completedLessons.length}/{WELLNESS_LESSONS.length} listas
                 </span>
-                <span className="mt-1 block font-display text-lg font-black leading-tight">Hablar</span>
-                <span className="block text-xs text-white/90">Diálogo cálido en vivo</span>
               </div>
-            </Link>
-          </motion.div>
 
-          {/* Breathing 4-7-8 3D Card */}
-          <motion.div whileHover={{ y: -3 }} whileTap={{ scale: 0.96 }}>
-            <Link
-              to="/respiracion"
-              className="group relative flex h-full flex-col justify-between gap-4 overflow-hidden rounded-3xl border-2 border-b-[6px] border-sky-600 border-b-sky-800 bg-gradient-to-br from-sky-500 to-cyan-600 p-4 text-white shadow-lg shadow-sky-500/20 transition-all active:translate-y-1 active:border-b-2"
+              <div className="space-y-2.5">
+                {WELLNESS_LESSONS.map((lesson) => {
+                  const isCompleted = completedLessons.includes(lesson.id);
+                  const isRecommended = lesson.id === recommendedLesson.id;
+
+                  return (
+                    <button
+                      key={lesson.id}
+                      type="button"
+                      onClick={() => setActiveLesson(lesson)}
+                      className={cn(
+                        "group flex w-full items-center gap-3 rounded-2xl border border-b-[4px] p-3 text-left transition-all active:translate-y-0.5",
+                        isRecommended
+                          ? "border-primary/50 border-b-primary bg-primary-tint/25 shadow-xs"
+                          : isCompleted
+                            ? "border-emerald-300/80 border-b-emerald-500 bg-emerald-50/40 dark:border-emerald-800/80 dark:bg-emerald-950/20"
+                            : "border-border border-b-neutral-300 bg-background hover:bg-surface-2 dark:border-b-neutral-800",
+                      )}
+                    >
+                      <div
+                        className={cn(
+                          "relative grid size-12 shrink-0 place-items-center rounded-xl border border-b-[3px] text-lg text-white",
+                          lesson.palette.bg,
+                          lesson.palette.border,
+                          lesson.palette.lip,
+                        )}
+                      >
+                        <span>{lesson.emoji}</span>
+                        {isCompleted && (
+                          <span className="absolute -top-1.5 -right-1.5 grid size-5 place-items-center rounded-full border border-white bg-amber-400 text-amber-950">
+                            <Crown className="size-3 fill-current" />
+                          </span>
+                        )}
+                      </div>
+
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2">
+                          <span className="text-[10px] font-extrabold uppercase tracking-wider text-muted-foreground">
+                            Unidad {lesson.unitNumber}
+                          </span>
+                          <span className="text-[10px] font-bold text-primary">+{lesson.xpReward} XP</span>
+                          <span className="text-[10px] text-muted-foreground">· {lesson.duration}</span>
+                        </div>
+                        <h4 className="truncate font-display text-sm font-bold text-heading">{lesson.title}</h4>
+                        <p className="truncate text-xs text-muted-foreground">{lesson.subtitle}</p>
+                      </div>
+
+                      <div
+                        className={cn(
+                          "grid size-8 shrink-0 place-items-center rounded-xl border",
+                          isCompleted
+                            ? "border-emerald-400 bg-emerald-500 text-white"
+                            : "border-border bg-surface text-heading group-hover:bg-primary group-hover:text-primary-foreground",
+                        )}
+                      >
+                        {isCompleted ? <Check className="size-4 stroke-[3]" /> : <Play className="size-3.5 fill-current" />}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </motion.section>
+          )}
+
+          {activeTab === "racha" && (
+            <motion.section
+              key="tab-racha"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.2 }}
+              className="space-y-3"
             >
-              <span className="grid size-11 place-items-center rounded-2xl border-2 border-white/40 bg-white/20 text-white transition-transform group-hover:scale-110">
-                <Wind className="size-5" />
-              </span>
-              <div>
-                <span className="block font-display text-base font-black leading-tight">Respirar 4-7-8</span>
-                <span className="mt-0.5 block text-xs text-white/90">Háptica + Guía 3 min</span>
-              </div>
-            </Link>
-          </motion.div>
+              <StreakWidget />
 
-          {/* Ambient Sounds 3D Card */}
-          <motion.div whileHover={{ y: -3 }} whileTap={{ scale: 0.96 }}>
-            <Link
-              to="/sonidos"
-              className="group relative flex h-full flex-col justify-between gap-4 overflow-hidden rounded-3xl border-2 border-b-[6px] border-teal-600 border-b-teal-800 bg-gradient-to-br from-teal-500 to-emerald-600 p-4 text-white shadow-lg shadow-teal-500/20 transition-all active:translate-y-1 active:border-b-2"
-            >
-              <span className="grid size-11 place-items-center rounded-2xl border-2 border-white/40 bg-white/20 text-white transition-transform group-hover:scale-110">
-                <Waves className="size-5" />
-              </span>
-              <div>
-                <span className="block font-display text-base font-black leading-tight">Sonidos Zen</span>
-                <span className="mt-0.5 block text-xs text-white/90">Lluvia, bosque y olas</span>
-              </div>
-            </Link>
-          </motion.div>
-        </div>
-      </motion.section>
+              <div className="grid grid-cols-3 gap-2.5">
+                <Link
+                  to="/respiracion"
+                  className="flex flex-col items-center gap-2 rounded-2xl border border-b-[4px] border-sky-300 border-b-sky-500 bg-sky-50/70 p-3 text-center transition-transform active:translate-y-0.5 dark:border-sky-800 dark:bg-sky-950/40"
+                >
+                  <span className="grid size-10 place-items-center rounded-xl bg-sky-500 text-white">
+                    <Wind className="size-5" />
+                  </span>
+                  <span className="text-xs font-bold text-heading">Respirar 4-7-8</span>
+                </Link>
 
-      {/* 7. Bitácora Emocional Banner Card */}
-      <motion.div {...fade(6)} whileHover={{ y: -2 }} whileTap={{ scale: 0.98 }}>
-        <Link
-          to="/bitacora"
-          className="flex items-center gap-4 rounded-3xl border-2 border-b-[6px] border-violet-400 border-b-violet-600 bg-gradient-to-r from-violet-500 to-purple-600 p-4 text-white shadow-lg shadow-violet-500/20 transition-all active:translate-y-1 active:border-b-2"
+                <Link
+                  to="/sonidos"
+                  className="flex flex-col items-center gap-2 rounded-2xl border border-b-[4px] border-teal-300 border-b-teal-500 bg-teal-50/70 p-3 text-center transition-transform active:translate-y-0.5 dark:border-teal-800 dark:bg-teal-950/40"
+                >
+                  <span className="grid size-10 place-items-center rounded-xl bg-teal-600 text-white">
+                    <Waves className="size-5" />
+                  </span>
+                  <span className="text-xs font-bold text-heading">Sonidos Zen</span>
+                </Link>
+
+                <Link
+                  to="/bitacora"
+                  className="flex flex-col items-center gap-2 rounded-2xl border border-b-[4px] border-violet-300 border-b-violet-500 bg-violet-50/70 p-3 text-center transition-transform active:translate-y-0.5 dark:border-violet-800 dark:bg-violet-950/40"
+                >
+                  <span className="grid size-10 place-items-center rounded-xl bg-violet-600 text-white">
+                    <BookHeart className="size-5" />
+                  </span>
+                  <span className="text-xs font-bold text-heading">Mi Bitácora</span>
+                </Link>
+              </div>
+            </motion.section>
+          )}
+        </AnimatePresence>
+      </div>
+
+      {/* 4. Sección Plegable: Reflexión del Día (Minimalista, sin saturar) */}
+      <div className="overflow-hidden rounded-2xl border border-b-[3px] border-border bg-surface/80">
+        <button
+          type="button"
+          onClick={() => setQuoteExpanded((x) => !x)}
+          className="flex w-full items-center justify-between px-4 py-3 text-left"
         >
-          <span className="grid size-12 shrink-0 place-items-center rounded-2xl border-2 border-white/40 bg-white/20 text-white">
-            <BookHeart className="size-6" />
+          <span className="inline-flex items-center gap-2 text-xs font-bold text-heading">
+            <Sparkles className="size-3.5 text-primary" />
+            Reflexión Preventiva del Día
           </span>
-          <span className="flex-1">
-            <span className="inline-block rounded-md bg-black/20 px-2 py-0.5 text-[10px] font-black uppercase">
-              Estadísticas & Diario
-            </span>
-            <span className="mt-0.5 block font-display text-lg font-black">Mi Bitácora Emocional</span>
-            <span className="block text-xs text-white/90">Gráficas de ánimo y reflexiones semanales</span>
-          </span>
-        </Link>
-      </motion.div>
+          <ChevronDown
+            className={cn("size-4 text-muted-foreground transition-transform", quoteExpanded && "rotate-180")}
+          />
+        </button>
+        <AnimatePresence>
+          {quoteExpanded && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="border-t border-border/60 px-4 py-3"
+            >
+              <div className="flex items-start justify-between gap-3">
+                <p className="font-display text-sm italic leading-relaxed text-heading">“{quote.text}”</p>
+                <button
+                  type="button"
+                  onClick={() => toggleFavorite(quote.id)}
+                  className="grid size-8 shrink-0 place-items-center rounded-xl border border-border bg-background"
+                  aria-label={fav ? "Quitar de favoritos" : "Guardar en favoritos"}
+                >
+                  <Heart className={cn("size-4", fav ? "fill-rose-500 text-rose-500" : "text-muted-foreground")} />
+                </button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
 
-      {/* 8. Daily Collectible Quote Card */}
-      <motion.section
-        {...fade(7)}
-        className="relative overflow-hidden rounded-3xl border-2 border-b-[6px] border-slate-700 border-b-slate-900 bg-gradient-to-br from-slate-800 to-slate-900 p-5 text-white shadow-lg"
-      >
-        <div className="flex items-center justify-between">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-[11px] font-extrabold uppercase tracking-wider text-amber-300">
-            <Sparkles className="size-3.5" /> Cápsula de Sabiduría
-          </span>
-          <motion.button
-            type="button"
-            whileTap={{ scale: 0.8 }}
-            animate={fav ? { scale: [1, 1.3, 1] } : undefined}
-            onClick={() => toggleFavorite(quote.id)}
-            className="grid size-10 place-items-center rounded-2xl border-2 border-white/25 bg-white/10 shadow-xs"
-            aria-label={fav ? "Quitar de favoritos" : "Guardar en favoritos"}
-            aria-pressed={fav}
-          >
-            <Heart className={cn("size-5 transition-colors", fav ? "fill-rose-400 text-rose-400" : "text-white")} />
-          </motion.button>
-        </div>
-        <p className="mt-3 font-display text-lg font-bold leading-snug text-white">“{quote.text}”</p>
-      </motion.section>
-
-      {/* Interactive Duolingo-Style Lesson Modal */}
+      {/* Interactive Lesson Modal */}
       <AnimatePresence>
         {activeLesson && (
           <InteractiveLessonModal
