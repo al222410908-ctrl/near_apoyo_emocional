@@ -47,10 +47,10 @@ export function BottomNav() {
   const { pathname } = useLocation();
 
   return (
-    <div className="pointer-events-none fixed bottom-0 left-1/2 z-40 w-full max-w-md -translate-x-1/2 px-3 pb-3 pb-safe">
+    <div className="sticky top-2 z-40 w-full px-4 pt-2">
       <nav
-        className="pointer-events-auto rounded-3xl border border-b-[4px] border-border/90 border-b-neutral-300 bg-surface/95 px-2 py-2 shadow-2xl backdrop-blur-2xl dark:border-b-neutral-800"
-        aria-label="Navegación principal estática"
+        className="rounded-2xl border border-b-[3px] border-border/90 border-b-neutral-300 bg-surface/95 px-2 py-1.5 shadow-sm backdrop-blur-xl dark:border-b-neutral-800"
+        aria-label="Navegación principal superior"
       >
         <ul className="grid grid-cols-5 gap-1">
           {tabs.map(({ to, label, icon: Icon, activeClass, labelClass }) => {

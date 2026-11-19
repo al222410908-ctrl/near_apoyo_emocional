@@ -68,7 +68,7 @@ export const Route = createFileRoute("/inicio")({
     ],
   }),
   component: () => (
-    <AppScreen emergency>
+    <AppScreen nav={false} emergency>
       <Dashboard />
     </AppScreen>
   ),

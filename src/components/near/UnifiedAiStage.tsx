@@ -20,6 +20,7 @@ import {
 import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 import { toast } from "sonner";
 import { NearMark } from "@/components/near/Logo";
+import { NearFriendlyAvatar } from "@/components/near/NearFriendlyAvatar";
 import { SafetyCard } from "@/components/near/SafetyCard";
 import { useNear } from "@/context/NearContext";
 import { useSpeechRecognition, useSpeechSynthesis } from "@/hooks/useSpeech";
@@ -454,131 +455,32 @@ export function UnifiedAiStage() {
             />
           )}
 
-          {/* Main Interactive 3D Voice/Chat Orb Button */}
-          <motion.button
+          {/* Main Interactive Friendly Near AI Character Button */}
+          <button
             type="button"
             onClick={handleToggleVoiceBubble}
-            animate={
-              phase === "speaking"
-                ? { scale: [1, 1.07, 0.97, 1.05, 1], y: [0, -3, 0] }
-                : phase === "listening"
-                  ? { scale: [1, 1.08, 1] }
-                  : phase === "thinking"
-                    ? { scale: [0.96, 1.03, 0.96] }
-                    : { y: [0, -4, 0] }
-            }
-            transition={{
-              duration: phase === "speaking" ? 1.1 : phase === "listening" ? 1 : 3.5,
-              repeat: Infinity,
-              ease: "easeInOut",
-            }}
-            className={cn(
-              "group relative grid size-28 place-items-center rounded-full border-2 p-2 shadow-2xl transition-all",
-              phase === "listening"
-                ? "border-sky-300 bg-gradient-to-br from-sky-400 via-blue-500 to-indigo-600 shadow-sky-500/40"
-                : phase === "thinking"
-                  ? "border-violet-300 bg-gradient-to-br from-violet-400 via-purple-500 to-indigo-700 shadow-violet-500/40"
-                  : "border-amber-200/80 bg-sphere shadow-amber-500/30",
-            )}
-            aria-label="Burbuja interactiva de Near IA"
+            className="group relative flex flex-col items-center justify-center rounded-3xl p-2 transition-transform active:scale-95"
+            aria-label="Interactuar por voz con Near IA"
           >
-            {/* Inner Specular Highlight */}
-            <span className="pointer-events-none absolute top-3 left-5 size-8 rounded-full bg-white/40 blur-md" />
+            <NearFriendlyAvatar phase={phase} size="lg" />
 
-            {/* Expressive AI Core Face / Equalizer Personality */}
-            <div className="relative flex flex-col items-center justify-center gap-1.5">
-              {/* Expressive Luminous Eyes */}
-              <div className="flex items-center gap-4">
-                <motion.span
-                  animate={
-                    phase === "thinking"
-                      ? { scaleY: [1, 0.3, 1], x: [-2, 2, -2] }
-                      : phase === "speaking"
-                        ? { scaleY: [1, 1.25, 0.2, 1] }
-                        : { scaleY: [1, 1, 0.15, 1] }
-                  }
-                  transition={{
-                    duration: phase === "thinking" ? 1.2 : phase === "speaking" ? 1.8 : 4,
-                    repeat: Infinity,
-                  }}
-                  className="size-3 rounded-full bg-slate-950 shadow-sm ring-2 ring-white/80"
-                />
-                <motion.span
-                  animate={
-                    phase === "thinking"
-                      ? { scaleY: [1, 0.3, 1], x: [-2, 2, -2] }
-                      : phase === "speaking"
-                        ? { scaleY: [1, 1.25, 0.2, 1] }
-                        : { scaleY: [1, 1, 0.15, 1] }
-                  }
-                  transition={{
-                    duration: phase === "thinking" ? 1.2 : phase === "speaking" ? 1.8 : 4,
-                    repeat: Infinity,
-                  }}
-                  className="size-3 rounded-full bg-slate-950 shadow-sm ring-2 ring-white/80"
-                />
-              </div>
-
-              {/* Dynamic Mouth / Live Voice Waveform Simulation */}
-              <div className="mt-1 flex h-6 items-center justify-center gap-1">
-                {phase === "speaking" || phase === "listening" ? (
-                  [0, 1, 2, 3, 4, 5, 6].map((bar) => (
-                    <motion.span
-                      key={bar}
-                      className="w-1 rounded-full bg-slate-950"
-                      animate={{
-                        height:
-                          phase === "speaking"
-                            ? [6, 18, 8, 22, 10, 16, 6]
-                            : [5, 14, 20, 10, 18, 8, 5],
-                      }}
-                      transition={{
-                        duration: 0.65,
-                        repeat: Infinity,
-                        delay: bar * 0.08,
-                        ease: "easeInOut",
-                      }}
-                    />
-                  ))
-                ) : phase === "thinking" ? (
-                  <div className="flex items-center gap-1">
-                    {[0, 1, 2].map((dot) => (
-                      <motion.span
-                        key={dot}
-                        className="size-2 rounded-full bg-slate-950"
-                        animate={{ y: [0, -5, 0] }}
-                        transition={{ duration: 0.6, repeat: Infinity, delay: dot * 0.15 }}
-                      />
-                    ))}
-                  </div>
-                ) : (
-                  /* Gentle calm smile wave when idle */
-                  <div className="flex items-center gap-1">
-                    <span className="h-1.5 w-1.5 rounded-full bg-slate-950/75" />
-                    <span className="h-2 w-5 rounded-full bg-slate-950/85" />
-                    <span className="h-1.5 w-1.5 rounded-full bg-slate-950/75" />
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Bottom Floating Mic Action Pill on the Orb */}
-            <span className="absolute -bottom-2.5 inline-flex items-center gap-1 rounded-full border border-white/30 bg-slate-950/90 px-2.5 py-0.5 text-[10px] font-extrabold text-amber-300 shadow-md">
+            {/* Floating Mic Action Pill */}
+            <span className="mt-2 inline-flex items-center gap-1.5 rounded-full border border-white/25 bg-white/15 px-3 py-1 text-[11px] font-extrabold text-amber-200 shadow-sm backdrop-blur-md transition-colors group-hover:bg-white/25">
               {phase === "listening" ? (
                 <>
-                  <MicOff className="size-3 text-sky-300" /> Escuchando…
+                  <MicOff className="size-3.5 text-sky-300" /> Escuchando tu voz… (Toca para detener)
                 </>
               ) : phase === "speaking" ? (
                 <>
-                  <AudioLines className="size-3 text-amber-300" /> Hablando…
+                  <AudioLines className="size-3.5 text-amber-300" /> Near hablando… (Toca para pausar)
                 </>
               ) : (
                 <>
-                  <Mic className="size-3" /> Toca para hablar
+                  <Mic className="size-3.5 text-amber-300" /> Toca a Near para hablar por voz
                 </>
               )}
             </span>
-          </motion.button>
+          </button>
         </div>
 
         {/* User's Last Spoken / Typed Line Pill */}

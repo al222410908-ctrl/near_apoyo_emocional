@@ -10,6 +10,7 @@ import {
   WandSparkles,
 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { NearFriendlyAvatar } from "@/components/near/NearFriendlyAvatar";
 import { useNear } from "@/context/NearContext";
 
 export const Route = createFileRoute("/")({
@@ -90,71 +91,10 @@ function Splash() {
         Near IA · VoiceChat & Chat en Vivo
       </motion.div>
 
-      {/* Center Live VoiceChat Bubble Preview with Speaking Simulation */}
+      {/* Center Live Friendly Near Character Preview with Speaking Simulation */}
       <div className="relative z-10 my-auto flex flex-col items-center py-5 text-center">
-        <div className="relative mb-4 flex items-center justify-center">
-          {/* Expanding Sonar Waves when Speaking */}
-          {speaking &&
-            [0, 1].map((idx) => (
-              <motion.span
-                key={idx}
-                className="pointer-events-none absolute size-32 rounded-full border-2 border-primary-soft/50"
-                initial={{ scale: 0.9, opacity: 0.7 }}
-                animate={{ scale: 1.65, opacity: 0 }}
-                transition={{ duration: 1.9, repeat: Infinity, delay: idx * 0.9, ease: "easeOut" }}
-              />
-            ))}
-
-          {/* Interactive Living VoiceChat Bubble */}
-          <motion.div
-            animate={
-              speaking
-                ? { scale: [1, 1.06, 0.98, 1.04, 1], y: [0, -4, 0] }
-                : { y: [0, -5, 0] }
-            }
-            transition={{ duration: speaking ? 1.2 : 3.5, repeat: Infinity, ease: "easeInOut" }}
-            className="relative grid size-28 place-items-center rounded-full border-2 border-amber-200/80 bg-sphere p-2 shadow-2xl shadow-amber-500/30"
-          >
-            <span className="pointer-events-none absolute top-3 left-5 size-8 rounded-full bg-white/40 blur-md" />
-
-            {/* Expressive Eyes + Live Audio Equalizer Waveform */}
-            <div className="flex flex-col items-center gap-1.5">
-              <div className="flex items-center gap-4">
-                <motion.span
-                  animate={{ scaleY: [1, 1, 0.15, 1] }}
-                  transition={{ duration: 3.2, repeat: Infinity }}
-                  className="size-3 rounded-full bg-slate-950 ring-2 ring-white/80"
-                />
-                <motion.span
-                  animate={{ scaleY: [1, 1, 0.15, 1] }}
-                  transition={{ duration: 3.2, repeat: Infinity }}
-                  className="size-3 rounded-full bg-slate-950 ring-2 ring-white/80"
-                />
-              </div>
-
-              <div className="mt-1 flex h-5 items-center justify-center gap-1">
-                {[0, 1, 2, 3, 4, 5, 6].map((bar) => (
-                  <motion.span
-                    key={bar}
-                    className="w-1 rounded-full bg-slate-950"
-                    animate={{
-                      height: speaking ? [5, 16, 7, 20, 9, 14, 5] : [4, 6, 8, 6, 4],
-                    }}
-                    transition={{
-                      duration: 0.6,
-                      repeat: Infinity,
-                      delay: bar * 0.08,
-                      ease: "easeInOut",
-                    }}
-                  />
-                ))}
-              </div>
-            </div>
-
-            <span className="absolute -bottom-2.5 inline-flex items-center gap-1 rounded-full border border-white/30 bg-slate-950 px-2.5 py-0.5 text-[10px] font-extrabold text-amber-300 shadow">
-              <AudioLines className="size-3" /> {speaking ? "Near hablando…" : "Near en línea"}
-            </span>
-          </motion.div>
+        <div className="relative mb-3 flex items-center justify-center">
+          <NearFriendlyAvatar phase={speaking ? "speaking" : "idle"} size="lg" />
         </div>
 
         {/* Live Simulated Speech Bubble */}
