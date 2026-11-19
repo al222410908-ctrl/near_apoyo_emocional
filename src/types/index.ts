@@ -2,8 +2,16 @@ export type MoodId = "calmado" | "cansado" | "ansioso" | "abrumado" | "esperanza
 export type CompanionStyle = "calido" | "directo" | "silencioso";
 export type GoalId = "estres" | "examenes" | "desahogo" | "dormir";
 export type TriggerId = "tareas" | "examenes" | "descanso" | "social" | "familia";
-export type ThemeId = "claro" | "noche";
+export type ThemeId = "claro" | "salvia" | "noche";
 export type SoundId = "lluvia" | "olas" | "fogata" | "bosque";
+
+export interface PillNotification {
+  id: string;
+  emoji: string;
+  title: string;
+  subtitle?: string;
+  tone?: "primary" | "secondary" | "success" | "gold";
+}
 
 export interface User {
   name: string;

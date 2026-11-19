@@ -19,7 +19,7 @@ export function AppScreen({
   emergency?: boolean;
   className?: string;
 }) {
-  const { hydrated, signedIn, user, onboarded } = useNear();
+  const { hydrated, signedIn, user, onboarded, todayMood } = useNear();
   const navigate = useNavigate();
   const ready = hydrated && signedIn && !!user && onboarded;
 
@@ -31,27 +31,50 @@ export function AppScreen({
 
   if (!ready) return <ScreenLoader />;
 
+  const mood = todayMood?.mood;
+  const isAnxious = mood === "ansioso" || mood === "abrumado";
+  const isTired = mood === "cansado";
+  const isCalm = mood === "calmado" || mood === "esperanzado";
+
+  const auraLeft = isAnxious
+    ? "bg-secondary-tint/35"
+    : isTired
+      ? "bg-amber-200/25"
+      : isCalm
+        ? "bg-primary-soft/22"
+        : "bg-primary-soft/14";
+
+  const auraRight = isAnxious
+    ? "bg-emerald-200/25"
+    : isTired
+      ? "bg-purple-200/25"
+      : isCalm
+        ? "bg-amber-100/35"
+        : "bg-secondary-tint/22";
+
+  const pulseDuration = isAnxious ? 18 : 12;
+
   return (
     <div className="relative flex min-h-screen flex-col overflow-x-hidden">
-      {/* Aurora ambiental de calma viva en segundo plano */}
+      {/* Aurora ambiental reactiva de calma en segundo plano */}
       <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
         <motion.div
-          className="absolute -top-20 -left-16 size-80 rounded-full bg-primary-soft/12 blur-3xl"
+          className={`absolute -top-20 -left-16 size-80 rounded-full blur-3xl transition-colors duration-1000 ${auraLeft}`}
           animate={{
             x: [0, 30, 0],
             y: [0, 20, 0],
             scale: [1, 1.15, 1],
           }}
-          transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
+          transition={{ duration: pulseDuration, repeat: Infinity, ease: "easeInOut" }}
         />
         <motion.div
-          className="absolute top-1/3 -right-24 size-88 rounded-full bg-secondary-tint/20 blur-3xl"
+          className={`absolute top-1/3 -right-24 size-88 rounded-full blur-3xl transition-colors duration-1000 ${auraRight}`}
           animate={{
             x: [0, -25, 0],
             y: [0, -35, 0],
             scale: [1, 1.2, 1],
           }}
-          transition={{ duration: 15, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+          transition={{ duration: pulseDuration + 3, repeat: Infinity, ease: "easeInOut", delay: 1 }}
         />
         <motion.div
           className="absolute -bottom-24 left-1/4 size-72 rounded-full bg-primary-tint/25 blur-3xl"

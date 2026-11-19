@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState, type ReactNode } from "react";
-import { BookHeart, ChevronRight, Download, EyeOff, FileText, Flame, LogOut, MessageCircle, Moon, Pencil, Phone, Sun, Trash2, UserRound, Volume2 } from "lucide-react";
+import { BookHeart, ChevronRight, Download, EyeOff, FileText, Flame, Leaf, LogOut, MessageCircle, Moon, Pencil, Phone, Sun, Trash2, UserRound, Volume2 } from "lucide-react";
 import { toast } from "sonner";
 import { AppScreen } from "@/components/near/AppScreen";
 import { PrivacyNoticeDialog } from "@/components/near/PrivacyNoticeDialog";
@@ -168,19 +168,31 @@ function Profile() {
           </div>
         </div>
         <div className="p-4">
-          <p className="mb-3 text-sm font-semibold text-heading">Tema</p>
-          <div className="grid grid-cols-2 gap-2">
+          <p className="mb-3 text-sm font-semibold text-heading">Tema del santuario</p>
+          <div className="grid grid-cols-3 gap-2">
             {[
-              { id: "claro" as const, label: "Claro", icon: <Sun className="size-4" /> },
-              { id: "noche" as const, label: "Noche cálida", icon: <Moon className="size-4" /> },
+              { id: "claro" as const, label: "Terracota", subtitle: "Cálido", icon: <Sun className="size-4 text-primary" /> },
+              { id: "salvia" as const, label: "Bosque", subtitle: "Salvia", icon: <Leaf className="size-4 text-emerald-600 dark:text-emerald-400" /> },
+              { id: "noche" as const, label: "Obsidiana", subtitle: "OLED", icon: <Moon className="size-4 text-secondary" /> },
             ].map((t) => (
               <button
                 key={t.id}
                 type="button"
                 onClick={() => updateSettings({ theme: t.id })}
-                className={cn("flex items-center justify-center gap-2 rounded-2xl border py-3 text-sm font-medium", settings.theme === t.id ? "border-primary bg-primary-tint text-heading" : "border-border bg-background")}
+                className={cn(
+                  "flex flex-col items-center justify-center gap-1.5 rounded-2xl border p-3 text-center transition-all",
+                  settings.theme === t.id
+                    ? "border-primary bg-primary-tint/70 text-heading shadow-soft ring-2 ring-primary/25"
+                    : "border-border bg-background hover:bg-surface-2",
+                )}
               >
-                {t.icon} {t.label}
+                <div className="grid size-8 place-items-center rounded-xl bg-surface shadow-xs">
+                  {t.icon}
+                </div>
+                <div>
+                  <span className="block text-xs font-semibold">{t.label}</span>
+                  <span className="block text-[10px] text-muted-foreground">{t.subtitle}</span>
+                </div>
               </button>
             ))}
           </div>

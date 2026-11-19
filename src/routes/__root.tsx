@@ -14,6 +14,7 @@ import appCss from "../styles.css?url";
 import { NearProvider } from "../context/NearContext";
 import { Toaster } from "../components/ui/sonner";
 import { PwaInstallPrompt } from "../components/near/PwaInstallPrompt";
+import { DynamicIslandPill } from "../components/near/DynamicIslandPill";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 
 function NotFoundComponent() {
@@ -143,6 +144,7 @@ function RootComponent() {
           {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
           <Outlet />
         </div>
+        <DynamicIslandPill />
         <PwaInstallPrompt />
         <Toaster position="top-center" />
       </NearProvider>

@@ -7,6 +7,7 @@ import type {
   MoodEntry,
   MoodId,
   NearState,
+  PillNotification,
   Settings,
   TriggerId,
   User,
@@ -21,6 +22,9 @@ interface NearContextValue extends NearState {
   streak: number;
   displayName: string;
   todayMood: MoodEntry | undefined;
+  activePill: PillNotification | null;
+  showPill: (notif: Omit<PillNotification, "id">) => void;
+  dismissPill: () => void;
   login: (email: string, name?: string) => void;
   loginDemo: () => void;
   register: (data: { name: string; email: string }) => void;
@@ -58,6 +62,24 @@ function buildUser(name: string, email: string): User {
 export function NearProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<NearState>(DEFAULT_STATE);
   const [hydrated, setHydrated] = useState(false);
+  const [activePill, setActivePill] = useState<PillNotification | null>(null);
+
+  const showPill = useCallback((notif: Omit<PillNotification, "id">) => {
+    const id = newId();
+    setActivePill({ ...notif, id });
+  }, []);
+
+  const dismissPill = useCallback(() => {
+    setActivePill(null);
+  }, []);
+
+  useEffect(() => {
+    if (!activePill) return;
+    const t = window.setTimeout(() => {
+      setActivePill((current) => (current?.id === activePill.id ? null : current));
+    }, 3600);
+    return () => window.clearTimeout(t);
+  }, [activePill]);
 
   useEffect(() => {
     try {
@@ -79,6 +101,7 @@ export function NearProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", state.settings.theme === "noche");
+    document.documentElement.classList.toggle("theme-salvia", state.settings.theme === "salvia");
   }, [state.settings.theme]);
 
   const startSession = useCallback((user: User, onboarded: boolean) => {
@@ -201,6 +224,9 @@ export function NearProvider({ children }: { children: ReactNode }) {
       streak: computeStreak(state.checkIns),
       displayName: state.settings.anonymousMode ? "" : (state.user?.name ?? ""),
       todayMood,
+      activePill,
+      showPill,
+      dismissPill,
       login,
       loginDemo,
       register,
@@ -217,7 +243,7 @@ export function NearProvider({ children }: { children: ReactNode }) {
       setEmergencyContact,
       exportData,
     };
-  }, [state, hydrated, login, loginDemo, register, logout, completeOnboarding, logMood, checkInToday, addMessage, clearMessages, restoreMessages, toggleFavorite, updateSettings, updateUser, setEmergencyContact, exportData]);
+  }, [state, hydrated, activePill, showPill, dismissPill, login, loginDemo, register, logout, completeOnboarding, logMood, checkInToday, addMessage, clearMessages, restoreMessages, toggleFavorite, updateSettings, updateUser, setEmergencyContact, exportData]);
 
   return <NearContext.Provider value={value}>{children}</NearContext.Provider>;
 }

@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { motion } from "framer-motion";
-import { BookHeart, ChevronRight, Heart, MessageCircleHeart, Mic, Waves, Wind } from "lucide-react";
+import { BookHeart, ChevronRight, Heart, Lightbulb, MessageCircleHeart, Mic, Sparkles, Waves, Wind } from "lucide-react";
 import { AppScreen } from "@/components/near/AppScreen";
 import { StreakWidget } from "@/components/near/StreakWidget";
 import { MoodChips } from "@/components/near/MoodChips";
@@ -27,9 +27,41 @@ export const Route = createFileRoute("/inicio")({
   ),
 });
 
-function greeting(d = new Date()) {
-  const h = d.getHours();
-  return h >= 5 && h < 12 ? "Buen día" : h >= 12 && h < 19 ? "Buenas tardes" : "Buenas noches";
+function getSmartGreeting(displayName?: string, mood?: string) {
+  const h = new Date().getHours();
+  const name = displayName ? `, ${displayName}` : "";
+
+  let title = "";
+  let subtitle = "";
+  let badge = "";
+
+  if (h >= 5 && h < 12) {
+    title = `Buen día${name}`;
+    subtitle = "Un paso a la vez con tus entregas y materias de hoy. Tu propio ritmo es el adecuado.";
+    badge = "Amanecer enfocado";
+  } else if (h >= 12 && h < 19) {
+    title = `Buenas tardes${name}`;
+    subtitle = "Pausa a mitad de jornada. Suelta la tensión de la espalda y hombros.";
+    badge = "Recarga vespertina";
+  } else if (h >= 19 && h < 23) {
+    title = `Noche serena${name}`;
+    subtitle = "Lo que lograste hoy en la escuela fue suficiente. Es momento de desconectar.";
+    badge = "Cierre de día";
+  } else {
+    title = `Noche silenciosa${name}`;
+    subtitle = "Los pensamientos suelen sentirse más pesados a deshoras. Aquí tienes un refugio seguro.";
+    badge = "Refugio nocturno";
+  }
+
+  if (mood === "ansioso" || mood === "abrumado") {
+    subtitle = `Notamos que te sientes ${mood}. No tienes que resolver todo de golpe; date un respiro suave.`;
+  } else if (mood === "cansado") {
+    subtitle = "Día de esfuerzo. Date permiso de descansar y soltar la autoexigencia universitaria.";
+  } else if (mood === "calmado" || mood === "esperanzado") {
+    subtitle = "Qué paz verte por aquí. Abraza esta serenidad y llévala contigo en tu jornada.";
+  }
+
+  return { title, subtitle, badge };
 }
 
 const fade = (i: number) => ({
@@ -39,25 +71,35 @@ const fade = (i: number) => ({
 });
 
 function Dashboard() {
-  const { displayName, favorites, toggleFavorite } = useNear();
+  const { displayName, favorites, toggleFavorite, todayMood } = useNear();
   const quote = quoteOfTheDay();
   const fav = favorites.includes(quote.id);
+  const greetingData = getSmartGreeting(displayName, todayMood?.mood);
 
   return (
     <div className="space-y-6 bg-sanctuary px-5 pt-6 pb-4">
       <motion.header {...fade(0)} className="flex items-start justify-between gap-3">
-        <div>
-          <h1 className="text-[26px] leading-tight font-semibold">
-            {greeting()}
-            {displayName ? `, ${displayName}` : ""} 👋
+        <div className="space-y-1">
+          <div className="inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary-tint/60 px-2.5 py-0.5 text-[11px] font-semibold tracking-wide text-primary">
+            <Sparkles className="size-3" />
+            <span>{greetingData.badge}</span>
+          </div>
+          <h1 className="text-[25px] leading-tight font-bold tracking-tight text-heading">
+            {greetingData.title} 👋
           </h1>
-          <p className="mt-1 text-sm">Tu refugio está listo para ti hoy.</p>
+          <p className="text-xs text-muted-foreground leading-relaxed max-w-[280px]">
+            {greetingData.subtitle}
+          </p>
         </div>
         <SosDialog
           trigger={
-            <button type="button" className="rounded-full bg-sos px-3.5 py-2 text-xs font-bold tracking-wide text-sos-foreground shadow-sm active:scale-95">
+            <motion.button
+              whileTap={{ scale: 0.92 }}
+              type="button"
+              className="rounded-full bg-sos px-3.5 py-2 text-xs font-bold tracking-wide text-sos-foreground shadow-sm transition-transform active:scale-95"
+            >
               SOS
-            </button>
+            </motion.button>
           }
         />
       </motion.header>
@@ -66,12 +108,37 @@ function Dashboard() {
         <StreakWidget />
       </motion.div>
 
-      <motion.section {...fade(2)}>
+      {/* Bento Emotional Insight Card */}
+      <motion.div
+        {...fade(2)}
+        className="group relative overflow-hidden rounded-3xl border border-white/30 bg-surface/80 p-4 shadow-soft backdrop-blur-xl transition-all hover:border-primary/30"
+      >
+        <div className="flex items-start gap-3">
+          <div className="grid size-9 shrink-0 place-items-center rounded-2xl bg-amber-500/10 text-amber-600 dark:text-amber-400">
+            <Lightbulb className="size-4.5" />
+          </div>
+          <div className="flex-1 space-y-1">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                Observación Empática
+              </span>
+              <span className="text-[10px] font-semibold text-primary">IA Preventiva</span>
+            </div>
+            <p className="text-xs font-medium leading-relaxed text-foreground/85">
+              {todayMood
+                ? `Registraste ánimo ${todayMood.mood} hoy. Recuerda que no necesitas exigirte la perfección en la escuela; cuidarte también es parte del camino.`
+                : "Hacer una pausa consciente antes de tus entregas universitarias reduce la sobrecarga mental y renueva tu energía."}
+            </p>
+          </div>
+        </div>
+      </motion.div>
+
+      <motion.section {...fade(3)}>
         <h2 className="mb-3 text-lg font-semibold">¿Cómo te sientes hoy?</h2>
         <MoodChips />
       </motion.section>
 
-      <motion.section {...fade(3)} className="rounded-3xl border border-border bg-surface p-5 shadow-soft">
+      <motion.section {...fade(4)} className="rounded-3xl border border-white/30 bg-surface/90 p-5 shadow-soft backdrop-blur-md">
         <h2 className="text-lg font-semibold">¿Quieres desahogarte o reflexionar?</h2>
         <p className="mt-1 mb-4 text-sm">Near te escucha sin juicios, a tu ritmo.</p>
         <div className="grid grid-cols-2 gap-3">
@@ -100,7 +167,7 @@ function Dashboard() {
         </div>
       </motion.section>
 
-      <motion.section {...fade(4)} className="relative overflow-hidden rounded-3xl bg-secondary p-5 text-secondary-foreground shadow-lift">
+      <motion.section {...fade(5)} className="relative overflow-hidden rounded-3xl bg-secondary p-5 text-secondary-foreground shadow-lift">
         <div className="flex items-center justify-between">
           <p className="text-xs font-medium tracking-wide uppercase opacity-80">Reflexión del día</p>
           <motion.button
@@ -118,7 +185,7 @@ function Dashboard() {
         <p className="mt-1 font-display text-lg leading-snug">“{quote.text}”</p>
       </motion.section>
 
-      <motion.section {...fade(5)}>
+      <motion.section {...fade(6)}>
         <div className="mb-3 flex items-center justify-between">
           <h2 className="text-lg font-semibold">Pausas de calma rápida</h2>
           <span className="text-xs text-muted-foreground">2-5 min</span>
@@ -149,8 +216,8 @@ function Dashboard() {
         </div>
       </motion.section>
 
-      <motion.div {...fade(6)} whileHover={{ x: 2 }} whileTap={{ scale: 0.98 }}>
-        <Link to="/bitacora" className="flex items-center gap-4 rounded-3xl border border-border bg-surface p-4 shadow-xs transition-shadow hover:shadow-soft">
+      <motion.div {...fade(7)} whileHover={{ x: 2 }} whileTap={{ scale: 0.98 }}>
+        <Link to="/bitacora" className="flex items-center gap-4 rounded-3xl border border-white/30 bg-surface/90 p-4 shadow-xs backdrop-blur-md transition-shadow hover:shadow-soft">
           <span className="grid size-12 place-items-center rounded-2xl bg-success-tint text-success">
             <BookHeart className="size-6" />
           </span>

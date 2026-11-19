@@ -15,7 +15,7 @@ const moodBg: Record<MoodId, string> = {
 export { moodBg };
 
 export function MoodChips() {
-  const { todayMood, logMood } = useNear();
+  const { todayMood, logMood, showPill } = useNear();
   return (
     <div className="flex flex-col gap-2">
       <div className="flex flex-wrap gap-2">
@@ -30,6 +30,12 @@ export function MoodChips() {
               animate={active ? { scale: 1.03 } : { scale: 1 }}
               onClick={() => {
                 logMood(m.id);
+                showPill({
+                  title: `Ánimo: ${m.label}`,
+                  subtitle: "Registrado en tu refugio personal",
+                  emoji: m.emoji,
+                  type: "mood",
+                });
                 toast.success(`Registrado: ${m.label} ${m.emoji}`, { description: "Gracias por escucharte hoy. Lo que sientes es válido." });
               }}
               className={cn(

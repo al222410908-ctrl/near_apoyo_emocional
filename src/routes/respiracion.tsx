@@ -64,7 +64,7 @@ function playCalmChime(freq = 432) {
 }
 
 function Breathing() {
-  const { checkInToday } = useNear();
+  const { checkInToday, showPill } = useNear();
   const [running, setRunning] = useState(false);
   const [haptics, setHaptics] = useState(true);
   const [sound, setSound] = useState(true);
@@ -103,11 +103,17 @@ function Breathing() {
       celebrated.current = true;
       setRunning(false);
       checkInToday();
+      showPill({
+        title: "Pausa Consciente Completada",
+        subtitle: "+1 a tu Racha de Calma semanal",
+        emoji: "🌿",
+        type: "streak",
+      });
       if (haptics) triggerHaptic([100, 50, 100, 50, 200]);
       if (sound) playCalmChime(528);
       toast.success("Pausa completada 🌿", { description: "Sumaste un día a tu Racha de Calma." });
     }
-  }, [cycles, checkInToday, haptics, sound]);
+  }, [cycles, checkInToday, haptics, sound, showPill]);
 
   const phase = PHASES[phaseIdx] ?? PHASES[0];
   const reset = () => {
