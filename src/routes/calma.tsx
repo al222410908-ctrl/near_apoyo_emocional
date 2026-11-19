@@ -4,6 +4,7 @@ import { useState } from "react";
 import { BookHeart, Check, ChevronRight, GraduationCap, Hand, Sparkles, Waves, Wind } from "lucide-react";
 import { toast } from "sonner";
 import { AppScreen, ScreenHeader } from "@/components/near/AppScreen";
+import { NearActivityGuide } from "@/components/near/NearActivityGuide";
 import { useNear } from "@/context/NearContext";
 import { cn } from "@/lib/utils";
 
@@ -103,7 +104,11 @@ function CalmaHub() {
   return (
     <div className="bg-sanctuary pb-6">
       <ScreenHeader title="Kit de Calma Interactiva" subtitle="Rituales táctiles para bajar revoluciones en minutos." />
-      <div className="space-y-3.5 px-4">
+      <div className="space-y-3.5 px-4 pt-3">
+        <NearActivityGuide
+          title="Near te acompaña en tu pausa"
+          explanation="Elige el ritual que tu mente pida hoy: respiración guiada 4-7-8, sonidos relajantes o el reto sensorial 5-4-3-2-1 para aterrizar en el presente."
+        />
         {tools.map((t, i) => (
           <motion.div
             key={t.to}

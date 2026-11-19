@@ -6,11 +6,14 @@ export type AvatarMoodState = "idle" | "listening" | "thinking" | "speaking";
 export function NearFriendlyAvatar({
   phase = "idle",
   size = "lg",
+  showWavePill = true,
 }: {
   phase?: AvatarMoodState;
-  size?: "md" | "lg";
+  size?: "sm" | "md" | "lg";
+  showWavePill?: boolean;
 }) {
-  const isLg = size === "lg";
+  const dimClass = size === "lg" ? "size-28" : size === "md" ? "size-20" : "size-14";
+  const auraClass = size === "lg" ? "size-36" : size === "md" ? "size-24" : "size-16";
 
   return (
     <div className="relative flex flex-col items-center justify-center">
@@ -18,7 +21,7 @@ export function NearFriendlyAvatar({
       <motion.div
         className={cn(
           "pointer-events-none absolute rounded-full blur-2xl",
-          isLg ? "size-36" : "size-28",
+          auraClass,
           phase === "listening"
             ? "bg-sky-400/35"
             : phase === "speaking"
@@ -37,19 +40,19 @@ export function NearFriendlyAvatar({
       <motion.div
         animate={
           phase === "speaking"
-            ? { y: [0, -6, 0], scale: [1, 1.04, 0.98, 1.03, 1] }
+            ? { y: [0, -5, 0], scale: [1, 1.05, 0.98, 1.03, 1] }
             : phase === "listening"
               ? { y: [0, -4, 0], rotate: [0, -3, 3, 0] }
               : phase === "thinking"
                 ? { y: [0, -3, 0], rotate: [-2, 2, -2] }
-                : { y: [0, -5, 0] }
+                : { y: [0, -4, 0] }
         }
         transition={{
           duration: phase === "speaking" ? 1.1 : phase === "listening" ? 1.6 : 3.4,
           repeat: Infinity,
           ease: "easeInOut",
         }}
-        className={cn("relative", isLg ? "size-28" : "size-24")}
+        className={cn("relative", dimClass)}
       >
         <svg viewBox="0 0 140 140" className="size-full overflow-visible drop-shadow-xl">
           <defs>
@@ -185,39 +188,41 @@ export function NearFriendlyAvatar({
       </motion.div>
 
       {/* External Soundwave Equalizer Pill BELOW the character (Clean & Friendly) */}
-      <div className="mt-1 flex h-6 items-center justify-center gap-1 rounded-full border border-white/20 bg-slate-950/80 px-3.5 py-1 shadow-md backdrop-blur-md">
-        {[0, 1, 2, 3, 4, 5, 6].map((bar) => (
-          <motion.span
-            key={bar}
-            className={cn(
-              "w-1 rounded-full",
-              phase === "listening"
-                ? "bg-sky-400"
-                : phase === "speaking"
-                  ? "bg-amber-300"
-                  : phase === "thinking"
-                    ? "bg-violet-400"
-                    : "bg-emerald-400",
-            )}
-            animate={{
-              height:
-                phase === "speaking"
-                  ? [4, 14, 6, 16, 7, 13, 4]
-                  : phase === "listening"
-                    ? [4, 12, 16, 8, 14, 6, 4]
+      {showWavePill && size !== "sm" && (
+        <div className="mt-1 flex h-6 items-center justify-center gap-1 rounded-full border border-white/20 bg-slate-950/80 px-3.5 py-1 shadow-md backdrop-blur-md">
+          {[0, 1, 2, 3, 4, 5, 6].map((bar) => (
+            <motion.span
+              key={bar}
+              className={cn(
+                "w-1 rounded-full",
+                phase === "listening"
+                  ? "bg-sky-400"
+                  : phase === "speaking"
+                    ? "bg-amber-300"
                     : phase === "thinking"
-                      ? [4, 10, 4, 10, 4]
-                      : [4, 6, 8, 6, 4],
-            }}
-            transition={{
-              duration: 0.6,
-              repeat: Infinity,
-              delay: bar * 0.08,
-              ease: "easeInOut",
-            }}
-          />
-        ))}
-      </div>
+                      ? "bg-violet-400"
+                      : "bg-emerald-400",
+              )}
+              animate={{
+                height:
+                  phase === "speaking"
+                    ? [4, 14, 6, 16, 7, 13, 4]
+                    : phase === "listening"
+                      ? [4, 12, 16, 8, 14, 6, 4]
+                      : phase === "thinking"
+                        ? [4, 10, 4, 10, 4]
+                        : [4, 6, 8, 6, 4],
+              }}
+              transition={{
+                duration: 0.6,
+                repeat: Infinity,
+                delay: bar * 0.08,
+                ease: "easeInOut",
+              }}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 }

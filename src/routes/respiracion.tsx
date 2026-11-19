@@ -5,6 +5,7 @@ import { ChevronLeft, Pause, Play, RotateCcw, Vibrate, VibrateOff, Volume2, Volu
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { AppScreen, ScreenHeader } from "@/components/near/AppScreen";
+import { NearActivityGuide } from "@/components/near/NearActivityGuide";
 import { useNear } from "@/context/NearContext";
 
 export const Route = createFileRoute("/respiracion")({
@@ -161,6 +162,17 @@ function Breathing() {
           </div>
         }
       />
+
+      <div className="px-5 pt-3">
+        <NearActivityGuide
+          title="Guía de Respiración Near"
+          explanation={
+            running
+              ? `${phase.label} ${phase.hint} durante ${phase.secs} segundos. Yo llevo el ritmo contigo.`
+              : "Inhala por la nariz 4 segundos, retén el aire 7 segundos y exhala suavemente por la boca durante 8 segundos. Toca Comenzar cuando estés listo."
+          }
+        />
+      </div>
 
       <div className="flex flex-1 flex-col items-center justify-center px-6">
         <div className="relative grid size-80 place-items-center">

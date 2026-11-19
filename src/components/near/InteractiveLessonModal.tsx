@@ -2,6 +2,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Check, CheckCircle2, Flame, Lightbulb, Sparkles, Trophy, Volume2, X, XCircle } from "lucide-react";
 import { useState } from "react";
 import { NearMark } from "@/components/near/Logo";
+import { NearActivityGuide } from "@/components/near/NearActivityGuide";
 import { useNear } from "@/context/NearContext";
 import type { InteractiveLesson } from "@/services/lessonsData";
 import { cn } from "@/lib/utils";
@@ -194,24 +195,11 @@ export function InteractiveLessonModal({ lesson, onClose }: InteractiveLessonMod
                   {lesson.title}
                 </h2>
 
-                {/* Near AI Companion Dialogue Bubble */}
-                <div className="flex items-start gap-3.5 rounded-3xl border border-b-[4px] border-border bg-surface p-4">
-                  <motion.div
-                    animate={{ scale: [1, 1.05, 1] }}
-                    transition={{ duration: 3.5, repeat: Infinity }}
-                    className="grid size-13 shrink-0 place-items-center rounded-2xl border border-border bg-background shadow-sm"
-                  >
-                    <NearMark className="size-8" />
-                  </motion.div>
-                  <div className="flex-1">
-                    <p className="text-[11px] font-extrabold uppercase tracking-wider text-primary">
-                      Near · IA Preventiva
-                    </p>
-                    <p className="mt-0.5 text-sm font-medium leading-relaxed text-heading">
-                      “{lesson.storyStep.mascotQuote}”
-                    </p>
-                  </div>
-                </div>
+                {/* Near AI Companion Guide speaking the lesson */}
+                <NearActivityGuide
+                  title={`Near te explica · Unidad ${lesson.unitNumber}`}
+                  explanation={`${lesson.storyStep.mascotQuote} ${lesson.storyStep.conceptBody}`}
+                />
 
                 {/* Main Concept Card */}
                 <div className={cn("rounded-3xl border-2 border-b-[5px] p-4", lesson.palette.lightBg, lesson.palette.lightBorder)}>
@@ -273,20 +261,10 @@ export function InteractiveLessonModal({ lesson, onClose }: InteractiveLessonMod
                 exit={{ opacity: 0, x: -25 }}
                 className="space-y-4"
               >
-                <span className="inline-flex items-center gap-1.5 rounded-xl bg-amber-500/15 px-3 py-1 text-xs font-extrabold text-amber-700 dark:text-amber-300">
-                  🧩 RETO DE SITUACIÓN UNIVERSITARIA
-                </span>
-
-                <div className="rounded-3xl border-2 border-b-4 border-border bg-surface p-4">
-                  <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Escenario real</p>
-                  <p className="mt-1 text-sm font-medium leading-relaxed text-heading">
-                    {lesson.quizStep.scenario}
-                  </p>
-                </div>
-
-                <h3 className="font-display text-lg font-bold text-heading">
-                  {lesson.quizStep.question}
-                </h3>
+                <NearActivityGuide
+                  title="Near te plantea un caso real"
+                  explanation={`${lesson.quizStep.scenario} ${lesson.quizStep.question}`}
+                />
 
                 <div className="space-y-2.5">
                   {lesson.quizStep.options.map((opt, idx) => {
@@ -372,22 +350,16 @@ export function InteractiveLessonModal({ lesson, onClose }: InteractiveLessonMod
               <motion.div
                 key="step-2"
                 initial={{ opacity: 0, x: 25 }}
-                animate={{ opacity: 1, x: 0 }}
+                animate={{ opacity: 1, y: 0, x: 0 }}
                 exit={{ opacity: 0, x: -25 }}
                 className="space-y-4"
               >
-                <span className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-500/15 px-3 py-1 text-xs font-extrabold text-emerald-700 dark:text-emerald-300">
-                  🛡️ MINI-JUEGO · {selectedChips.length}/{positiveChipsCount} ACTIVADOS
-                </span>
+                <NearActivityGuide
+                  title={`Práctica guiada · ${selectedChips.length}/${positiveChipsCount} listos`}
+                  explanation={`${lesson.practiceStep.prompt}. ${lesson.practiceStep.instruction}`}
+                />
 
-                <h3 className="font-display text-2xl font-bold text-heading">
-                  {lesson.practiceStep.prompt}
-                </h3>
-                <p className="text-sm text-muted-foreground">
-                  {lesson.practiceStep.instruction}
-                </p>
-
-                <div className="grid grid-cols-1 gap-3 pt-1">
+                <div className="grid grid-cols-1 gap-2.5 pt-1">
                   {lesson.practiceStep.actionChips.map((chip) => {
                     const picked = selectedChips.includes(chip.id);
                     const isWrong = wrongChipId === chip.id;
