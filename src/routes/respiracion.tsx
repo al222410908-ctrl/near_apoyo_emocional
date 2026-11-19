@@ -105,9 +105,9 @@ function Breathing() {
       checkInToday();
       showPill({
         title: "Pausa Consciente Completada",
-        subtitle: "+1 a tu Racha de Calma semanal",
+        subtitle: "+1 a tu Racha de Calma semanal (+20 XP)",
         emoji: "🌿",
-        type: "streak",
+        tone: "success",
       });
       if (haptics) triggerHaptic([100, 50, 100, 50, 200]);
       if (sound) playCalmChime(528);

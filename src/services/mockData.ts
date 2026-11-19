@@ -125,6 +125,8 @@ export const DEFAULT_STATE: NearState = {
   messages: [],
   favorites: [],
   emergencyContact: null,
+  xp: 140,
+  completedLessons: ["u1"],
 };
 
 export const welcomeMessage = (name: string): ChatMessage => ({

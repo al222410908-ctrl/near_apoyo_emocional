@@ -64,4 +64,8 @@ export interface NearState {
   messages: ChatMessage[];
   favorites: string[];
   emergencyContact: EmergencyContact | null;
+  /** Gamified Calm Seeds (XP) */
+  xp: number;
+  /** Completed interactive lesson IDs */
+  completedLessons: string[];
 }

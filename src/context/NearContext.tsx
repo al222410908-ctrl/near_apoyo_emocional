@@ -32,6 +32,8 @@ interface NearContextValue extends NearState {
   completeOnboarding: (data: { goals: GoalId[]; mood: MoodId | null; style: CompanionStyle }) => void;
   logMood: (mood: MoodId, extra?: { triggers?: TriggerId[] | undefined; note?: string | undefined }) => void;
   checkInToday: () => void;
+  addXp: (amount: number) => void;
+  completeLesson: (lessonId: string, xpReward: number) => void;
   addMessage: (msg: Omit<ChatMessage, "id" | "createdAt">) => ChatMessage;
   clearMessages: () => void;
   restoreMessages: (msgs: ChatMessage[]) => void;
@@ -150,7 +152,25 @@ export function NearProvider({ children }: { children: ReactNode }) {
 
   const checkInToday = useCallback(() => {
     const key = dayKey(new Date());
-    setState((s) => (s.checkIns.includes(key) ? s : { ...s, checkIns: [...s.checkIns, key] }));
+    setState((s) => (s.checkIns.includes(key) ? s : { ...s, checkIns: [...s.checkIns, key], xp: (s.xp ?? 140) + 20 }));
+  }, []);
+
+  const addXp = useCallback((amount: number) => {
+    setState((s) => ({ ...s, xp: (s.xp ?? 140) + amount }));
+  }, []);
+
+  const completeLesson = useCallback((lessonId: string, xpReward: number) => {
+    const key = dayKey(new Date());
+    setState((s) => {
+      const prevLessons = s.completedLessons ?? ["u1"];
+      const alreadyDone = prevLessons.includes(lessonId);
+      return {
+        ...s,
+        completedLessons: alreadyDone ? prevLessons : [...prevLessons, lessonId],
+        xp: (s.xp ?? 140) + (alreadyDone ? Math.round(xpReward / 2) : xpReward),
+        checkIns: s.checkIns.includes(key) ? s.checkIns : [...s.checkIns, key],
+      };
+    });
   }, []);
 
   const logMood = useCallback((mood: MoodId, extra?: { triggers?: TriggerId[] | undefined; note?: string | undefined }) => {
@@ -163,10 +183,12 @@ export function NearProvider({ children }: { children: ReactNode }) {
         triggers: extra?.triggers ?? [],
         note: extra?.note,
       };
+      const firstMoodToday = !s.moods.some((m) => dayKey(new Date(m.date)) === key);
       return {
         ...s,
         moods: [...s.moods, entry],
         checkIns: s.checkIns.includes(key) ? s.checkIns : [...s.checkIns, key],
+        xp: (s.xp ?? 140) + (firstMoodToday ? 15 : 5),
       };
     });
   }, []);
@@ -220,6 +242,8 @@ export function NearProvider({ children }: { children: ReactNode }) {
     const todayMood = [...state.moods].reverse().find((m) => dayKey(new Date(m.date)) === today);
     return {
       ...state,
+      xp: state.xp ?? 140,
+      completedLessons: state.completedLessons ?? ["u1"],
       hydrated,
       streak: computeStreak(state.checkIns),
       displayName: state.settings.anonymousMode ? "" : (state.user?.name ?? ""),
@@ -234,6 +258,8 @@ export function NearProvider({ children }: { children: ReactNode }) {
       completeOnboarding,
       logMood,
       checkInToday,
+      addXp,
+      completeLesson,
       addMessage,
       clearMessages,
       restoreMessages,
@@ -243,7 +269,7 @@ export function NearProvider({ children }: { children: ReactNode }) {
       setEmergencyContact,
       exportData,
     };
-  }, [state, hydrated, activePill, showPill, dismissPill, login, loginDemo, register, logout, completeOnboarding, logMood, checkInToday, addMessage, clearMessages, restoreMessages, toggleFavorite, updateSettings, updateUser, setEmergencyContact, exportData]);
+  }, [state, hydrated, activePill, showPill, dismissPill, login, loginDemo, register, logout, completeOnboarding, logMood, checkInToday, addXp, completeLesson, addMessage, clearMessages, restoreMessages, toggleFavorite, updateSettings, updateUser, setEmergencyContact, exportData]);
 
   return <NearContext.Provider value={value}>{children}</NearContext.Provider>;
 }
