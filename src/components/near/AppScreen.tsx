@@ -7,7 +7,7 @@ import { BottomNav } from "./BottomNav";
 import { EmergencyBanner } from "./EmergencyBanner";
 import { cn } from "@/lib/utils";
 
-/** Signed-in screen: guards the session, then renders content + sticky footer with ambient aura. */
+/** Signed-in screen: guards the session, then renders content + fixed static bottom navigation dock. */
 export function AppScreen({
   children,
   nav = true,
@@ -55,7 +55,7 @@ export function AppScreen({
   const pulseDuration = isAnxious ? 18 : 12;
 
   return (
-    <div className="relative flex min-h-screen flex-col overflow-x-hidden">
+    <div className="relative flex min-h-screen flex-col">
       {/* Aurora ambiental reactiva de calma en segundo plano */}
       <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
         <motion.div
@@ -87,19 +87,21 @@ export function AppScreen({
       </div>
 
       <motion.main
-        initial={{ opacity: 0, y: 10 }}
+        initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.35, ease: "easeOut" }}
-        className={cn("relative z-10 flex-1", className)}
+        transition={{ duration: 0.3, ease: "easeOut" }}
+        className={cn("relative z-10 flex-1", nav && "pb-28", className)}
       >
         {children}
+        {emergency && (
+          <div className="mt-2">
+            <EmergencyBanner />
+          </div>
+        )}
       </motion.main>
-      {(nav || emergency) && (
-        <div className="sticky bottom-0 z-30 pt-2">
-          {emergency && <EmergencyBanner />}
-          {nav && <BottomNav />}
-        </div>
-      )}
+
+      {/* Menú Inferior 100% Estático (Fixed Bottom Dock) */}
+      {nav && <BottomNav />}
     </div>
   );
 }
@@ -115,13 +117,23 @@ export function ScreenLoader() {
   );
 }
 
-export function ScreenHeader({ title, subtitle, right, back }: { title: string; subtitle?: string; right?: ReactNode; back?: ReactNode }) {
+export function ScreenHeader({
+  title,
+  subtitle,
+  right,
+  back,
+}: {
+  title: string;
+  subtitle?: string;
+  right?: ReactNode;
+  back?: ReactNode;
+}) {
   return (
-    <header className="flex items-start gap-3 px-5 pt-6 pb-4">
+    <header className="sticky top-0 z-30 flex items-center gap-3 border-b border-border/70 bg-background/90 px-5 py-3.5 backdrop-blur-xl">
       {back}
       <div className="flex-1">
-        <h1 className="text-2xl font-semibold">{title}</h1>
-        {subtitle && <p className="mt-0.5 text-sm text-muted-foreground">{subtitle}</p>}
+        <h1 className="text-xl leading-tight font-bold text-heading">{title}</h1>
+        {subtitle && <p className="mt-0.5 text-xs text-muted-foreground">{subtitle}</p>}
       </div>
       {right}
     </header>
