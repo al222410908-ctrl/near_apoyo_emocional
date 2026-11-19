@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { motion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
-import { ChevronLeft, Pause, Play, RotateCcw } from "lucide-react";
+import { ChevronLeft, Pause, Play, RotateCcw, Vibrate, VibrateOff, Volume2, VolumeX } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { AppScreen, ScreenHeader } from "@/components/near/AppScreen";
@@ -32,9 +32,42 @@ const PHASES = [
 ] as const;
 const TARGET_CYCLES = 8; // 8 × 19 s ≈ 2.5–3 min
 
+function triggerHaptic(pattern: number | number[]) {
+  if (typeof window !== "undefined" && "vibrate" in navigator) {
+    try {
+      navigator.vibrate(pattern);
+    } catch {
+      // Ignorar si el dispositivo bloquea la vibración
+    }
+  }
+}
+
+function playCalmChime(freq = 432) {
+  if (typeof window === "undefined") return;
+  try {
+    const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+    if (!AudioCtx) return;
+    const ctx = new AudioCtx();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(freq, ctx.currentTime);
+    gain.gain.setValueAtTime(0.04, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 1.2);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start();
+    osc.stop(ctx.currentTime + 1.2);
+  } catch {
+    // Audio Context no disponible
+  }
+}
+
 function Breathing() {
   const { checkInToday } = useNear();
   const [running, setRunning] = useState(false);
+  const [haptics, setHaptics] = useState(true);
+  const [sound, setSound] = useState(true);
   const [tick, setTick] = useState({ phaseIdx: 0, remaining: PHASES[0].secs as number, cycles: 0 });
   const { phaseIdx, remaining, cycles } = tick;
   const celebrated = useRef(false);
@@ -52,13 +85,29 @@ function Breathing() {
   }, [running]);
 
   useEffect(() => {
+    if (!running) return;
+    if (haptics) {
+      if (phaseIdx === 0) triggerHaptic(80); // Inhala
+      else if (phaseIdx === 1) triggerHaptic([50, 60, 50]); // Retén
+      else if (phaseIdx === 2) triggerHaptic(140); // Exhala
+    }
+    if (sound) {
+      if (phaseIdx === 0) playCalmChime(392); // G4
+      else if (phaseIdx === 1) playCalmChime(432); // A4
+      else if (phaseIdx === 2) playCalmChime(329.6); // E4
+    }
+  }, [phaseIdx, running, haptics, sound]);
+
+  useEffect(() => {
     if (cycles >= TARGET_CYCLES && !celebrated.current) {
       celebrated.current = true;
       setRunning(false);
       checkInToday();
+      if (haptics) triggerHaptic([100, 50, 100, 50, 200]);
+      if (sound) playCalmChime(528);
       toast.success("Pausa completada 🌿", { description: "Sumaste un día a tu Racha de Calma." });
     }
-  }, [cycles, checkInToday]);
+  }, [cycles, checkInToday, haptics, sound]);
 
   const phase = PHASES[phaseIdx] ?? PHASES[0];
   const reset = () => {
@@ -76,6 +125,34 @@ function Breathing() {
           <Link to="/calma" className="mt-0.5 grid size-10 place-items-center rounded-full bg-background/70 text-heading" aria-label="Volver">
             <ChevronLeft className="size-5" />
           </Link>
+        }
+        right={
+          <div className="flex items-center gap-1.5 pt-1">
+            <button
+              type="button"
+              onClick={() => {
+                setHaptics((h) => !h);
+                toast(haptics ? "Vibración háptica desactivada" : "Vibración háptica activada", { duration: 1500 });
+              }}
+              className={`grid size-9 place-items-center rounded-full border transition-all ${haptics ? "border-primary/30 bg-primary-tint text-primary" : "border-border bg-surface-2 text-muted-foreground opacity-60"}`}
+              aria-label="Alternar vibración háptica"
+              title={haptics ? "Vibración activada" : "Vibración silenciada"}
+            >
+              {haptics ? <Vibrate className="size-4" /> : <VibrateOff className="size-4" />}
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setSound((s) => !s);
+                toast(sound ? "Sonido de campana desactivado" : "Sonido de campana activado", { duration: 1500 });
+              }}
+              className={`grid size-9 place-items-center rounded-full border transition-all ${sound ? "border-secondary/30 bg-secondary-tint text-secondary" : "border-border bg-surface-2 text-muted-foreground opacity-60"}`}
+              aria-label="Alternar sonido de campana"
+              title={sound ? "Campana activada" : "Campana silenciada"}
+            >
+              {sound ? <Volume2 className="size-4" /> : <VolumeX className="size-4" />}
+            </button>
+          </div>
         }
       />
 

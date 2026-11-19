@@ -23,6 +23,7 @@ export interface SendMessageResponse {
   action?: "respiracion" | "sonidos" | "sos" | null;
   riskScore?: number;
   crisisAlert: boolean;
+  suggestions?: string[] | undefined;
 }
 
 export const apiService = {
@@ -73,6 +74,7 @@ export const apiService = {
     return {
       reply: local.text,
       action: local.action,
+      suggestions: local.suggestions,
       crisisAlert: false,
       riskScore: 0.1,
     };

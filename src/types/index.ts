@@ -29,6 +29,7 @@ export interface ChatMessage {
   createdAt: string;
   kind?: "text" | "safety" | undefined;
   action?: "respiracion" | "sonidos" | undefined;
+  suggestions?: string[] | undefined;
 }
 
 export interface EmergencyContact {

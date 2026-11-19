@@ -69,11 +69,21 @@ function ChatScreen() {
       if (response.crisisAlert) {
         addMessage({ role: "near", text: response.reply, kind: "safety" });
       } else {
-        addMessage({ role: "near", text: response.reply, action: response.action ?? undefined });
+        addMessage({
+          role: "near",
+          text: response.reply,
+          action: response.action ?? undefined,
+          suggestions: response.suggestions ?? undefined,
+        });
       }
     } catch {
       const fallback = generateReply(value, settings.companionStyle);
-      addMessage({ role: "near", text: fallback.text, action: fallback.action });
+      addMessage({
+        role: "near",
+        text: fallback.text,
+        action: fallback.action,
+        suggestions: fallback.suggestions,
+      });
     } finally {
       setTyping(false);
     }
@@ -99,7 +109,13 @@ function ChatScreen() {
     if (!stt.start()) toast("Tu navegador no permite dictado por voz", { description: "Prueba en Chrome o escribe tu mensaje." });
   };
 
-  const showSuggestions = messages.filter((m) => m.role === "user").length === 0;
+  const lastNearMessage = [...messages].reverse().find((m) => m.role === "near");
+  const activeSuggestions =
+    lastNearMessage?.suggestions && lastNearMessage.suggestions.length > 0
+      ? lastNearMessage.suggestions
+      : messages.filter((m) => m.role === "user").length === 0
+        ? CHAT_SUGGESTIONS
+        : [];
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -144,11 +160,16 @@ function ChatScreen() {
       </div>
 
       <div className="sticky bottom-0 z-20 border-t border-border bg-background/95 px-3 pt-2 pb-3 backdrop-blur-xl">
-        {showSuggestions && (
+        {!typing && activeSuggestions.length > 0 && (
           <div className="no-scrollbar -mx-3 mb-2 flex gap-2 overflow-x-auto px-3">
-            {CHAT_SUGGESTIONS.map((s) => (
-              <button key={s} type="button" onClick={() => send(s)} className="shrink-0 rounded-full border border-border bg-surface px-3.5 py-2 text-xs font-medium text-heading active:scale-95">
-                {s}
+            {activeSuggestions.map((s) => (
+              <button
+                key={s}
+                type="button"
+                onClick={() => send(s)}
+                className="shrink-0 rounded-full border border-primary/20 bg-primary-tint/60 px-3.5 py-1.5 text-xs font-medium text-heading transition-all hover:bg-primary-tint active:scale-95"
+              >
+                ✨ {s}
               </button>
             ))}
           </div>

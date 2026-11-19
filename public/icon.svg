@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <rect width="512" height="512" rx="128" fill="#FBF9F5"/>
+  <g transform="translate(64, 64) scale(8)">
+    <path
+      d="M17 38c-6-4.6-11-9.4-11-16a7.5 7.5 0 0 1 13.5-4.5"
+      fill="none"
+      stroke="#914A36"
+      stroke-width="3.4"
+      stroke-linecap="round"
+    />
+    <path
+      d="M24 41c-8-5.6-15-11.2-15-19a8 8 0 0 1 15-3.9A8 8 0 0 1 39 22c0 7.8-7 13.4-15 19Z"
+      fill="#FFDBD1"
+      stroke="#E08A72"
+      stroke-width="2.6"
+      stroke-linejoin="round"
+    />
+    <path
+      d="M31 38c6-4.6 11-9.4 11-16a7.5 7.5 0 0 0-13.5-4.5"
+      fill="none"
+      stroke="#45617D"
+      stroke-width="3.4"
+      stroke-linecap="round"
+    />
+  </g>
+</svg>

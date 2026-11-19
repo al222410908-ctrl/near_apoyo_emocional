@@ -99,6 +99,54 @@ const REPLIES: Record<Topic, Record<CompanionStyle, string[]>> = {
   },
 };
 
+const SUGGESTIONS_BY_TOPIC: Record<Topic, string[]> = {
+  examen: [
+    "¿Hacemos una pausa de 3 min?",
+    "Ayúdame a organizar mis temas",
+    "Siento que se me va a olvidar todo",
+  ],
+  calma: [
+    "Hacer respiración 4-7-8",
+    "Escuchar lluvia relajante",
+    "Solo quiero platicar un poco más",
+  ],
+  sueno: [
+    "Poner sonidos de noche",
+    "No puedo apagar mis pensamientos",
+    "¿Qué rutina me recomiendas?",
+  ],
+  tristeza: [
+    "Me siento solo/a en la escuela",
+    "¿Qué puedo hacer en este momento?",
+    "Gracias por escucharme",
+  ],
+  cansancio: [
+    "Tengo demasiadas entregas pendientes",
+    "Necesito desconectar un rato",
+    "Poner sonidos de bosque",
+  ],
+  desahogo: [
+    "Tengo problemas con un equipo",
+    "Siento mucha presión de mi familia",
+    "Me da miedo no terminar la carrera",
+  ],
+  gracias: [
+    "Me siento un poco más tranquilo/a",
+    "Hacer una pausa de respiración",
+    "Guardar esta conversación",
+  ],
+  saludo: [
+    "Tengo mucho estrés por las clases",
+    "Necesito calmarme ahorita",
+    "Quiero hacer un ejercicio rápido",
+  ],
+  general: [
+    "¿Hacemos respiración guiada?",
+    "Quiero ordenar mis pendientes",
+    "Solo desahogarme un rato",
+  ],
+};
+
 export function detectTopic(text: string): Topic {
   const t = normalize(text);
   return TOPICS.find((x) => x.pattern.test(t))?.topic ?? "general";
@@ -108,13 +156,14 @@ export function generateReply(
   text: string,
   style: CompanionStyle,
   rand: () => number = Math.random,
-): Pick<ChatMessage, "text" | "action"> {
+): Pick<ChatMessage, "text" | "action" | "suggestions"> {
   const topic = detectTopic(text);
   const options = REPLIES[topic][style];
   const reply = options[Math.floor(rand() * options.length)] ?? options[0] ?? "";
   const action =
     topic === "calma" ? "respiracion" : topic === "sueno" || topic === "cansancio" ? "sonidos" : undefined;
-  return { text: reply, action };
+  const suggestions = SUGGESTIONS_BY_TOPIC[topic] ?? SUGGESTIONS_BY_TOPIC.general;
+  return { text: reply, action, suggestions };
 }
 
 export const SAFETY_MESSAGE =
