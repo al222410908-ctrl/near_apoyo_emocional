@@ -1,12 +1,13 @@
 import { useEffect, type ReactNode } from "react";
 import { useNavigate } from "@tanstack/react-router";
+import { motion } from "framer-motion";
 import { useNear } from "@/context/NearContext";
 import { NearMark } from "./Logo";
 import { BottomNav } from "./BottomNav";
 import { EmergencyBanner } from "./EmergencyBanner";
 import { cn } from "@/lib/utils";
 
-/** Signed-in screen: guards the session, then renders content + sticky footer. */
+/** Signed-in screen: guards the session, then renders content + sticky footer with ambient aura. */
 export function AppScreen({
   children,
   nav = true,
@@ -31,8 +32,45 @@ export function AppScreen({
   if (!ready) return <ScreenLoader />;
 
   return (
-    <div className="flex min-h-screen flex-col">
-      <main className={cn("flex-1", className)}>{children}</main>
+    <div className="relative flex min-h-screen flex-col overflow-x-hidden">
+      {/* Aurora ambiental de calma viva en segundo plano */}
+      <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
+        <motion.div
+          className="absolute -top-20 -left-16 size-80 rounded-full bg-primary-soft/12 blur-3xl"
+          animate={{
+            x: [0, 30, 0],
+            y: [0, 20, 0],
+            scale: [1, 1.15, 1],
+          }}
+          transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
+        />
+        <motion.div
+          className="absolute top-1/3 -right-24 size-88 rounded-full bg-secondary-tint/20 blur-3xl"
+          animate={{
+            x: [0, -25, 0],
+            y: [0, -35, 0],
+            scale: [1, 1.2, 1],
+          }}
+          transition={{ duration: 15, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+        />
+        <motion.div
+          className="absolute -bottom-24 left-1/4 size-72 rounded-full bg-primary-tint/25 blur-3xl"
+          animate={{
+            scale: [1, 1.15, 1],
+            opacity: [0.35, 0.65, 0.35],
+          }}
+          transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+        />
+      </div>
+
+      <motion.main
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.35, ease: "easeOut" }}
+        className={cn("relative z-10 flex-1", className)}
+      >
+        {children}
+      </motion.main>
       {(nav || emergency) && (
         <div className="sticky bottom-0 z-30 pt-2">
           {emergency && <EmergencyBanner />}

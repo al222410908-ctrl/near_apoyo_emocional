@@ -1,4 +1,5 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useLocation } from "@tanstack/react-router";
+import { motion } from "framer-motion";
 import { Home, Leaf, UserRound } from "lucide-react";
 
 const tabs = [
@@ -8,22 +9,43 @@ const tabs = [
 ] as const;
 
 export function BottomNav() {
+  const { pathname } = useLocation();
+
   return (
-    <nav className="border-t border-border bg-background/90 px-6 pt-2 pb-safe backdrop-blur-xl" aria-label="Principal">
+    <nav className="border-t border-border/80 bg-background/95 px-6 pt-2 pb-safe shadow-lg backdrop-blur-xl" aria-label="Navegación principal">
       <ul className="flex items-center justify-around pb-2">
-        {tabs.map(({ to, label, icon: Icon }) => (
-          <li key={to}>
-            <Link
-              to={to}
-              className="group flex min-w-16 flex-col items-center gap-1 rounded-2xl px-3 py-1.5 text-muted-foreground transition-colors data-[status=active]:text-primary"
-            >
-              <span className="grid h-8 w-14 place-items-center rounded-full transition-colors group-data-[status=active]:bg-primary-tint">
-                <Icon className="size-5" />
-              </span>
-              <span className="text-[11px] font-medium">{label}</span>
-            </Link>
-          </li>
-        ))}
+        {tabs.map(({ to, label, icon: Icon }) => {
+          const isActive = pathname === to || (to !== "/inicio" && pathname.startsWith(to));
+          return (
+            <li key={to} className="relative">
+              <Link
+                to={to}
+                className={`group relative flex min-w-16 flex-col items-center gap-1 rounded-2xl px-3 py-1.5 transition-colors ${
+                  isActive ? "font-semibold text-primary" : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                <motion.span
+                  whileTap={{ scale: 0.88 }}
+                  className="relative grid h-8 w-14 place-items-center rounded-full"
+                >
+                  {isActive && (
+                    <motion.span
+                      layoutId="activeNavIndicator"
+                      className="absolute inset-0 rounded-full bg-primary-tint"
+                      transition={{ type: "spring", stiffness: 420, damping: 30 }}
+                    />
+                  )}
+                  <Icon
+                    className={`relative z-10 size-5 transition-transform duration-200 ${
+                      isActive ? "scale-110 text-primary" : "text-muted-foreground group-hover:scale-105"
+                    }`}
+                  />
+                </motion.span>
+                <span className="relative z-10 text-[11px] tracking-tight">{label}</span>
+              </Link>
+            </li>
+          );
+        })}
       </ul>
     </nav>
   );

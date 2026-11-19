@@ -44,19 +44,27 @@ export function StreakWidget() {
       <div className="mt-5 flex justify-between">
         {week.map((d) => (
           <div key={d.key} className="flex flex-col items-center gap-1.5">
-            <span
+            <motion.span
+              whileHover={{ scale: 1.15 }}
+              whileTap={{ scale: 0.9 }}
+              animate={d.isToday ? { scale: [1, 1.08, 1] } : undefined}
+              transition={d.isToday ? { duration: 3, repeat: Infinity, ease: "easeInOut" } : undefined}
               className={cn(
-                "grid size-9 place-items-center rounded-full border-2 text-xs font-semibold transition-colors",
+                "relative grid size-9 place-items-center rounded-full border-2 text-xs font-semibold shadow-xs transition-colors",
                 d.done
-                  ? "border-transparent bg-primary-foreground text-primary"
+                  ? "border-transparent bg-primary-foreground text-primary shadow-sm"
                   : d.isToday
-                    ? "border-dashed border-primary-foreground/80"
+                    ? "border-dashed border-primary-foreground/90 bg-primary-foreground/10"
                     : "border-primary-foreground/25",
               )}
             >
-              {d.done ? <Check className="size-4" strokeWidth={3} /> : null}
-            </span>
-            <span className={cn("text-[11px]", d.isToday ? "font-bold" : "opacity-75")}>{d.label}</span>
+              {d.done ? (
+                <motion.span initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 500, damping: 25 }}>
+                  <Check className="size-4" strokeWidth={3} />
+                </motion.span>
+              ) : null}
+            </motion.span>
+            <span className={cn("text-[11px]", d.isToday ? "font-bold text-primary-foreground" : "opacity-75")}>{d.label}</span>
           </div>
         ))}
       </div>

@@ -75,39 +75,45 @@ function Dashboard() {
         <h2 className="text-lg font-semibold">¿Quieres desahogarte o reflexionar?</h2>
         <p className="mt-1 mb-4 text-sm">Near te escucha sin juicios, a tu ritmo.</p>
         <div className="grid grid-cols-2 gap-3">
-          <Link to="/chat" className="group flex flex-col gap-3 rounded-2xl bg-primary-tint p-4 transition-transform active:scale-[0.98]">
-            <span className="grid size-11 place-items-center rounded-xl bg-primary text-primary-foreground">
-              <MessageCircleHeart className="size-5" />
-            </span>
-            <span>
-              <span className="block font-semibold text-heading">Chatear</span>
-              <span className="block text-xs text-muted-foreground">Escribe con calma</span>
-            </span>
-          </Link>
-          <Link to="/voz" className="group flex flex-col gap-3 rounded-2xl bg-secondary-tint p-4 transition-transform active:scale-[0.98]">
-            <span className="grid size-11 place-items-center rounded-xl bg-secondary text-secondary-foreground">
-              <Mic className="size-5" />
-            </span>
-            <span>
-              <span className="block font-semibold text-heading">Hablar con voz</span>
-              <span className="block text-xs text-muted-foreground">Siente un diálogo real</span>
-            </span>
-          </Link>
+          <motion.div whileHover={{ y: -3, scale: 1.02 }} whileTap={{ scale: 0.96 }}>
+            <Link to="/chat" className="group flex flex-col gap-3 rounded-2xl bg-primary-tint p-4 shadow-xs transition-shadow hover:shadow-soft">
+              <span className="grid size-11 place-items-center rounded-xl bg-primary text-primary-foreground shadow-xs transition-transform group-hover:scale-110">
+                <MessageCircleHeart className="size-5" />
+              </span>
+              <span>
+                <span className="block font-semibold text-heading">Chatear</span>
+                <span className="block text-xs text-muted-foreground">Escribe con calma</span>
+              </span>
+            </Link>
+          </motion.div>
+          <motion.div whileHover={{ y: -3, scale: 1.02 }} whileTap={{ scale: 0.96 }}>
+            <Link to="/voz" className="group flex flex-col gap-3 rounded-2xl bg-secondary-tint p-4 shadow-xs transition-shadow hover:shadow-soft">
+              <span className="grid size-11 place-items-center rounded-xl bg-secondary text-secondary-foreground shadow-xs transition-transform group-hover:scale-110">
+                <Mic className="size-5" />
+              </span>
+              <span>
+                <span className="block font-semibold text-heading">Hablar con voz</span>
+                <span className="block text-xs text-muted-foreground">Siente un diálogo real</span>
+              </span>
+            </Link>
+          </motion.div>
         </div>
       </motion.section>
 
-      <motion.section {...fade(4)} className="relative overflow-hidden rounded-3xl bg-secondary p-5 text-secondary-foreground">
+      <motion.section {...fade(4)} className="relative overflow-hidden rounded-3xl bg-secondary p-5 text-secondary-foreground shadow-lift">
         <div className="flex items-center justify-between">
           <p className="text-xs font-medium tracking-wide uppercase opacity-80">Reflexión del día</p>
-          <button
-          type="button"
-          onClick={() => toggleFavorite(quote.id)}
-          className="grid size-10 place-items-center rounded-full bg-secondary-foreground/15 active:scale-90"
-          aria-label={fav ? "Quitar de favoritos" : "Guardar en favoritos"}
-          aria-pressed={fav}
-        >
-          <Heart className={cn("size-5", fav && "fill-current")} />
-          </button>
+          <motion.button
+            type="button"
+            whileTap={{ scale: 0.8 }}
+            animate={fav ? { scale: [1, 1.3, 1] } : undefined}
+            onClick={() => toggleFavorite(quote.id)}
+            className="grid size-10 place-items-center rounded-full bg-secondary-foreground/15 shadow-xs"
+            aria-label={fav ? "Quitar de favoritos" : "Guardar en favoritos"}
+            aria-pressed={fav}
+          >
+            <Heart className={cn("size-5 transition-colors", fav ? "fill-current text-primary-tint" : "text-secondary-foreground")} />
+          </motion.button>
         </div>
         <p className="mt-1 font-display text-lg leading-snug">“{quote.text}”</p>
       </motion.section>
@@ -118,29 +124,33 @@ function Dashboard() {
           <span className="text-xs text-muted-foreground">2-5 min</span>
         </div>
         <div className="no-scrollbar -mx-5 flex snap-x snap-mandatory gap-3 overflow-x-auto px-5 pb-1">
-          <Link to="/respiracion" className="flex w-[72%] shrink-0 snap-start flex-col justify-between gap-6 rounded-3xl bg-primary-tint p-5 active:scale-[0.98]">
-            <span className="grid size-12 place-items-center rounded-2xl bg-background/70 text-primary">
-              <Wind className="size-6" />
-            </span>
-            <span>
-              <span className="block font-display text-lg font-semibold text-heading">Respiración 4-7-8</span>
-              <span className="block text-sm">3 min para soltar tensión</span>
-            </span>
-          </Link>
-          <Link to="/sonidos" className="flex w-[72%] shrink-0 snap-start flex-col justify-between gap-6 rounded-3xl bg-secondary-tint p-5 active:scale-[0.98]">
-            <span className="grid size-12 place-items-center rounded-2xl bg-background/70 text-secondary">
-              <Waves className="size-6" />
-            </span>
-            <span>
-              <span className="block font-display text-lg font-semibold text-heading">Sonidos de calma</span>
-              <span className="block text-sm">5 min de lluvia y olas</span>
-            </span>
-          </Link>
+          <motion.div whileHover={{ y: -3 }} whileTap={{ scale: 0.97 }} className="w-[72%] shrink-0 snap-start">
+            <Link to="/respiracion" className="group flex h-full flex-col justify-between gap-6 rounded-3xl bg-primary-tint p-5 shadow-xs transition-shadow hover:shadow-soft">
+              <span className="grid size-12 place-items-center rounded-2xl bg-background/80 text-primary shadow-xs transition-transform group-hover:scale-110">
+                <Wind className="size-6" />
+              </span>
+              <span>
+                <span className="block font-display text-lg font-semibold text-heading">Respiración 4-7-8</span>
+                <span className="block text-sm text-foreground/80">3 min para soltar tensión</span>
+              </span>
+            </Link>
+          </motion.div>
+          <motion.div whileHover={{ y: -3 }} whileTap={{ scale: 0.97 }} className="w-[72%] shrink-0 snap-start">
+            <Link to="/sonidos" className="group flex h-full flex-col justify-between gap-6 rounded-3xl bg-secondary-tint p-5 shadow-xs transition-shadow hover:shadow-soft">
+              <span className="grid size-12 place-items-center rounded-2xl bg-background/80 text-secondary shadow-xs transition-transform group-hover:scale-110">
+                <Waves className="size-6" />
+              </span>
+              <span>
+                <span className="block font-display text-lg font-semibold text-heading">Sonidos de calma</span>
+                <span className="block text-sm text-foreground/80">5 min de lluvia y olas</span>
+              </span>
+            </Link>
+          </motion.div>
         </div>
       </motion.section>
 
-      <motion.div {...fade(6)}>
-        <Link to="/bitacora" className="flex items-center gap-4 rounded-3xl border border-border bg-surface p-4 active:scale-[0.99]">
+      <motion.div {...fade(6)} whileHover={{ x: 2 }} whileTap={{ scale: 0.98 }}>
+        <Link to="/bitacora" className="flex items-center gap-4 rounded-3xl border border-border bg-surface p-4 shadow-xs transition-shadow hover:shadow-soft">
           <span className="grid size-12 place-items-center rounded-2xl bg-success-tint text-success">
             <BookHeart className="size-6" />
           </span>
