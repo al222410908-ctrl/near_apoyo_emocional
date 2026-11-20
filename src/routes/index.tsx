@@ -98,10 +98,10 @@ function Splash() {
         </div>
 
         {/* Live Simulated Speech Bubble */}
-        <div className="mt-3 w-full rounded-3xl border border-b-[4px] border-border border-b-neutral-300 bg-surface p-4 text-left shadow-sm dark:border-b-neutral-800">
+        <div className="mt-3 w-full rounded-3xl border-2 border-[#1C1917]/15 bg-[#FFFDF9] p-4 text-left shadow-[0_4px_0_rgba(28,25,23,0.08)] dark:border-white/15 dark:bg-[#262421]">
           <div className="mb-1 flex items-center justify-between">
-            <span className="inline-flex items-center gap-1 text-[10px] font-extrabold uppercase tracking-wider text-primary">
-              <Bot className="size-3.5" /> Simulación en vivo · Voz y Texto
+            <span className="inline-flex items-center gap-1 text-[10px] font-extrabold uppercase tracking-wider text-[#B85A3A]">
+              <Bot className="size-3.5" /> Espacio de escucha · Voz y Texto
             </span>
             <span className="text-[10px] font-semibold text-muted-foreground">24/7</span>
           </div>
@@ -111,7 +111,7 @@ function Splash() {
               <motion.span
                 animate={{ opacity: [0, 1, 0] }}
                 transition={{ duration: 0.7, repeat: Infinity }}
-                className="ml-1 inline-block h-3.5 w-1.5 translate-y-0.5 rounded-full bg-primary"
+                className="ml-1 inline-block h-3.5 w-1.5 translate-y-0.5 rounded-full bg-[#B85A3A]"
               />
             )}
           </p>
@@ -122,34 +122,34 @@ function Splash() {
           {[
             {
               icon: AudioLines,
-              title: "Voz + Chat IA",
-              sub: "Burbuja reactiva unificada",
-              tone: "bg-primary-tint text-primary",
+              title: "Voz y Texto",
+              sub: "Escucha interactiva",
+              tone: "bg-[#B85A3A] text-[#FFFDF9]",
             },
             {
               icon: GraduationCap,
               title: "Cápsulas & Radar",
-              sub: "5 unidades y test preventivo",
-              tone: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300",
+              sub: "5 unidades de 2 min",
+              tone: "bg-[#284B3C] text-[#FFFDF9]",
             },
             {
               icon: WandSparkles,
-              title: "Laboratorio Mental",
-              sub: "Reencuadre y Pomodoro 25/5",
-              tone: "bg-indigo-500/15 text-indigo-700 dark:text-indigo-300",
+              title: "Estudio & Calma",
+              sub: "Reencuadre y Pomodoro",
+              tone: "bg-[#C88A2B] text-[#FFFDF9]",
             },
             {
               icon: Activity,
               title: "Bitácora & Nivel",
-              sub: "Racha, misiones y métricas",
-              tone: "bg-amber-500/15 text-amber-700 dark:text-amber-300",
+              sub: "Racha y progreso",
+              tone: "bg-[#45617D] text-[#FFFDF9]",
             },
           ].map((item) => {
             const Icon = item.icon;
             return (
               <div
                 key={item.title}
-                className="flex items-center gap-2.5 rounded-2xl border border-b-[3px] border-border bg-surface/90 p-2.5 shadow-2xs"
+                className="flex items-center gap-2.5 rounded-2xl border-2 border-[#1C1917]/15 bg-[#FFFDF9] p-2.5 shadow-2xs dark:border-white/15 dark:bg-[#262421]"
               >
                 <span className={`grid size-8 shrink-0 place-items-center rounded-xl ${item.tone}`}>
                   <Icon className="size-4" />

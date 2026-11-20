@@ -94,31 +94,31 @@ const THEMATIC_MODULES: {
 }[] = [
   {
     id: "ia",
-    label: "Near IA",
+    label: "Near",
     subtitle: "Voz y Chat",
     icon: Bot,
-    activeColor: "border-primary border-b-[#693222] bg-clay text-primary-foreground",
+    activeColor: "border-[#1C1917] bg-[#B85A3A] text-[#FFFDF9]",
   },
   {
     id: "capsulas",
     label: "Cápsulas",
     subtitle: "Ruta & Radar",
     icon: GraduationCap,
-    activeColor: "border-emerald-600 border-b-emerald-800 bg-emerald-600 text-white",
+    activeColor: "border-[#1C1917] bg-[#284B3C] text-[#FFFDF9]",
   },
   {
     id: "laboratorio",
-    label: "Laboratorio",
-    subtitle: "Tools & Calma",
+    label: "Estudio",
+    subtitle: "Enfoque & Calma",
     icon: WandSparkles,
-    activeColor: "border-indigo-600 border-b-indigo-800 bg-indigo-600 text-white",
+    activeColor: "border-[#1C1917] bg-[#C88A2B] text-[#FFFDF9]",
   },
   {
     id: "perfil",
     label: "Mi Perfil",
     subtitle: "Nivel & Racha",
     icon: UserCheck,
-    activeColor: "border-secondary border-b-slate-800 bg-secondary text-secondary-foreground",
+    activeColor: "border-[#1C1917] bg-[#45617D] text-[#FFFDF9]",
   },
 ];
 
@@ -239,10 +239,10 @@ function Dashboard() {
             <UnifiedAiStage />
 
             {/* Selector Compacto de Estado Emocional */}
-            <section className="rounded-3xl border border-b-[4px] border-border border-b-neutral-300 bg-surface p-3.5 shadow-xs dark:border-b-neutral-800">
+            <section className="rounded-3xl border-2 border-[#1C1917]/15 bg-[#EFEAE0] p-3.5 shadow-[0_4px_0_rgba(28,25,23,0.08)] dark:border-white/15 dark:bg-[#1E1C1A]">
               <div className="mb-2 flex items-center justify-between">
-                <span className="text-xs font-bold text-heading">¿Cómo te sientes ahora? (Near adapta su voz)</span>
-                <span className="rounded-lg bg-primary-tint px-2 py-0.5 text-[10px] font-bold text-primary">
+                <span className="text-xs font-bold text-[#1C1917] dark:text-[#F4EFE6]">¿Cómo vienes hoy?</span>
+                <span className="rounded-lg bg-[#284B3C] px-2 py-0.5 text-[10px] font-bold text-[#FFFDF9]">
                   +15 XP
                 </span>
               </div>
@@ -436,9 +436,9 @@ function Dashboard() {
               <div className="grid grid-cols-1 gap-2.5">
                 <Link
                   to="/respiracion"
-                  className="flex items-center gap-3.5 rounded-3xl border border-b-[4px] border-sky-300 border-b-sky-500 bg-sky-50/80 p-4 transition-transform active:translate-y-0.5 dark:border-sky-800 dark:bg-sky-950/40"
+                  className="flex items-center gap-3.5 rounded-3xl border-2 border-[#1C1917]/15 bg-[#FFFDF9] p-4 shadow-[0_3px_0_rgba(28,25,23,0.08)] transition-transform active:translate-y-0.5 dark:border-white/15 dark:bg-[#262421]"
                 >
-                  <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-sky-500 text-white shadow-xs">
+                  <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-[#284B3C] text-[#FFFDF9]">
                     <Wind className="size-6" />
                   </span>
                   <div className="flex-1">
@@ -451,13 +451,13 @@ function Dashboard() {
 
                 <Link
                   to="/sonidos"
-                  className="flex items-center gap-3.5 rounded-3xl border border-b-[4px] border-teal-300 border-b-teal-500 bg-teal-50/80 p-4 transition-transform active:translate-y-0.5 dark:border-teal-800 dark:bg-teal-950/40"
+                  className="flex items-center gap-3.5 rounded-3xl border-2 border-[#1C1917]/15 bg-[#FFFDF9] p-4 shadow-[0_3px_0_rgba(28,25,23,0.08)] transition-transform active:translate-y-0.5 dark:border-white/15 dark:bg-[#262421]"
                 >
-                  <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-teal-600 text-white shadow-xs">
+                  <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-[#B85A3A] text-[#FFFDF9]">
                     <Waves className="size-6" />
                   </span>
                   <div className="flex-1">
-                    <span className="block font-display text-base font-bold text-heading">Paisajes Sonoros Zen</span>
+                    <span className="block font-display text-base font-bold text-heading">Paisajes Sonoros</span>
                     <span className="block text-xs text-muted-foreground">
                       Lluvia suave, olas, fogata y bosque sintetizados en tiempo real
                     </span>
@@ -466,13 +466,13 @@ function Dashboard() {
 
                 <Link
                   to="/bitacora"
-                  className="flex items-center gap-3.5 rounded-3xl border border-b-[4px] border-violet-300 border-b-violet-500 bg-violet-50/80 p-4 transition-transform active:translate-y-0.5 dark:border-violet-800 dark:bg-violet-950/40"
+                  className="flex items-center gap-3.5 rounded-3xl border-2 border-[#1C1917]/15 bg-[#FFFDF9] p-4 shadow-[0_3px_0_rgba(28,25,23,0.08)] transition-transform active:translate-y-0.5 dark:border-white/15 dark:bg-[#262421]"
                 >
-                  <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-violet-600 text-white shadow-xs">
+                  <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-[#C88A2B] text-[#FFFDF9]">
                     <BookHeart className="size-6" />
                   </span>
                   <div className="flex-1">
-                    <span className="block font-display text-base font-bold text-heading">Mi Bitácora Emocional</span>
+                    <span className="block font-display text-base font-bold text-heading">Mi Bitácora</span>
                     <span className="block text-xs text-muted-foreground">
                       Analítica semanal de estados de ánimo, detonantes y diario privado
                     </span>

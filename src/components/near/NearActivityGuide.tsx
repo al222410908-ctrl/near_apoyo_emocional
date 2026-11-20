@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Sparkles, Square, Volume2 } from "lucide-react";
+import { Square, Volume2 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { NearFriendlyAvatar } from "@/components/near/NearFriendlyAvatar";
 import { useNear } from "@/context/NearContext";
@@ -51,9 +51,9 @@ export function NearActivityGuide({
           window.clearInterval(streamRef.current);
           streamRef.current = null;
         }
-      }, 42);
+      }, 40);
 
-      const duration = Math.min(5500, Math.max(2200, words.length * 55));
+      const duration = Math.min(5000, Math.max(2000, words.length * 52));
 
       if (withAudio) {
         const started = tts.speak(explanation, title, () => {
@@ -69,7 +69,6 @@ export function NearActivityGuide({
     [explanation, stopAll, title, tts],
   );
 
-  // Animate typewriter explanation whenever the explanation text changes
   useEffect(() => {
     triggerExplain(autoSpeakOnMount);
     return () => {
@@ -83,26 +82,24 @@ export function NearActivityGuide({
   return (
     <div
       className={cn(
-        "relative flex items-center gap-3 rounded-3xl border border-b-[4px] border-amber-300/90 border-b-amber-500 bg-gradient-to-r from-amber-50/90 via-surface to-orange-50/50 p-3.5 shadow-xs dark:border-amber-800/80 dark:border-b-amber-950 dark:from-amber-950/35 dark:via-surface dark:to-orange-950/20",
+        "relative flex items-center gap-3 rounded-3xl border-2 border-[#1C1917]/15 bg-[#EFEAE0] p-3.5 shadow-[0_4px_0_rgba(28,25,23,0.08)] dark:border-white/15 dark:bg-[#1E1C1A]",
         className,
       )}
     >
-      {/* Interactive Mini Avatar */}
       <button
         type="button"
         onClick={() => (isTalking ? stopAll() : triggerExplain(true))}
-        className="shrink-0 rounded-2xl p-0.5 transition-transform active:scale-95"
-        title="Toca a Near para que te lea la actividad"
-        aria-label="Escuchar guía de Near"
+        className="shrink-0 rounded-full transition-transform active:scale-95"
+        title="Escuchar explicación"
+        aria-label="Escuchar guía"
       >
         <NearFriendlyAvatar phase={isTalking ? "speaking" : "idle"} size="sm" showWavePill={false} />
       </button>
 
-      {/* Explanation Speech Content */}
       <div className="min-w-0 flex-1">
         <div className="flex items-center justify-between gap-2">
-          <span className="inline-flex items-center gap-1 text-[10px] font-extrabold uppercase tracking-wider text-primary">
-            <Sparkles className="size-3" /> {title}
+          <span className="text-[10px] font-extrabold tracking-wider text-[#284B3C] uppercase dark:text-emerald-400">
+            {title}
           </span>
 
           <button
@@ -111,29 +108,29 @@ export function NearActivityGuide({
             className={cn(
               "inline-flex items-center gap-1 rounded-xl border px-2.5 py-1 text-[10px] font-extrabold transition-all active:scale-95",
               isTalking
-                ? "border-primary bg-primary text-primary-foreground"
-                : "border-amber-400/80 bg-white text-amber-900 hover:bg-amber-100 dark:border-amber-700 dark:bg-amber-950 dark:text-amber-200",
+                ? "border-[#1C1917] bg-[#284B3C] text-[#FFFDF9]"
+                : "border-[#1C1917]/15 bg-[#FFFDF9] text-[#1C1917] hover:bg-[#F4EFE6] dark:border-white/15 dark:bg-[#2A2724] dark:text-[#F4EFE6]",
             )}
           >
             {isTalking ? (
               <>
-                <Square className="size-2.5 fill-current" /> Detener voz
+                <Square className="size-2.5 fill-current" /> Detener
               </>
             ) : (
               <>
-                <Volume2 className="size-3" /> Escuchar a Near
+                <Volume2 className="size-3 text-[#B85A3A]" /> Escuchar
               </>
             )}
           </button>
         </div>
 
-        <p className="mt-1 text-xs font-semibold leading-relaxed text-heading">
+        <p className="mt-1 text-xs font-semibold leading-relaxed text-[#1C1917] dark:text-[#F4EFE6]">
           “{streamedText}”
           {isTalking && (
             <motion.span
               animate={{ opacity: [0, 1, 0] }}
               transition={{ duration: 0.65, repeat: Infinity }}
-              className="ml-1 inline-block h-3 w-1 translate-y-0.5 rounded-full bg-primary"
+              className="ml-1 inline-block h-3 w-1 translate-y-0.5 rounded-full bg-[#B85A3A]"
             />
           )}
         </p>

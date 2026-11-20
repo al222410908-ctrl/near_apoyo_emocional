@@ -108,7 +108,7 @@ export function AcademicBalanceRadar() {
     <div className="rounded-3xl border border-b-[4px] border-border border-b-neutral-300 bg-surface p-4 shadow-xs dark:border-b-neutral-800">
       <div className="mb-3 flex items-center justify-between">
         <div className="flex items-center gap-2.5">
-          <span className="grid size-10 place-items-center rounded-2xl border border-b-[3px] border-indigo-500/40 border-b-indigo-700 bg-indigo-500 text-white">
+          <span className="grid size-10 place-items-center rounded-2xl border border-b-[3px] border-[#1C1917] bg-[#284B3C] text-white">
             <Activity className="size-5" />
           </span>
           <div>
@@ -116,7 +116,7 @@ export function AcademicBalanceRadar() {
             <p className="text-xs text-muted-foreground">Auto-exploración preventiva (no clínica) · +35 XP</p>
           </div>
         </div>
-        <span className="rounded-xl bg-indigo-500/15 px-2.5 py-1 text-xs font-extrabold text-indigo-700 dark:text-indigo-300">
+        <span className="rounded-xl bg-[#284B3C]/15 px-2.5 py-1 text-xs font-extrabold text-[#284B3C] dark:text-emerald-300">
           {balancePct}% Equilibrio
         </span>
       </div>
@@ -159,10 +159,10 @@ export function AcademicBalanceRadar() {
       <button
         type="button"
         onClick={handleAnalyze}
-        className="mt-3.5 flex w-full items-center justify-center gap-2 rounded-2xl border border-b-[4px] border-indigo-600 border-b-indigo-800 bg-indigo-600 py-3 text-xs font-extrabold tracking-wide text-white shadow-sm transition-all active:translate-y-0.5"
+        className="mt-3.5 flex w-full items-center justify-center gap-2 rounded-2xl border border-b-[4px] border-[#1C1917] bg-[#284B3C] py-3 text-xs font-extrabold tracking-wide text-white shadow-sm transition-all active:translate-y-0.5"
       >
         <Sparkles className="size-4" />
-        <span>Generar Interpretación Preventiva con Near IA</span>
+        <span>Generar Interpretación Preventiva</span>
       </button>
 
       <AnimatePresence>
