@@ -66,7 +66,7 @@ export const Route = createFileRoute("/inicio")({
     ],
   }),
   component: () => (
-    <AppScreen nav={false} emergency>
+    <AppScreen nav={false} emergency={false}>
       <Dashboard />
     </AppScreen>
   ),
@@ -475,32 +475,33 @@ function Dashboard() {
             />
 
             {/* Tarjeta Compacta de Pasaporte Universitario */}
-            <div className="rounded-3xl border border-b-[4px] border-border border-b-neutral-300 bg-surface p-4 shadow-xs dark:border-b-neutral-800">
-              <div className="flex items-center justify-between gap-3">
-                <div className="flex items-center gap-3">
-                  <div className="relative grid size-12 shrink-0 place-items-center rounded-2xl border border-b-[3px] border-secondary/30 border-b-secondary/60 bg-secondary-tint text-secondary">
-                    {settings.anonymousMode ? <EyeOff className="size-5" /> : <GraduationCap className="size-6" />}
-                    <span className="absolute -right-1 -bottom-1 grid size-5 place-items-center rounded-full border border-white bg-primary text-[9px] font-black text-primary-foreground">
+            <div className="overflow-hidden rounded-3xl border border-b-[4px] border-border border-b-neutral-300 bg-surface p-4 shadow-xs dark:border-b-neutral-800">
+              <div className="flex items-center justify-between gap-2.5">
+                <div className="flex min-w-0 flex-1 items-center gap-2.5">
+                  <div className="relative grid size-11 shrink-0 place-items-center rounded-2xl border border-b-[3px] border-secondary/30 border-b-secondary/60 bg-secondary-tint text-secondary">
+                    {settings.anonymousMode ? <EyeOff className="size-5" /> : <GraduationCap className="size-5" />}
+                    <span className="absolute -right-1 -bottom-1 grid size-4.5 place-items-center rounded-full border border-white bg-primary text-[9px] font-black text-primary-foreground">
                       {level}
                     </span>
                   </div>
 
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-2">
-                      <h2 className="truncate font-display text-base font-bold text-heading">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      <h2 className="max-w-[140px] truncate font-display text-sm font-bold text-heading sm:max-w-[180px] sm:text-base">
                         {settings.anonymousMode ? "Estudiante (Anónimo)" : (user?.name ?? "Estudiante")}
                       </h2>
-                      <span className="inline-flex items-center gap-1 rounded-md bg-surface-2 px-2 py-0.5 text-[10px] font-bold text-muted-foreground">
+                      <span className="inline-flex shrink-0 items-center gap-1 rounded-md bg-surface-2 px-1.5 py-0.5 text-[9px] font-bold text-muted-foreground">
                         <SlidersHorizontal className="size-2.5 text-primary" /> IA {styleLabel}
                       </span>
                     </div>
-                    <p className="truncate text-xs text-muted-foreground">{user?.major ?? "Ingeniería TIC"} · UTVT</p>
+                    <p className="truncate text-[11px] text-muted-foreground">{user?.major ?? "Ingeniería TIC"} · UTVT</p>
                   </div>
                 </div>
 
                 <Link
                   to="/perfil"
-                  className="inline-flex items-center gap-1 rounded-xl border border-b-[3px] border-border bg-background px-3 py-2 text-xs font-bold text-heading hover:bg-surface-2"
+                  className="inline-flex shrink-0 items-center gap-1 rounded-xl border border-border/90 bg-background px-2.5 py-1.5 text-xs font-bold text-heading hover:bg-surface-2"
+                  title="Ajustes de perfil"
                 >
                   <Settings2 className="size-3.5 text-primary" />
                   <span>Ajustes</span>
@@ -557,8 +558,8 @@ function Dashboard() {
                   {[
                     {
                       id: "q1",
-                      title: "Sincroniza tu estado emocional",
-                      subtitle: "Registra cómo te sientes hoy",
+                      title: "Registra tu ánimo de hoy",
+                      subtitle: "Check-in emocional diario",
                       xp: "+15 XP",
                       done: quest1Done,
                       icon: Sun,
@@ -566,8 +567,8 @@ function Dashboard() {
                     },
                     {
                       id: "q2",
-                      title: "Conversa con Near IA (Voz o Chat)",
-                      subtitle: "Usa la burbuja interactiva principal",
+                      title: "Conversa con Near IA",
+                      subtitle: "Usa el espacio de voz o texto",
                       xp: "+20 XP",
                       done: quest3Done,
                       icon: MessageSquareHeart,
@@ -575,8 +576,8 @@ function Dashboard() {
                     },
                     {
                       id: "q3",
-                      title: "Completa una Cápsula Preventiva",
-                      subtitle: "Termina 1 unidad en el módulo Cápsulas",
+                      title: "Completa una Cápsula",
+                      subtitle: "1 lección preventiva de 2 min",
                       xp: "+30 XP",
                       done: quest2Done,
                       icon: GraduationCap,
@@ -598,9 +599,9 @@ function Dashboard() {
                           <QuestIcon className="size-4.5" />
                         </span>
                         <div className="min-w-0 flex-1">
-                          <div className="flex items-center justify-between">
+                          <div className="flex items-center justify-between gap-2">
                             <p className="truncate text-xs font-bold text-heading">{q.title}</p>
-                            <span className="text-[11px] font-extrabold text-primary">{q.xp}</span>
+                            <span className="shrink-0 whitespace-nowrap text-[11px] font-extrabold text-primary">{q.xp}</span>
                           </div>
                           <p className="truncate text-[11px] text-muted-foreground">{q.subtitle}</p>
                         </div>
