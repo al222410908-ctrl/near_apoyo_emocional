@@ -393,7 +393,7 @@ export function UnifiedAiStage() {
               </div>
               <div className="grid grid-cols-5 gap-1.5">
                 {AVATAR_STYLES.map((av) => {
-                  const active = (settings.avatarId ?? "ondas") === av.id;
+                  const active = (settings.avatarId ?? "brote") === av.id;
                   return (
                     <button
                       key={av.id}
@@ -491,7 +491,7 @@ export function UnifiedAiStage() {
             </button>
             <button
               type="button"
-              onClick={() => updateSettings({ avatarId: "ondas" })}
+              onClick={() => updateSettings({ avatarId: "brote" })}
               className="inline-flex items-center gap-1 rounded-lg border border-[#1C1917]/15 px-2 py-1 text-[10px] font-bold text-[#5C5248] hover:text-[#1C1917] dark:border-white/15 dark:text-white/70"
             >
               <Eye className="size-3" /> Mostrar

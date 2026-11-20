@@ -147,7 +147,7 @@ function Profile() {
           </div>
           <div className="grid grid-cols-5 gap-1.5">
             {AVATAR_STYLES.map((av) => {
-              const active = (settings.avatarId ?? "ondas") === av.id;
+              const active = (settings.avatarId ?? "brote") === av.id;
               return (
                 <button
                   key={av.id}

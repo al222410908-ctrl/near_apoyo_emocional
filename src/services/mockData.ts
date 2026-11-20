@@ -60,11 +60,11 @@ export const COMPANION_STYLES: { id: CompanionStyle; label: string; description:
 ];
 
 export const AVATAR_STYLES: { id: AvatarStyleId; label: string; short: string; description: string }[] = [
-  { id: "ondas", label: "Núcleo de Voz", short: "Ondas", description: "Ecualizador orgánico editorial" },
-  { id: "brote", label: "Compañero Brote", short: "Brote", description: "Personaje cálido y amigable" },
-  { id: "geometrico", label: "Prisma Zen", short: "Prisma", description: "Geometría moderna en equilibrio" },
-  { id: "constelacion", label: "Eco Astral", short: "Astral", description: "Nodos y anillos de luz serena" },
-  { id: "oculto", label: "Sin Avatar", short: "Ocultar", description: "Oculta la figura visual en toda la app" },
+  { id: "brote", label: "Espíritu Brote", short: "Brote", description: "Compañero cálido de calma y equilibrio" },
+  { id: "ondas", label: "Guardián Kitsune", short: "Kitsune", description: "Zorro guardián de enfoque y energía" },
+  { id: "geometrico", label: "Mentor Búho", short: "Búho", description: "Sabiduría académica para tus entregas" },
+  { id: "constelacion", label: "Nova Astral", short: "Nova", description: "Espíritu estelar para calma nocturna" },
+  { id: "oculto", label: "Sin Avatar", short: "Ocultar", description: "Oculta el personaje en toda la app" },
 ];
 
 export const QUOTES = [
@@ -128,7 +128,7 @@ export const DEFAULT_STATE: NearState = {
   signedIn: false,
   onboarded: false,
   goals: [],
-  settings: { companionStyle: "calido", voiceRate: 1, theme: "claro", anonymousMode: false, avatarId: "ondas" },
+  settings: { companionStyle: "calido", voiceRate: 1, theme: "claro", anonymousMode: false, avatarId: "brote" },
   moods: [],
   checkIns: [],
   messages: [],
