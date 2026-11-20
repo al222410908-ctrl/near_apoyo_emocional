@@ -152,64 +152,48 @@ function Dashboard() {
         : "Silencioso";
 
   return (
-    <div className="space-y-3.5 bg-sanctuary px-4 pt-3 pb-28">
+    <div className="space-y-3.5 bg-sanctuary px-4 pt-3 pb-36">
       {/* =====================================================================
-          1. ENCABEZADO SUPERIOR ESTÁTICO (Logo + Racha + XP + Nivel + SOS)
+          1. ENCABEZADO SUPERIOR LIMPIO Y DESPEJADO
          ===================================================================== */}
-      <header className="sticky top-2 z-30 flex items-center justify-between gap-2 rounded-2xl border border-b-[3px] border-border/90 border-b-neutral-300 bg-surface/95 px-3 py-2 shadow-sm backdrop-blur-xl dark:border-b-neutral-800">
-        <div className="flex items-center gap-2">
+      <header className="sticky top-2 z-30 flex items-center justify-between gap-3 rounded-2xl border border-border/80 bg-surface/95 px-3.5 py-2.5 shadow-xs backdrop-blur-xl">
+        <div className="flex items-center gap-2.5">
           <div className="grid size-8 place-items-center rounded-xl bg-primary-tint">
             <NearMark className="size-5" />
           </div>
-          <div className="leading-none">
+          <div className="leading-tight">
             <span className="block font-display text-sm font-extrabold tracking-tight text-heading">Near</span>
-            <span className="text-[9px] font-bold text-emerald-700 dark:text-emerald-400">IA Preventiva</span>
+            <span className="text-[10px] font-medium text-muted-foreground">Apoyo Emocional</span>
           </div>
         </div>
 
-        <div className="flex items-center gap-1.5">
-          <button
-            type="button"
-            onClick={() => {
-              setActiveModule("perfil");
-              setPerfilSubTab("racha");
-            }}
-            className="inline-flex items-center gap-1 rounded-xl border border-amber-300/90 bg-amber-50/90 px-2 py-1 text-[11px] font-bold text-amber-800 dark:border-amber-800 dark:bg-amber-950/60 dark:text-amber-300"
-            title="Ver Racha de Calma"
-          >
-            <Flame className="size-3.5 fill-amber-500 text-amber-600" />
-            <span>{streak}d</span>
-          </button>
-
-          <motion.button
-            type="button"
-            key={xp}
-            initial={{ scale: 1.12 }}
-            animate={{ scale: 1 }}
-            onClick={() => setActiveModule("perfil")}
-            className="inline-flex items-center gap-1 rounded-xl border border-emerald-300/90 bg-emerald-50/90 px-2 py-1 text-[11px] font-bold text-emerald-800 dark:border-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300"
-            title="Puntos de Bienestar (XP)"
-          >
-            <Sprout className="size-3.5 text-emerald-600 dark:text-emerald-400" />
-            <span>{xp} XP</span>
-          </motion.button>
-
+        <div className="flex items-center gap-2">
+          {/* Cápsula Unificada de Progreso (Racha + XP) */}
           <button
             type="button"
             onClick={() => setActiveModule("perfil")}
-            className="inline-flex items-center gap-1 rounded-xl border border-border bg-background px-2 py-1 text-[11px] font-bold text-heading"
-            title={`Nivel ${level}`}
+            className="inline-flex items-center gap-2 rounded-xl border border-border/90 bg-surface-2/80 px-2.5 py-1 text-xs font-bold text-heading transition-colors hover:bg-surface-2"
+            title="Ver progreso y racha"
           >
-            <Crown className="size-3.5 text-primary" />
-            <span>Nv.{level}</span>
+            <span className="inline-flex items-center gap-1 text-amber-700 dark:text-amber-400">
+              <Flame className="size-3.5 fill-current" />
+              <span>{streak}d</span>
+            </span>
+            <span className="h-3 w-px bg-border" />
+            <span className="inline-flex items-center gap-1 text-emerald-700 dark:text-emerald-400">
+              <Sprout className="size-3.5 text-emerald-600 dark:text-emerald-400" />
+              <span>{xp} XP</span>
+            </span>
           </button>
 
+          {/* Botón SOS Discreto y Claro */}
           <SosDialog
             trigger={
               <motion.button
                 whileTap={{ scale: 0.94 }}
                 type="button"
-                className="inline-flex items-center gap-1 rounded-xl border border-b-[2px] border-rose-700 border-b-rose-900 bg-sos px-2.5 py-1 text-[11px] font-extrabold tracking-wider text-sos-foreground shadow-2xs"
+                className="inline-flex items-center gap-1 rounded-xl bg-sos px-2.5 py-1 text-xs font-extrabold tracking-wide text-sos-foreground shadow-2xs transition-transform"
+                title="Línea de emergencia y apoyo en crisis"
               >
                 <ShieldAlert className="size-3.5" />
                 <span>SOS</span>
@@ -224,30 +208,19 @@ function Dashboard() {
          ===================================================================== */}
       <AnimatePresence mode="wait">
         {/* -------------------------------------------------------------------
-            MÓDULO 1: NEAR IA (VOICECHAT + CHAT UNIFICADO EN VIVO)
+            MÓDULO 1: NEAR IA (ESPACIO DE ESCUCHA PURO Y EXPANDIDO)
            ------------------------------------------------------------------- */}
         {activeModule === "ia" && (
           <motion.div
             key="module-ia"
-            initial={{ opacity: 0, y: 8 }}
+            initial={{ opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.2 }}
-            className="space-y-3.5"
+            exit={{ opacity: 0, y: -6 }}
+            transition={{ duration: 0.18 }}
+            className="space-y-0"
           >
-            {/* Cabina Unificada de VoiceChat + Chat con Avatar Amigable */}
+            {/* Cabina Unificada de VoiceChat + Chat: El ÚNICO foco de la pantalla */}
             <UnifiedAiStage />
-
-            {/* Selector Compacto de Estado Emocional */}
-            <section className="rounded-3xl border-2 border-[#1C1917]/15 bg-[#EFEAE0] p-3.5 shadow-[0_4px_0_rgba(28,25,23,0.08)] dark:border-white/15 dark:bg-[#1E1C1A]">
-              <div className="mb-2 flex items-center justify-between">
-                <span className="text-xs font-bold text-[#1C1917] dark:text-[#F4EFE6]">¿Cómo vienes hoy?</span>
-                <span className="rounded-lg bg-[#284B3C] px-2 py-0.5 text-[10px] font-bold text-[#FFFDF9]">
-                  +15 XP
-                </span>
-              </div>
-              <MoodChips />
-            </section>
           </motion.div>
         )}
 
