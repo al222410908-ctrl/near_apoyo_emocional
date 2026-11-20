@@ -28,6 +28,7 @@ import {
   Waves,
   Wind,
   Zap,
+  Sparkles,
   type LucideIcon,
 } from "lucide-react";
 import { useState } from "react";
@@ -44,7 +45,9 @@ import {
 } from "@/components/near/PreventiveToolsPack";
 import { SosDialog } from "@/components/near/SosDialog";
 import { StreakWidget } from "@/components/near/StreakWidget";
+import { TactileEmotionUntangler } from "@/components/near/TactileEmotionUntangler";
 import { UnifiedAiStage } from "@/components/near/UnifiedAiStage";
+import { VentAndDissolveModal } from "@/components/near/VentAndDissolveModal";
 import { useNear } from "@/context/NearContext";
 import { WELLNESS_LESSONS, type InteractiveLesson } from "@/services/lessonsData";
 import { cn } from "@/lib/utils";
@@ -130,6 +133,8 @@ function Dashboard() {
   const [labSubTab, setLabSubTab] = useState<LabSubTab>("reencuadre");
   const [perfilSubTab, setPerfilSubTab] = useState<PerfilSubTab>("misiones");
   const [activeLesson, setActiveLesson] = useState<InteractiveLesson | null>(null);
+  const [showVentModal, setShowVentModal] = useState(false);
+  const [showUntanglerModal, setShowUntanglerModal] = useState(false);
 
   const level = Math.floor(xp / 100) + 1;
   const levelProgress = xp % 100;
@@ -408,6 +413,44 @@ function Dashboard() {
             {labSubTab === "pomodoro" && <CompassionatePomodoroTool />}
             {labSubTab === "sensorial" && (
               <div className="grid grid-cols-1 gap-2.5">
+                {/* 1. Desahogo Sin Filtro y Disolver */}
+                <button
+                  type="button"
+                  onClick={() => setShowVentModal(true)}
+                  className="flex items-center gap-3.5 rounded-3xl border-2 border-rose-300/35 bg-[#FFFDF9] p-4 text-left shadow-[0_3px_0_rgba(28,25,23,0.08)] transition-transform active:translate-y-0.5 dark:border-rose-500/25 dark:bg-[#262421]"
+                >
+                  <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-rose-500/15 text-rose-600 dark:text-rose-400">
+                    <Flame className="size-6" />
+                  </span>
+                  <div className="flex-1">
+                    <span className="block font-display text-base font-bold text-heading">
+                      Desahogo Sin Filtro & Disolver
+                    </span>
+                    <span className="block text-xs text-muted-foreground">
+                      Escribe o dicta todo sin censura y desintégralo sin dejar rastro · +25 XP
+                    </span>
+                  </div>
+                </button>
+
+                {/* 2. El Desempaquetador Táctil */}
+                <button
+                  type="button"
+                  onClick={() => setShowUntanglerModal(true)}
+                  className="flex items-center gap-3.5 rounded-3xl border-2 border-indigo-300/35 bg-[#FFFDF9] p-4 text-left shadow-[0_3px_0_rgba(28,25,23,0.08)] transition-transform active:translate-y-0.5 dark:border-indigo-500/25 dark:bg-[#262421]"
+                >
+                  <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-indigo-500/15 text-indigo-600 dark:text-indigo-400">
+                    <Sparkles className="size-6" />
+                  </span>
+                  <div className="flex-1">
+                    <span className="block font-display text-base font-bold text-heading">
+                      El Desempaquetador Táctil
+                    </span>
+                    <span className="block text-xs text-muted-foreground">
+                      Cero texto: identifica qué tienes por cómo se siente en tu cuerpo · +20 XP
+                    </span>
+                  </div>
+                </button>
+
                 <Link
                   to="/respiracion"
                   className="flex items-center gap-3.5 rounded-3xl border-2 border-[#1C1917]/15 bg-[#FFFDF9] p-4 shadow-[0_3px_0_rgba(28,25,23,0.08)] transition-transform active:translate-y-0.5 dark:border-white/15 dark:bg-[#262421]"
@@ -671,6 +714,33 @@ function Dashboard() {
           <InteractiveLessonModal
             lesson={activeLesson}
             onClose={() => setActiveLesson(null)}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Modales de Herramientas Táctiles Inmediatas */}
+      <AnimatePresence>
+        {showVentModal && (
+          <VentAndDissolveModal
+            isOpen={showVentModal}
+            onClose={() => setShowVentModal(false)}
+            onSeekPerspective={() => {
+              setShowVentModal(false);
+              setActiveModule("ia");
+            }}
+          />
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showUntanglerModal && (
+          <TactileEmotionUntangler
+            isOpen={showUntanglerModal}
+            onClose={() => setShowUntanglerModal(false)}
+            onOpenChatWithTopic={() => {
+              setShowUntanglerModal(false);
+              setActiveModule("ia");
+            }}
           />
         )}
       </AnimatePresence>

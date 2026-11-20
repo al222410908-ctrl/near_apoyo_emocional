@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import type { AvatarStyleId, MoodId } from "@/types";
 
 export type AvatarMoodState = "idle" | "listening" | "thinking" | "speaking";
+export type AvatarExpression = "neutral" | "caring" | "hugging" | "celebrating" | "relieved" | "listening";
 
 export function NearFriendlyAvatar({
   phase = "idle",
@@ -12,12 +13,14 @@ export function NearFriendlyAvatar({
   showWavePill = true,
   variant,
   interactive = true,
+  expression = "neutral",
 }: {
   phase?: AvatarMoodState;
   size?: "xs" | "sm" | "md" | "lg";
   showWavePill?: boolean;
   variant?: AvatarStyleId;
   interactive?: boolean;
+  expression?: AvatarExpression;
 }) {
   const { settings, todayMood } = useNear();
   const [tapHeart, setTapHeart] = useState(false);
@@ -103,18 +106,33 @@ export function NearFriendlyAvatar({
       {/* Main Animated 3D Character Container */}
       <motion.div
         animate={
-          isAnxious
-            ? { scale: [1, 1.08, 1], y: [0, -3, 0] } // Co-regulación respiratoria (4.2 segundos)
-            : phase === "speaking"
-              ? { y: [0, -5, 0], scale: [1, 1.05, 0.98, 1.03, 1] }
-              : phase === "listening"
-                ? { y: [0, -4, 0], rotate: [0, -3, 3, 0] }
-                : phase === "thinking"
-                  ? { y: [0, -3, 0], rotate: [-2, 2, -2] }
-                  : { y: [0, -4, 0] }
+          expression === "celebrating"
+            ? { y: [0, -10, 0], scale: [1, 1.1, 1] }
+            : expression === "caring"
+              ? { rotate: [0, -4, 4, 0], y: [0, -2, 0] }
+              : expression === "hugging"
+                ? { scale: [1, 1.07, 1], y: [0, -4, 0] }
+                : isAnxious
+                  ? { scale: [1, 1.08, 1], y: [0, -3, 0] } // Co-regulación respiratoria (4.2 segundos)
+                  : phase === "speaking"
+                    ? { y: [0, -5, 0], scale: [1, 1.05, 0.98, 1.03, 1] }
+                    : phase === "listening"
+                      ? { y: [0, -4, 0], rotate: [0, -3, 3, 0] }
+                      : phase === "thinking"
+                        ? { y: [0, -3, 0], rotate: [-2, 2, -2] }
+                        : { y: [0, -4, 0] }
         }
         transition={{
-          duration: isAnxious ? 4.2 : phase === "speaking" ? 1.1 : phase === "listening" ? 1.6 : 3.4,
+          duration:
+            expression === "celebrating"
+              ? 0.9
+              : isAnxious
+                ? 4.2
+                : phase === "speaking"
+                  ? 1.1
+                  : phase === "listening"
+                    ? 1.6
+                    : 3.4,
           repeat: Infinity,
           ease: "easeInOut",
         }}
@@ -148,13 +166,21 @@ export function NearFriendlyAvatar({
               <path d="M70 28 L70 22" stroke="#059669" strokeWidth="3" strokeLinecap="round" />
             </g>
 
-            {/* Side Paws */}
+            {/* Side Paws (Posición reactiva al contexto) */}
             <ellipse
               cx="23"
               cy="84"
               rx="10"
               ry="7"
-              transform={phase === "speaking" ? "rotate(-22 23 84)" : "rotate(-10 23 84)"}
+              transform={
+                expression === "celebrating"
+                  ? "rotate(-45 23 84)"
+                  : expression === "hugging"
+                    ? "rotate(22 23 84)"
+                    : phase === "speaking"
+                      ? "rotate(-22 23 84)"
+                      : "rotate(-10 23 84)"
+              }
               fill="#FCD5B5"
               stroke="#FFFFFF"
               strokeWidth="2.5"
@@ -164,7 +190,15 @@ export function NearFriendlyAvatar({
               cy="84"
               rx="10"
               ry="7"
-              transform={phase === "speaking" ? "rotate(22 117 84)" : "rotate(10 117 84)"}
+              transform={
+                expression === "celebrating"
+                  ? "rotate(45 117 84)"
+                  : expression === "hugging"
+                    ? "rotate(-22 117 84)"
+                    : phase === "speaking"
+                      ? "rotate(22 117 84)"
+                      : "rotate(10 117 84)"
+              }
               fill="#FCD5B5"
               stroke="#FFFFFF"
               strokeWidth="2.5"
@@ -182,11 +216,55 @@ export function NearFriendlyAvatar({
             <ellipse cx="52" cy="42" rx="16" ry="7" transform="rotate(-15 52 42)" fill="#FFFFFF" opacity="0.75" />
 
             {/* Rosy Cheeks */}
-            <ellipse cx="42" cy="79" rx="8.5" ry="5" fill="#FB7185" opacity="0.45" />
-            <ellipse cx="98" cy="79" rx="8.5" ry="5" fill="#FB7185" opacity="0.45" />
+            <ellipse
+              cx="42"
+              cy="79"
+              rx="8.5"
+              ry="5"
+              fill="#FB7185"
+              opacity={expression === "caring" || expression === "hugging" ? 0.65 : 0.45}
+            />
+            <ellipse
+              cx="98"
+              cy="79"
+              rx="8.5"
+              ry="5"
+              fill="#FB7185"
+              opacity={expression === "caring" || expression === "hugging" ? 0.65 : 0.45}
+            />
 
-            {/* Eyes */}
-            {phase === "speaking" ? (
+            {/* Eyes (Reactivos al contexto de la conversación) */}
+            {expression === "celebrating" ? (
+              <>
+                {/* Estrellitas en los ojos al celebrar */}
+                <path d="M46 68 Q52 58 58 68" fill="none" stroke="#432818" strokeWidth="4.2" strokeLinecap="round" />
+                <path d="M82 68 Q88 58 94 68" fill="none" stroke="#432818" strokeWidth="4.2" strokeLinecap="round" />
+                <circle cx="52" cy="56" r="2.5" fill="#F59E0B" />
+                <circle cx="88" cy="56" r="2.5" fill="#F59E0B" />
+              </>
+            ) : expression === "relieved" ? (
+              <>
+                {/* Ojos sonrientes de alivio profundo */}
+                <path d="M46 67 Q52 60 58 67" fill="none" stroke="#432818" strokeWidth="4.2" strokeLinecap="round" />
+                <path d="M82 67 Q88 60 94 67" fill="none" stroke="#432818" strokeWidth="4.2" strokeLinecap="round" />
+              </>
+            ) : expression === "listening" ? (
+              <>
+                {/* Mirada atenta e inclinada escuchando cada palabra */}
+                <circle cx="52" cy="65" r="7.5" fill="#3B2314" />
+                <circle cx="53.5" cy="63" r="3.2" fill="#FFFFFF" />
+                <circle cx="88" cy="65" r="7.5" fill="#3B2314" />
+                <circle cx="89.5" cy="63" r="3.2" fill="#FFFFFF" />
+              </>
+            ) : expression === "hugging" || expression === "caring" ? (
+              <>
+                {/* Mirada tierna comprensiva */}
+                <circle cx="52" cy="66" r="7.5" fill="#3B2314" />
+                <circle cx="50" cy="63" r="3.2" fill="#FFFFFF" />
+                <circle cx="88" cy="66" r="7.5" fill="#3B2314" />
+                <circle cx="86" cy="63" r="3.2" fill="#FFFFFF" />
+              </>
+            ) : phase === "speaking" ? (
               <>
                 <path d="M45 67 Q52 58 59 67" fill="none" stroke="#432818" strokeWidth="4.2" strokeLinecap="round" />
                 <path d="M81 67 Q88 58 95 67" fill="none" stroke="#432818" strokeWidth="4.2" strokeLinecap="round" />
@@ -218,7 +296,13 @@ export function NearFriendlyAvatar({
 
             {/* Mouth */}
             <path
-              d={phase === "speaking" ? "M63 80 Q70 91 77 80 Z" : "M64 81 Q70 87 76 81"}
+              d={
+                phase === "speaking"
+                  ? "M63 80 Q70 91 77 80 Z"
+                  : expression === "celebrating"
+                    ? "M62 79 Q70 90 78 79"
+                    : "M64 81 Q70 87 76 81"
+              }
               fill={phase === "speaking" ? "#E11D48" : "none"}
               stroke="#432818"
               strokeWidth={phase === "speaking" ? "2" : "3.5"}

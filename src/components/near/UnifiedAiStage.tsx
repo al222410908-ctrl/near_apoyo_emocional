@@ -4,6 +4,7 @@ import {
   BrainCircuit,
   Eye,
   EyeOff,
+  Flame,
   ListTodo,
   Mic,
   MicOff,
@@ -18,8 +19,10 @@ import {
 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 import { toast } from "sonner";
-import { NearFriendlyAvatar } from "@/components/near/NearFriendlyAvatar";
+import { NearFriendlyAvatar, type AvatarExpression } from "@/components/near/NearFriendlyAvatar";
 import { SafetyCard } from "@/components/near/SafetyCard";
+import { TactileEmotionUntangler } from "@/components/near/TactileEmotionUntangler";
+import { VentAndDissolveModal } from "@/components/near/VentAndDissolveModal";
 import { useCircadianTheme } from "@/hooks/useCircadianTheme";
 import { useNear } from "@/context/NearContext";
 import { useSpeechRecognition, useSpeechSynthesis } from "@/hooks/useSpeech";
@@ -45,6 +48,44 @@ const STYLE_LABELS: Record<CompanionStyle, string> = {
   silencioso: "Escucha breve",
 };
 
+function detectSentimentExpression(userText: string, replyText: string): AvatarExpression {
+  const combined = `${userText} ${replyText}`.toLowerCase();
+
+  // 1. Celebración, éxito, logro o gratitud
+  if (
+    /gracias|logr[eé]|alivio|pude|mejor|tranquil|paz|sonre|bien|feliz|avanc[eé]|felicidad|orgull/i.test(
+      combined,
+    )
+  ) {
+    return "celebrating";
+  }
+
+  // 2. Abrazo o contención profunda (dolor, llanto, soledad, miedo)
+  if (
+    /llor|abrazo|soledad|solo|sola|trist|dolor|destrozad|desesperad|miedo|p[aá]nico|no puedo m[aá]s/i.test(
+      combined,
+    )
+  ) {
+    return "hugging";
+  }
+
+  // 3. Cuidado y empatía (cansancio, presión, agobio, estrés)
+  if (
+    /cansad|agotad|abrumad|presi[oó]n|estr[eé]s|bloque|pesad|no s[eé] qu[eé]|nudo|pecho/i.test(
+      combined,
+    )
+  ) {
+    return "caring";
+  }
+
+  // 4. Alivio / serenidad
+  if (/respir|solt[eé]|desahog|calma|serenidad/i.test(combined)) {
+    return "relieved";
+  }
+
+  return "neutral";
+}
+
 export function UnifiedAiStage() {
   const {
     displayName,
@@ -60,6 +101,9 @@ export function UnifiedAiStage() {
 
   const circadian = useCircadianTheme();
   const [phase, setPhase] = useState<AiPhase>("idle");
+  const [avatarExpression, setAvatarExpression] = useState<AvatarExpression>("neutral");
+  const [showVentModal, setShowVentModal] = useState(false);
+  const [showUntanglerModal, setShowUntanglerModal] = useState(false);
   const [inputText, setInputText] = useState("");
   const [voiceEnabled, setVoiceEnabled] = useState(true);
   const [showTonePicker, setShowTonePicker] = useState(false);
@@ -91,6 +135,9 @@ export function UnifiedAiStage() {
       setStreamedText("");
       setLastAction(action);
       setPhase("speaking");
+
+      const expr = detectSentimentExpression(lastUserPrompt, replyText);
+      setAvatarExpression(expr);
 
       const words = replyText.split(" ");
       let idx = 0;
@@ -143,6 +190,16 @@ export function UnifiedAiStage() {
       ansioso: "Cuando se junta la presión escolar es normal sentir tensión en el pecho. Ordenemos un solo pendiente a la vez.",
       abrumado: "Si todo parece urgente ahora mismo, hagamos una pausa de un minuto para despejar el ruido mental.",
     };
+    const moodExpressions: Record<string, AvatarExpression> = {
+      calmado: "relieved",
+      esperanzado: "celebrating",
+      cansado: "caring",
+      ansioso: "caring",
+      abrumado: "caring",
+    };
+    if (moodExpressions[todayMood.mood]) {
+      setAvatarExpression(moodExpressions[todayMood.mood]!);
+    }
     const msg = moodReplies[todayMood.mood];
     if (msg) {
       simulateSpeakingResponse(
@@ -179,6 +236,7 @@ export function UnifiedAiStage() {
       if (detectCrisis(value)) {
         setIsCrisis(true);
         setPhase("idle");
+        setAvatarExpression("hugging");
         addMessage({
           role: "near",
           text: "No estás solo/a. Tu bienestar es lo más importante en este momento.",
@@ -189,6 +247,10 @@ export function UnifiedAiStage() {
 
       setIsCrisis(false);
       setPhase("thinking");
+      const initExpr = detectSentimentExpression(value, "");
+      if (initExpr !== "neutral") {
+        setAvatarExpression(initExpr);
+      }
       setStreamedText("Te escucho y ordeno ideas contigo…");
 
       try {
@@ -567,7 +629,11 @@ export function UnifiedAiStage() {
             className="group relative flex flex-col items-center justify-center p-2 transition-transform active:scale-95"
             aria-label="Hablar o pausar voz con Near"
           >
-            <NearFriendlyAvatar phase={phase} size="lg" />
+            <NearFriendlyAvatar
+              phase={phase}
+              size="lg"
+              expression={phase === "listening" ? "listening" : avatarExpression}
+            />
           </button>
         )}
 
@@ -641,8 +707,53 @@ export function UnifiedAiStage() {
         </div>
       </div>
 
-      {/* 3. DOCK INFERIOR DE ENTRADA: MICRÓFONO PROTAGONISTA Y CHIPS SUAVES */}
+      {/* 3. DOCK INFERIOR DE ENTRADA: ACCIONES TÁCTILES RÁPIDAS, MICRÓFONO PROTAGONISTA Y CHIPS SUAVES */}
       <div className="mt-3 space-y-2.5">
+        {/* Acciones Táctiles Inmediatas: Desahogo Sin Filtro & Desempaquetador */}
+        <div className="grid grid-cols-2 gap-2">
+          <button
+            type="button"
+            onClick={() => setShowVentModal(true)}
+            className={cn(
+              "flex items-center gap-2 rounded-2xl border px-2.5 py-2 text-left shadow-2xs transition-all active:scale-95",
+              circadian.period === "noche"
+                ? "border-rose-400/25 bg-gradient-to-br from-rose-950/60 to-rose-900/30 text-rose-100 hover:border-rose-400/40"
+                : "border-rose-300/60 bg-gradient-to-br from-rose-50/90 to-orange-50/70 text-rose-950 hover:border-rose-400/60 dark:border-rose-500/25 dark:bg-rose-950/40 dark:text-rose-100",
+            )}
+          >
+            <span className="grid size-7.5 shrink-0 place-items-center rounded-xl bg-rose-500/25 text-rose-400 dark:text-rose-300">
+              <Flame className="size-4" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <span className="block text-[11px] font-bold leading-tight sm:text-xs">Desahogo libre</span>
+              <span className="block truncate text-[9.5px] font-medium leading-tight opacity-75">
+                Disolver sin rastro
+              </span>
+            </div>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setShowUntanglerModal(true)}
+            className={cn(
+              "flex items-center gap-2 rounded-2xl border px-2.5 py-2 text-left shadow-2xs transition-all active:scale-95",
+              circadian.period === "noche"
+                ? "border-indigo-400/25 bg-gradient-to-br from-indigo-950/60 to-indigo-900/30 text-indigo-100 hover:border-indigo-400/40"
+                : "border-indigo-300/60 bg-gradient-to-br from-indigo-50/90 to-teal-50/70 text-indigo-950 hover:border-indigo-400/60 dark:border-indigo-500/25 dark:bg-indigo-950/40 dark:text-indigo-100",
+            )}
+          >
+            <span className="grid size-7.5 shrink-0 place-items-center rounded-xl bg-indigo-500/25 text-indigo-400 dark:text-indigo-300">
+              <Sparkles className="size-4" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <span className="block text-[11px] font-bold leading-tight sm:text-xs">Desempaquetar</span>
+              <span className="block truncate text-[9.5px] font-medium leading-tight opacity-75">
+                Cero texto · Tacto
+              </span>
+            </div>
+          </button>
+        </div>
+
         {/* Chips de temas sugeridos con diseño limpio y sutil */}
         <div className="no-scrollbar flex items-center gap-1.5 overflow-x-auto pb-0.5">
           {QUICK_TOPICS.map((t) => {
@@ -697,6 +808,35 @@ export function UnifiedAiStage() {
           </button>
         </form>
       </div>
+
+      {/* Modales de Herramientas Táctiles Inmediatas */}
+      <AnimatePresence>
+        {showVentModal && (
+          <VentAndDissolveModal
+            isOpen={showVentModal}
+            onClose={() => setShowVentModal(false)}
+            onSeekPerspective={(text) => {
+              setShowVentModal(false);
+              handleUnifiedSubmit(text, false);
+              setAvatarExpression("caring");
+            }}
+          />
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showUntanglerModal && (
+          <TactileEmotionUntangler
+            isOpen={showUntanglerModal}
+            onClose={() => setShowUntanglerModal(false)}
+            onOpenChatWithTopic={(topic) => {
+              setShowUntanglerModal(false);
+              handleUnifiedSubmit(topic, false);
+              setAvatarExpression("caring");
+            }}
+          />
+        )}
+      </AnimatePresence>
     </section>
   );
 }
