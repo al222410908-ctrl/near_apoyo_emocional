@@ -1,7 +1,8 @@
-import { motion } from "framer-motion";
+import { useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import { useNear } from "@/context/NearContext";
 import { cn } from "@/lib/utils";
-import type { AvatarStyleId } from "@/types";
+import type { AvatarStyleId, MoodId } from "@/types";
 
 export type AvatarMoodState = "idle" | "listening" | "thinking" | "speaking";
 
@@ -10,18 +11,31 @@ export function NearFriendlyAvatar({
   size = "lg",
   showWavePill = true,
   variant,
+  interactive = true,
 }: {
   phase?: AvatarMoodState;
   size?: "xs" | "sm" | "md" | "lg";
   showWavePill?: boolean;
   variant?: AvatarStyleId;
+  interactive?: boolean;
 }) {
-  const { settings } = useNear();
+  const { settings, todayMood } = useNear();
+  const [tapHeart, setTapHeart] = useState(false);
   const activeVariant: AvatarStyleId = variant ?? settings.avatarId ?? "brote";
 
   if (activeVariant === "oculto") {
     return null;
   }
+
+  const handleTap = () => {
+    if (!interactive) return;
+    setTapHeart(true);
+    setTimeout(() => setTapHeart(false), 1400);
+  };
+
+  const isAnxious = todayMood?.mood === "ansioso" || todayMood?.mood === "abrumado";
+  const isTired = todayMood?.mood === "cansado";
+  const isCalmOrHopeful = todayMood?.mood === "calmado" || todayMood?.mood === "esperanzado";
 
   const dimClass =
     size === "lg" ? "size-28" : size === "md" ? "size-20" : size === "sm" ? "size-14" : "size-10";
@@ -30,7 +44,31 @@ export function NearFriendlyAvatar({
   const isSmall = size === "sm" || size === "xs";
 
   return (
-    <div className="relative flex flex-col items-center justify-center">
+    <div
+      onClick={handleTap}
+      className={cn(
+        "relative flex flex-col items-center justify-center select-none",
+        interactive && "cursor-pointer active:scale-95 transition-transform",
+      )}
+    >
+      {/* Floating Hearts / Sparkles on Tap */}
+      <AnimatePresence>
+        {tapHeart && (
+          <motion.div
+            initial={{ opacity: 0, y: 0, scale: 0.5 }}
+            animate={{ opacity: 1, y: -35, scale: 1.2 }}
+            exit={{ opacity: 0, y: -50, scale: 0.8 }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
+            className="pointer-events-none absolute -top-4 z-30 flex items-center gap-1 font-bold text-rose-500 drop-shadow-md text-sm"
+          >
+            <span>💖</span>
+            <span className="text-[11px] font-extrabold text-amber-900 bg-amber-100/90 px-2 py-0.5 rounded-full border border-amber-300">
+              ¡Aquí estoy contigo!
+            </span>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Outer Soft Pastel Aura */}
       <motion.div
         className={cn(
@@ -42,27 +80,41 @@ export function NearFriendlyAvatar({
               ? "bg-emerald-400/35"
               : activeVariant === "ondas"
                 ? "bg-orange-400/35"
-                : "bg-amber-300/40",
+                : isAnxious
+                  ? "bg-teal-300/45"
+                  : isTired
+                    ? "bg-amber-200/40"
+                    : "bg-amber-300/40",
         )}
         animate={{
-          scale: phase === "speaking" ? [1, 1.22, 1] : [0.95, 1.08, 0.95],
+          scale: isAnxious
+            ? [1, 1.3, 1] // Guía de respiración lenta
+            : phase === "speaking"
+              ? [1, 1.22, 1]
+              : [0.95, 1.08, 0.95],
         }}
-        transition={{ duration: phase === "speaking" ? 1.2 : 3.5, repeat: Infinity, ease: "easeInOut" }}
+        transition={{
+          duration: isAnxious ? 4.2 : phase === "speaking" ? 1.2 : 3.5,
+          repeat: Infinity,
+          ease: "easeInOut",
+        }}
       />
 
       {/* Main Animated 3D Character Container */}
       <motion.div
         animate={
-          phase === "speaking"
-            ? { y: [0, -5, 0], scale: [1, 1.05, 0.98, 1.03, 1] }
-            : phase === "listening"
-              ? { y: [0, -4, 0], rotate: [0, -3, 3, 0] }
-              : phase === "thinking"
-                ? { y: [0, -3, 0], rotate: [-2, 2, -2] }
-                : { y: [0, -4, 0] }
+          isAnxious
+            ? { scale: [1, 1.08, 1], y: [0, -3, 0] } // Co-regulación respiratoria (4.2 segundos)
+            : phase === "speaking"
+              ? { y: [0, -5, 0], scale: [1, 1.05, 0.98, 1.03, 1] }
+              : phase === "listening"
+                ? { y: [0, -4, 0], rotate: [0, -3, 3, 0] }
+                : phase === "thinking"
+                  ? { y: [0, -3, 0], rotate: [-2, 2, -2] }
+                  : { y: [0, -4, 0] }
         }
         transition={{
-          duration: phase === "speaking" ? 1.1 : phase === "listening" ? 1.6 : 3.4,
+          duration: isAnxious ? 4.2 : phase === "speaking" ? 1.1 : phase === "listening" ? 1.6 : 3.4,
           repeat: Infinity,
           ease: "easeInOut",
         }}
@@ -139,6 +191,20 @@ export function NearFriendlyAvatar({
                 <path d="M45 67 Q52 58 59 67" fill="none" stroke="#432818" strokeWidth="4.2" strokeLinecap="round" />
                 <path d="M81 67 Q88 58 95 67" fill="none" stroke="#432818" strokeWidth="4.2" strokeLinecap="round" />
               </>
+            ) : isTired ? (
+              <>
+                {/* Sleepy soothing eyes */}
+                <path d="M46 68 Q52 74 58 68" fill="none" stroke="#432818" strokeWidth="3.8" strokeLinecap="round" />
+                <path d="M82 68 Q88 74 94 68" fill="none" stroke="#432818" strokeWidth="3.8" strokeLinecap="round" />
+              </>
+            ) : isCalmOrHopeful ? (
+              <>
+                {/* Happy smiling eyes */}
+                <path d="M46 68 Q52 61 58 68" fill="none" stroke="#432818" strokeWidth="4" strokeLinecap="round" />
+                <path d="M82 68 Q88 61 94 68" fill="none" stroke="#432818" strokeWidth="4" strokeLinecap="round" />
+                <circle cx="52" cy="57" r="1.5" fill="#F59E0B" />
+                <circle cx="88" cy="57" r="1.5" fill="#F59E0B" />
+              </>
             ) : (
               <>
                 <circle cx="52" cy="66" r="7.5" fill="#3B2314" />
@@ -151,12 +217,30 @@ export function NearFriendlyAvatar({
             )}
 
             {/* Mouth */}
-            {phase === "speaking" ? (
-              <path d="M60 77 Q70 89 80 77 Z" fill="#F43F5E" stroke="#432818" strokeWidth="3" strokeLinejoin="round" />
-            ) : phase === "listening" ? (
-              <ellipse cx="70" cy="79" rx="4.5" ry="3.5" fill="#432818" />
-            ) : (
-              <path d="M61 77 Q70 85 79 77" fill="none" stroke="#432818" strokeWidth="3.6" strokeLinecap="round" />
+            <path
+              d={phase === "speaking" ? "M63 80 Q70 91 77 80 Z" : "M64 81 Q70 87 76 81"}
+              fill={phase === "speaking" ? "#E11D48" : "none"}
+              stroke="#432818"
+              strokeWidth={phase === "speaking" ? "2" : "3.5"}
+              strokeLinecap="round"
+            />
+
+            {/* Cozy Warm Tea Accessory if Tired */}
+            {isTired && !isSmall && (
+              <g transform="translate(56, 92)">
+                <rect x="0" y="4" width="28" height="20" rx="6" fill="#FBBF24" stroke="#D97706" strokeWidth="1.5" />
+                <path d="M28 8 Q34 14 28 20" fill="none" stroke="#D97706" strokeWidth="2" strokeLinecap="round" />
+                {/* Steam */}
+                <motion.path
+                  d="M8 0 Q10 -6 8 -12 M18 0 Q20 -6 18 -12"
+                  fill="none"
+                  stroke="#FFFFFF"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  animate={{ y: [0, -4, 0], opacity: [0.3, 0.9, 0.3] }}
+                  transition={{ duration: 1.8, repeat: Infinity }}
+                />
+              </g>
             )}
           </svg>
         )}

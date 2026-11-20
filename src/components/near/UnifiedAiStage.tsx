@@ -20,6 +20,7 @@ import { useCallback, useEffect, useRef, useState, type FormEvent } from "react"
 import { toast } from "sonner";
 import { NearFriendlyAvatar } from "@/components/near/NearFriendlyAvatar";
 import { SafetyCard } from "@/components/near/SafetyCard";
+import { useCircadianTheme } from "@/hooks/useCircadianTheme";
 import { useNear } from "@/context/NearContext";
 import { useSpeechRecognition, useSpeechSynthesis } from "@/hooks/useSpeech";
 import { apiService } from "@/services/api";
@@ -57,6 +58,7 @@ export function UnifiedAiStage() {
     showPill,
   } = useNear();
 
+  const circadian = useCircadianTheme();
   const [phase, setPhase] = useState<AiPhase>("idle");
   const [inputText, setInputText] = useState("");
   const [voiceEnabled, setVoiceEnabled] = useState(true);
@@ -308,10 +310,19 @@ export function UnifiedAiStage() {
   };
 
   return (
-    <section className="relative flex min-h-[72vh] flex-col justify-between overflow-hidden rounded-[32px] border border-[#1C1917]/10 bg-gradient-to-b from-[#F9F6F0] via-[#F4EFE6] to-[#EFEAE0] p-5 text-[#1C1917] shadow-sm dark:border-white/10 dark:from-[#24211E] dark:via-[#1E1C1A] dark:to-[#171514] dark:text-[#F4EFE6]">
+    <section
+      className={cn(
+        "relative flex min-h-[72vh] flex-col justify-between overflow-hidden rounded-[36px] border p-5 shadow-sm transition-colors duration-700",
+        circadian.period === "noche"
+          ? "border-indigo-500/20 bg-gradient-to-b from-[#181C24] via-[#13171F] to-[#0D1016] text-[#E6EDF5]"
+          : circadian.period === "tarde"
+            ? "border-amber-900/10 bg-gradient-to-b from-[#FAF5EE] via-[#F3ECE1] to-[#E9DFD2] text-[#1C1917]"
+            : "border-emerald-900/10 bg-gradient-to-b from-[#FAF7F2] via-[#F4EDE4] to-[#EBE0D3] text-[#1C1917]",
+      )}
+    >
       {/* 1. Barra de Herramientas Superior: Muy sutil y despejada */}
       <div className="flex items-center justify-between gap-2">
-        <div className="inline-flex items-center gap-2 rounded-full border border-[#1C1917]/8 bg-[#FFFDF9]/90 px-3 py-1 text-[11px] font-semibold text-[#5C5248] backdrop-blur-md dark:border-white/10 dark:bg-[#2A2724]/90 dark:text-white/80">
+        <div className="inline-flex items-center gap-2 rounded-full border border-black/5 bg-white/80 px-3 py-1 text-[11px] font-semibold backdrop-blur-md dark:border-white/10 dark:bg-[#2A2724]/90">
           <span
             className={cn(
               "size-2 rounded-full transition-colors",
@@ -324,12 +335,12 @@ export function UnifiedAiStage() {
           />
           <span className="tracking-wide">
             {phase === "listening"
-              ? "Escuchándote…"
+              ? "Escuchándote con calma…"
               : phase === "speaking"
-                ? "Near respondiendo"
+                ? "Near contigo"
                 : phase === "thinking"
-                  ? "Reflexionando…"
-                  : "Espacio de Escucha"}
+                  ? "Acomodando ideas…"
+                  : `${circadian.icon} ${circadian.label}`}
           </span>
         </div>
 
@@ -581,25 +592,25 @@ export function UnifiedAiStage() {
               <SafetyCard />
             </div>
           ) : (
-            <div className="rounded-[24px] border border-[#1C1917]/10 bg-[#FFFDF9]/95 p-5 text-[#1C1917] shadow-sm backdrop-blur-md dark:border-white/10 dark:bg-[#2A2724]/95 dark:text-[#F4EFE6]">
+            <div className="rounded-[28px] border border-black/5 bg-white/90 p-5 text-[#1C1917] shadow-sm backdrop-blur-md dark:border-white/10 dark:bg-[#20252E]/95 dark:text-[#E6EDF5]">
               <div className="mb-2 flex items-center justify-between">
-                <span className="text-[10px] font-extrabold tracking-wider text-[#B85A3A] uppercase">
-                  Near · Espacio Seguro
+                <span className="text-[10px] font-extrabold tracking-wider text-[#284B3C] dark:text-emerald-400 uppercase">
+                  🌿 Aquí no hay prisa · Cuentas conmigo
                 </span>
 
                 {fullBubbleText && phase !== "thinking" && (
                   <button
                     type="button"
                     onClick={() => simulateSpeakingResponse(fullBubbleText, lastAction, true)}
-                    className="inline-flex items-center gap-1 rounded-full border border-[#1C1917]/8 bg-[#F4EFE6]/70 px-2.5 py-0.5 text-[10px] font-bold text-[#5C5248] hover:bg-[#EAE4D7] dark:border-white/10 dark:bg-white/5 dark:text-white/80"
+                    className="inline-flex items-center gap-1 rounded-full border border-black/5 bg-[#F4EFE6]/70 px-2.5 py-0.5 text-[10px] font-bold text-[#5C5248] hover:bg-[#EAE4D7] dark:border-white/10 dark:bg-white/10 dark:text-white/80"
                   >
                     <Volume2 className="size-3 text-[#B85A3A]" /> Escuchar voz
                   </button>
                 )}
               </div>
 
-              <p className="font-display text-[15px] font-medium leading-relaxed text-[#2A2724] sm:text-base dark:text-[#F4EFE6]">
-                {streamedText || "Cuéntame cómo va tu día o qué pendiente te tiene con la cabeza pesada."}
+              <p className="font-display text-[15px] font-medium leading-relaxed text-[#2A2724] sm:text-base dark:text-[#E6EDF5]">
+                {streamedText || `${circadian.greeting}. Este es tu rincón seguro. Toca al avatar si necesitas un abrazo virtual o cuéntame qué traes en mente.`}
                 {(phase === "speaking" || phase === "thinking") && (
                   <motion.span
                     animate={{ opacity: [0, 1, 0] }}

@@ -32,6 +32,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { AppScreen } from "@/components/near/AppScreen";
+import { GardenWidget } from "@/components/near/GardenWidget";
 import { InteractiveLessonModal } from "@/components/near/InteractiveLessonModal";
 import { NearMark } from "@/components/near/Logo";
 import { MoodChips } from "@/components/near/MoodChips";
@@ -95,30 +96,30 @@ const THEMATIC_MODULES: {
   {
     id: "ia",
     label: "Near",
-    subtitle: "Voz y Chat",
+    subtitle: "Tu refugio",
     icon: Bot,
     activeColor: "border-[#1C1917] bg-[#B85A3A] text-[#FFFDF9]",
   },
   {
     id: "capsulas",
-    label: "Cápsulas",
-    subtitle: "Ruta & Radar",
+    label: "Aprende",
+    subtitle: "2 minutos",
     icon: GraduationCap,
     activeColor: "border-[#1C1917] bg-[#284B3C] text-[#FFFDF9]",
   },
   {
     id: "laboratorio",
-    label: "Estudio",
-    subtitle: "Enfoque & Calma",
+    label: "Pausas",
+    subtitle: "Claridad",
     icon: WandSparkles,
     activeColor: "border-[#1C1917] bg-[#C88A2B] text-[#FFFDF9]",
   },
   {
     id: "perfil",
-    label: "Mi Perfil",
-    subtitle: "Nivel & Racha",
-    icon: UserCheck,
-    activeColor: "border-[#1C1917] bg-[#45617D] text-[#FFFDF9]",
+    label: "Mi Jardín",
+    subtitle: "Cuidado",
+    icon: Sprout,
+    activeColor: "border-[#1C1917] bg-[#2E5844] text-[#FFFDF9]",
   },
 ];
 
@@ -522,7 +523,10 @@ function Dashboard() {
               </div>
             </div>
 
-            {/* Sub-selector: Misiones vs Racha Semanal */}
+            {/* Jardín de Calma (Crecimiento de tu plantita en vez de solo números) */}
+            <GardenWidget />
+
+            {/* Sub-selector: Pausas de hoy vs Racha Semanal */}
             <div className="grid grid-cols-2 gap-1.5 rounded-2xl border border-b-[3px] border-border bg-surface-2/90 p-1.5">
               <button
                 type="button"
@@ -534,8 +538,8 @@ function Dashboard() {
                     : "text-muted-foreground hover:text-heading",
                 )}
               >
-                <Gift className="size-3.5 text-amber-600" />
-                <span>Misiones de Hoy ({questsDoneCount}/3)</span>
+                <Gift className="size-3.5 text-emerald-600" />
+                <span>Pausas de hoy ({questsDoneCount}/3)</span>
               </button>
               <button
                 type="button"
@@ -547,8 +551,8 @@ function Dashboard() {
                     : "text-muted-foreground hover:text-heading",
                 )}
               >
-                <Flame className="size-3.5 text-orange-600" />
-                <span>Racha Semanal ({streak}d)</span>
+                <Flame className="size-3.5 text-amber-600" />
+                <span>Racha de Calma ({streak}d)</span>
               </button>
             </div>
 
