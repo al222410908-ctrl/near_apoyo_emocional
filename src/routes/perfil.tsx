@@ -3,6 +3,7 @@ import { useState, type ReactNode } from "react";
 import { BookHeart, ChevronRight, Download, EyeOff, FileText, Flame, Leaf, LogOut, MessageCircle, Moon, Pencil, Phone, Sun, Trash2, UserRound, Volume2 } from "lucide-react";
 import { toast } from "sonner";
 import { AppScreen } from "@/components/near/AppScreen";
+import { NearFriendlyAvatar } from "@/components/near/NearFriendlyAvatar";
 import { PrivacyNoticeDialog } from "@/components/near/PrivacyNoticeDialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,7 +14,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useNear } from "@/context/NearContext";
 import { useSpeechSynthesis } from "@/hooks/useSpeech";
-import { COMPANION_STYLES } from "@/services/mockData";
+import { AVATAR_STYLES, COMPANION_STYLES } from "@/services/mockData";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/perfil")({
@@ -139,6 +140,46 @@ function Profile() {
       </Section>
 
       <Section title="Personaliza a Near">
+        <div className="space-y-2.5 p-4">
+          <div className="flex items-center justify-between">
+            <p className="text-sm font-semibold text-heading">Avatar de Near (Opcional)</p>
+            <span className="text-[11px] font-bold text-primary">Elige o desactiva</span>
+          </div>
+          <div className="grid grid-cols-5 gap-1.5">
+            {AVATAR_STYLES.map((av) => {
+              const active = (settings.avatarId ?? "ondas") === av.id;
+              return (
+                <button
+                  key={av.id}
+                  type="button"
+                  onClick={() => {
+                    updateSettings({ avatarId: av.id });
+                    toast.success(
+                      av.id === "oculto" ? "Avatar desactivado" : `Avatar cambiado a: ${av.label}`,
+                    );
+                  }}
+                  className={cn(
+                    "flex flex-col items-center justify-between gap-1.5 rounded-2xl border p-2 text-center transition-all",
+                    active
+                      ? "border-primary bg-primary-tint text-heading ring-2 ring-primary/25"
+                      : "border-border bg-background hover:bg-surface-2",
+                  )}
+                >
+                  <div className="grid h-10 place-items-center">
+                    {av.id === "oculto" ? (
+                      <span className="grid size-8 place-items-center rounded-full border border-dashed border-muted-foreground/50 text-muted-foreground">
+                        <EyeOff className="size-4" />
+                      </span>
+                    ) : (
+                      <NearFriendlyAvatar variant={av.id} size="xs" showWavePill={false} />
+                    )}
+                  </div>
+                  <span className="block text-[10px] font-bold leading-tight">{av.short}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
         <div className="space-y-2 p-4">
           <p className="text-sm font-semibold text-heading">Tono del acompañante</p>
           <div className="grid gap-2">

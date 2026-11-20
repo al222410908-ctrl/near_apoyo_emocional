@@ -86,15 +86,17 @@ export function NearActivityGuide({
         className,
       )}
     >
-      <button
-        type="button"
-        onClick={() => (isTalking ? stopAll() : triggerExplain(true))}
-        className="shrink-0 rounded-full transition-transform active:scale-95"
-        title="Escuchar explicación"
-        aria-label="Escuchar guía"
-      >
-        <NearFriendlyAvatar phase={isTalking ? "speaking" : "idle"} size="sm" showWavePill={false} />
-      </button>
+      {settings.avatarId !== "oculto" && (
+        <button
+          type="button"
+          onClick={() => (isTalking ? stopAll() : triggerExplain(true))}
+          className="shrink-0 rounded-full transition-transform active:scale-95"
+          title="Escuchar explicación"
+          aria-label="Escuchar guía"
+        >
+          <NearFriendlyAvatar phase={isTalking ? "speaking" : "idle"} size="sm" showWavePill={false} />
+        </button>
+      )}
 
       <div className="min-w-0 flex-1">
         <div className="flex items-center justify-between gap-2">

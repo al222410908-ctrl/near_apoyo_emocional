@@ -1,4 +1,5 @@
 import type {
+  AvatarStyleId,
   ChatMessage,
   CompanionStyle,
   GoalId,
@@ -56,6 +57,14 @@ export const COMPANION_STYLES: { id: CompanionStyle; label: string; description:
   { id: "calido", label: "Cálido y empático", description: "Palabras suaves, validación y mucha calidez." },
   { id: "directo", label: "Directo y reflexivo", description: "Preguntas claras que te ayudan a ordenar ideas." },
   { id: "silencioso", label: "Escucha silenciosa", description: "Respuestas breves; tú llevas el ritmo." },
+];
+
+export const AVATAR_STYLES: { id: AvatarStyleId; label: string; short: string; description: string }[] = [
+  { id: "ondas", label: "Núcleo de Voz", short: "Ondas", description: "Ecualizador orgánico editorial" },
+  { id: "brote", label: "Compañero Brote", short: "Brote", description: "Personaje cálido y amigable" },
+  { id: "geometrico", label: "Prisma Zen", short: "Prisma", description: "Geometría moderna en equilibrio" },
+  { id: "constelacion", label: "Eco Astral", short: "Astral", description: "Nodos y anillos de luz serena" },
+  { id: "oculto", label: "Sin Avatar", short: "Ocultar", description: "Oculta la figura visual en toda la app" },
 ];
 
 export const QUOTES = [
@@ -119,7 +128,7 @@ export const DEFAULT_STATE: NearState = {
   signedIn: false,
   onboarded: false,
   goals: [],
-  settings: { companionStyle: "calido", voiceRate: 1, theme: "claro", anonymousMode: false },
+  settings: { companionStyle: "calido", voiceRate: 1, theme: "claro", anonymousMode: false, avatarId: "ondas" },
   moods: [],
   checkIns: [],
   messages: [],

@@ -4,6 +4,7 @@ export type GoalId = "estres" | "examenes" | "desahogo" | "dormir";
 export type TriggerId = "tareas" | "examenes" | "descanso" | "social" | "familia";
 export type ThemeId = "claro" | "salvia" | "noche";
 export type SoundId = "lluvia" | "olas" | "fogata" | "bosque";
+export type AvatarStyleId = "ondas" | "brote" | "geometrico" | "constelacion" | "oculto";
 
 export interface PillNotification {
   id: string;
@@ -50,6 +51,7 @@ export interface Settings {
   voiceRate: number;
   theme: ThemeId;
   anonymousMode: boolean;
+  avatarId?: AvatarStyleId;
 }
 
 export interface NearState {

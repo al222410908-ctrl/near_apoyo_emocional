@@ -4,6 +4,8 @@ import {
   AudioLines,
   BookOpen,
   BrainCircuit,
+  Eye,
+  EyeOff,
   ListTodo,
   MessageSquareHeart,
   Mic,
@@ -11,6 +13,7 @@ import {
   MoonStar,
   SendHorizontal,
   SlidersHorizontal,
+  Sparkles,
   Volume2,
   VolumeX,
   Waves,
@@ -24,7 +27,7 @@ import { useNear } from "@/context/NearContext";
 import { useSpeechRecognition, useSpeechSynthesis } from "@/hooks/useSpeech";
 import { apiService } from "@/services/api";
 import { generateReply } from "@/services/companion";
-import { COMPANION_STYLES } from "@/services/mockData";
+import { AVATAR_STYLES, COMPANION_STYLES } from "@/services/mockData";
 import { detectCrisis } from "@/services/safety";
 import { cn } from "@/lib/utils";
 import type { CompanionStyle } from "@/types";
@@ -60,6 +63,7 @@ export function UnifiedAiStage() {
   const [inputText, setInputText] = useState("");
   const [voiceEnabled, setVoiceEnabled] = useState(true);
   const [showTonePicker, setShowTonePicker] = useState(false);
+  const [showAvatarPicker, setShowAvatarPicker] = useState(false);
   const [streamedText, setStreamedText] = useState("");
   const [fullBubbleText, setFullBubbleText] = useState("");
   const [lastUserPrompt, setLastUserPrompt] = useState("");
@@ -341,7 +345,27 @@ export function UnifiedAiStage() {
 
           <button
             type="button"
-            onClick={() => setShowTonePicker((s) => !s)}
+            onClick={() => {
+              setShowAvatarPicker((a) => !a);
+              setShowTonePicker(false);
+            }}
+            className="inline-flex items-center gap-1 rounded-xl border border-[#1C1917]/15 bg-[#FFFDF9] px-2.5 py-1 text-[11px] font-bold text-[#1C1917] hover:bg-[#F4EFE6] dark:border-white/15 dark:bg-[#2A2724] dark:text-[#F4EFE6]"
+            title="Cambiar o quitar avatar"
+          >
+            {settings.avatarId === "oculto" ? (
+              <EyeOff className="size-3 text-[#5C5248]" />
+            ) : (
+              <Sparkles className="size-3 text-[#284B3C]" />
+            )}
+            <span>Avatar</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              setShowTonePicker((s) => !s);
+              setShowAvatarPicker(false);
+            }}
             className="inline-flex items-center gap-1 rounded-xl border border-[#1C1917]/15 bg-[#FFFDF9] px-2.5 py-1 text-[11px] font-bold text-[#1C1917] hover:bg-[#F4EFE6] dark:border-white/15 dark:bg-[#2A2724] dark:text-[#F4EFE6]"
             title="Estilo de conversación"
           >
@@ -350,6 +374,62 @@ export function UnifiedAiStage() {
           </button>
         </div>
       </div>
+
+      {/* Collapsible Avatar Selector (Choose from 4 Avatars or Hide It!) */}
+      <AnimatePresence>
+        {showAvatarPicker && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            className="overflow-hidden pt-2.5"
+          >
+            <div className="rounded-2xl border border-[#1C1917]/15 bg-[#FFFDF9] p-2.5 dark:border-white/15 dark:bg-[#2A2724]">
+              <div className="mb-2 flex items-center justify-between px-1">
+                <span className="text-[10px] font-extrabold tracking-wider text-[#5C5248] uppercase dark:text-white/70">
+                  Elige tu avatar o desactívalo:
+                </span>
+                <span className="text-[10px] font-bold text-[#284B3C] dark:text-emerald-400">Opcional</span>
+              </div>
+              <div className="grid grid-cols-5 gap-1.5">
+                {AVATAR_STYLES.map((av) => {
+                  const active = (settings.avatarId ?? "ondas") === av.id;
+                  return (
+                    <button
+                      key={av.id}
+                      type="button"
+                      onClick={() => {
+                        updateSettings({ avatarId: av.id });
+                        setShowAvatarPicker(false);
+                        toast.success(
+                          av.id === "oculto" ? "Avatar ocultado (Modo minimalista)" : `Avatar: ${av.label}`,
+                        );
+                      }}
+                      className={cn(
+                        "flex flex-col items-center justify-between gap-1 rounded-xl border p-1.5 text-center transition-all",
+                        active
+                          ? "border-[#1C1917] bg-[#284B3C] text-[#FFFDF9]"
+                          : "border-[#1C1917]/12 bg-[#F4EFE6]/60 text-[#1C1917] hover:bg-[#F4EFE6] dark:border-white/10 dark:bg-white/5 dark:text-[#F4EFE6]",
+                      )}
+                    >
+                      <div className="grid h-9 place-items-center">
+                        {av.id === "oculto" ? (
+                          <span className="grid size-8 place-items-center rounded-full border border-dashed border-current/40">
+                            <EyeOff className="size-4" />
+                          </span>
+                        ) : (
+                          <NearFriendlyAvatar variant={av.id} size="xs" showWavePill={false} />
+                        )}
+                      </div>
+                      <span className="block text-[10px] font-extrabold leading-tight">{av.short}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Collapsible Tone Picker */}
       <AnimatePresence>
@@ -389,16 +469,44 @@ export function UnifiedAiStage() {
         )}
       </AnimatePresence>
 
-      {/* Center Audio Core + Editorial Dialogue Card */}
+      {/* Center Audio Core (or Compact Bar when Avatar is Hidden) + Editorial Dialogue Card */}
       <div className="my-3.5 flex flex-col items-center">
-        <button
-          type="button"
-          onClick={handleToggleVoiceBubble}
-          className="group flex flex-col items-center justify-center rounded-3xl p-1 transition-transform active:scale-95"
-          aria-label="Hablar por voz con Near"
-        >
-          <NearFriendlyAvatar phase={phase} size="lg" />
-        </button>
+        {settings.avatarId === "oculto" ? (
+          <div className="flex w-full items-center justify-between rounded-2xl border border-[#1C1917]/15 bg-[#FFFDF9] px-3.5 py-2 dark:border-white/15 dark:bg-[#2A2724]">
+            <button
+              type="button"
+              onClick={handleToggleVoiceBubble}
+              className="inline-flex items-center gap-2 text-xs font-bold text-[#1C1917] dark:text-[#F4EFE6]"
+            >
+              <span className="grid size-7 place-items-center rounded-lg bg-[#284B3C] text-[#FFFDF9]">
+                <Mic className="size-3.5" />
+              </span>
+              <span>
+                {phase === "listening"
+                  ? "Escuchando tu voz… (Toca para detener)"
+                  : phase === "speaking"
+                    ? "Near hablando… (Toca para pausar)"
+                    : "Modo sin avatar · Toca para hablar por voz"}
+              </span>
+            </button>
+            <button
+              type="button"
+              onClick={() => updateSettings({ avatarId: "ondas" })}
+              className="inline-flex items-center gap-1 rounded-lg border border-[#1C1917]/15 px-2 py-1 text-[10px] font-bold text-[#5C5248] hover:text-[#1C1917] dark:border-white/15 dark:text-white/70"
+            >
+              <Eye className="size-3" /> Mostrar
+            </button>
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={handleToggleVoiceBubble}
+            className="group flex flex-col items-center justify-center rounded-3xl p-1 transition-transform active:scale-95"
+            aria-label="Hablar por voz con Near"
+          >
+            <NearFriendlyAvatar phase={phase} size="lg" />
+          </button>
+        )}
 
         {/* User's Last Spoken / Typed Line */}
         <AnimatePresence>
