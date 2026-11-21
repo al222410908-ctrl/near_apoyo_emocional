@@ -28,6 +28,15 @@ dist-ssr
 *.zip
 archive/
 
+# Python & Backend
+__pycache__/
+*.py[cod]
+*$py.class
+backend/.venv/
+.venv/
+backend/.env
+!backend/.env.example
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

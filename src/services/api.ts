@@ -95,4 +95,34 @@ export const apiService = {
       return false; // Permanece guardado en localStorage
     }
   },
+
+  /**
+   * Obtiene el catálogo de líneas de emergencia desde MongoDB
+   */
+  async getEmergencyLines() {
+    try {
+      const response = await fetch(`${API_BASE_URL}/emergencias/lineas`);
+      if (response.ok) {
+        return await response.json();
+      }
+    } catch {
+      // Fallback
+    }
+    return null;
+  },
+
+  /**
+   * Obtiene métricas consolidadas del sistema para el panel administrativo
+   */
+  async getAdminMetrics() {
+    try {
+      const response = await fetch(`${API_BASE_URL}/admin/dashboard`);
+      if (response.ok) {
+        return await response.json();
+      }
+    } catch {
+      // Fallback
+    }
+    return null;
+  },
 };
