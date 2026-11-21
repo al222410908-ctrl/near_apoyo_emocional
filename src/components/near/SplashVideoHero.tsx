@@ -5,11 +5,13 @@ import { cn } from "@/lib/utils";
 
 interface SplashVideoHeroProps {
   className?: string;
+  videoClassName?: string;
   onAnimationComplete?: () => void;
 }
 
 export function SplashVideoHero({
   className,
+  videoClassName,
   onAnimationComplete,
 }: SplashVideoHeroProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -52,13 +54,13 @@ export function SplashVideoHero({
   return (
     <div className={cn("relative mx-auto flex w-full max-w-sm flex-col items-center", className)}>
       {/* Halo de luz ambiental multicolor (Turquesa y Coral) */}
-      <div className="pointer-events-none absolute -inset-4 rounded-full bg-gradient-to-r from-sky-400/25 via-teal-300/20 to-rose-400/25 blur-2xl animate-pulse" />
+      <div className="pointer-events-none absolute -inset-3 rounded-full bg-gradient-to-r from-sky-400/20 via-teal-300/15 to-rose-400/20 blur-xl animate-pulse" />
 
       {/* Contenedor del video con esquinas redondeadas y sombra suave */}
       <div className="relative z-10 w-full overflow-hidden rounded-3xl border-2 border-border/70 bg-[#FFFDF9] shadow-[0_8px_30px_rgb(0,0,0,0.06)] dark:bg-[#1C1917]/90">
         <video
           ref={videoRef}
-          className="h-64 w-full object-contain md:h-72 select-none"
+          className={cn("h-44 w-full object-contain sm:h-52 select-none", videoClassName)}
           playsInline
           autoPlay
           muted
