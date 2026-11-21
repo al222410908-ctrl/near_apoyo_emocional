@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Eye,
@@ -10,7 +10,6 @@ import {
   ArrowRight,
   LogOut,
   RotateCcw,
-  GraduationCap,
 } from "lucide-react";
 import { useState, useRef, useEffect, type FormEvent } from "react";
 import { toast } from "sonner";
@@ -44,14 +43,14 @@ export const Route = createFileRoute("/")({
 
 /**
  * PANTALLA PRINCIPAL CON SECUENCIA EXACTA:
- * 1. Primero la Animación Sola (Splash Screen de Cerebro -> Corazón de Near).
- * 2. Al terminar la animación (o tocar Saltar), transición fluida al Formulario de Iniciar Sesión / Crear Cuenta.
+ * 1. La Animación abarca TODA LA PANTALLA completa (sin botones de saltar ni textos que estorben).
+ * 2. Al terminar la animación del video (o al tocar la pantalla), transición suave al Formulario de Login/Registro.
  */
 function RootLandingScreen() {
   const { hydrated, signedIn, user, onboarded, login, register, loginDemo, logout } = useNear();
   const navigate = useNavigate();
 
-  // Estado que controla si estamos viendo la animación sola o el formulario
+  // Controla si se muestra la animación en pantalla completa o el formulario
   const [showSplash, setShowSplash] = useState(true);
 
   // Tab activo dentro del formulario: 'login' | 'register'
@@ -69,15 +68,45 @@ function RootLandingScreen() {
   const [showRegPassword, setShowRegPassword] = useState(false);
   const [regConsent, setRegConsent] = useState(true);
 
+  const videoRef = useRef<HTMLVideoElement>(null);
   const returning = hydrated && signedIn && user;
 
-  // Finalizar splash y pasar a formulario o inicio
+  // Finalizar splash y pasar al formulario o dashboard si ya inició sesión
   const handleSplashFinish = () => {
     if (returning) {
       navigate({ to: onboarded ? "/inicio" : "/onboarding" });
     } else {
       setShowSplash(false);
     }
+  };
+
+  // Manejar el video de pantalla completa
+  useEffect(() => {
+    if (!showSplash) return;
+
+    const video = videoRef.current;
+    if (video) {
+      const playPromise = video.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(() => {
+          // Si el navegador bloquea autoplay, se permite tocar la pantalla
+        });
+      }
+    }
+
+    // Temporizador de seguridad: si el video no termina en 6.2s, pasa automáticamente
+    const timer = window.setTimeout(() => {
+      handleSplashFinish();
+    }, 6200);
+
+    return () => window.clearTimeout(timer);
+  }, [showSplash]);
+
+  const handleVideoEnded = () => {
+    // Breve pausa de 400ms sobre el logo final antes del fundido al formulario
+    window.setTimeout(() => {
+      handleSplashFinish();
+    }, 400);
   };
 
   // Manejar Login
@@ -120,7 +149,7 @@ function RootLandingScreen() {
     navigate({ to: "/onboarding" });
   };
 
-  // Manejar Modo Demo (sin desecharlo, disponible en 1 clic)
+  // Manejar Modo Demo (accesible en 1 clic para no desecharlo)
   const handleQuickDemo = () => {
     loginDemo();
     toast.success("Ingresaste en Modo Demo");
@@ -131,54 +160,31 @@ function RootLandingScreen() {
     <AnimatePresence mode="wait">
       {showSplash ? (
         /* =========================================================================
-           PASO 1: LA ANIMACIÓN SOLA (SPLASH SCREEN COMPLETO)
+           PASO 1: LA ANIMACIÓN ABARCA TODA LA PANTALLA (SIN BOTONES NI ELEMENTOS)
            ========================================================================= */
         <motion.div
           key="splash-screen"
-          initial={{ opacity: 0 }}
+          initial={{ opacity: 1 }}
           animate={{ opacity: 1 }}
-          exit={{ opacity: 0, scale: 0.98 }}
-          transition={{ duration: 0.45 }}
-          className="relative flex min-h-screen flex-col items-center justify-between overflow-hidden bg-[#FDFBF7] px-6 pt-6 pb-8 text-center select-none dark:bg-[#161412]"
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.55, ease: "easeInOut" }}
+          className="fixed inset-0 z-50 flex h-full w-full cursor-pointer items-center justify-center overflow-hidden bg-[#FDFBF7] select-none dark:bg-[#151413]"
+          onClick={handleSplashFinish}
+          title="Toca para continuar"
         >
-          {/* Halos ambientales suaves (Turquesa y Coral) */}
-          <div className="pointer-events-none absolute -top-20 -left-16 size-80 rounded-full bg-sky-400/20 blur-3xl" />
-          <div className="pointer-events-none absolute -bottom-20 -right-16 size-80 rounded-full bg-rose-400/20 blur-3xl" />
-
-          {/* Barra superior de la animación sola */}
-          <header className="relative z-10 flex w-full max-w-sm items-center justify-between">
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-border/80 bg-surface/85 px-3 py-1 text-[11px] font-bold text-heading shadow-2xs backdrop-blur">
-              <GraduationCap className="size-3.5 text-primary" />
-              Near · UTVT TIC
-            </span>
-
-            {/* Botón para saltar directo al formulario si no se desea esperar */}
-            <button
-              type="button"
-              onClick={handleSplashFinish}
-              className="inline-flex items-center gap-1 rounded-full border border-border/80 bg-surface/90 px-3 py-1 text-xs font-semibold text-heading shadow-2xs backdrop-blur transition-all active:scale-95 hover:bg-surface-2"
-              title="Saltar intro e ir al formulario"
-            >
-              <span>Saltar</span>
-              <ArrowRight className="size-3" />
-            </button>
-          </header>
-
-          {/* Animación de video SOLA al centro de la pantalla */}
-          <main className="relative z-10 my-auto flex w-full max-w-xs flex-col items-center sm:max-w-sm">
-            <div className="pointer-events-none absolute -inset-6 rounded-full bg-gradient-to-r from-sky-400/25 via-teal-300/20 to-rose-400/25 blur-3xl animate-pulse" />
-
-            <SplashVideoStandalone onComplete={handleSplashFinish} />
-          </main>
-
-          {/* Pie de la animación sola */}
-          <footer className="relative z-10 flex flex-col items-center gap-2">
-            <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
-              <span className="size-2 rounded-full bg-sky-500 animate-ping" />
-              <span>Espacio confidencial de apoyo emocional</span>
-            </div>
-            <p className="text-[10px] text-muted-foreground/80">Toca la pantalla o presiona saltar en cualquier momento</p>
-          </footer>
+          <video
+            ref={videoRef}
+            className="h-full w-full object-cover select-none"
+            playsInline
+            autoPlay
+            muted
+            poster="/near-splash-poster.jpg"
+            onEnded={handleVideoEnded}
+          >
+            <source src="/near-splash.webm" type="video/webm" />
+            <source src="/near-splash.mp4" type="video/mp4" />
+            Tu navegador no soporta video.
+          </video>
         </motion.div>
       ) : (
         /* =========================================================================
@@ -186,21 +192,20 @@ function RootLandingScreen() {
            ========================================================================= */
         <motion.div
           key="auth-screen"
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0, scale: 0.98 }}
+          animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.4 }}
+          transition={{ duration: 0.45, ease: "easeOut" }}
           className="relative flex min-h-screen flex-col justify-between overflow-x-hidden bg-sanctuary px-4 pt-6 pb-6 sm:px-6"
         >
           {/* Halos de luz de fondo */}
           <div className="pointer-events-none absolute -top-20 -left-16 size-72 rounded-full bg-sky-400/15 blur-3xl" />
           <div className="pointer-events-none absolute top-1/3 -right-20 size-72 rounded-full bg-rose-400/15 blur-3xl" />
 
-          {/* Encabezado con Logo Oficial de Near y botón para repetir la animación */}
+          {/* Encabezado con Logo Oficial de Near y botón discreto para repetir la intro */}
           <header className="relative z-10 mx-auto flex w-full max-w-sm items-center justify-between pb-3">
             <NearLogo showSubtitle={true} />
 
-            {/* Botón para volver a ver la animación del video */}
             <button
               type="button"
               onClick={() => setShowSplash(true)}
@@ -465,60 +470,5 @@ function RootLandingScreen() {
         </motion.div>
       )}
     </AnimatePresence>
-  );
-}
-
-/**
- * Componente que reproduce exclusivamente la animación del video sin adornos ni formularios encima.
- */
-function SplashVideoStandalone({ onComplete }: { onComplete: () => void }) {
-  const videoRef = useRef<HTMLVideoElement>(null);
-
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
-
-    const playPromise = video.play();
-    if (playPromise !== undefined) {
-      playPromise.catch(() => {
-        // Autoplay policy handled
-      });
-    }
-
-    // Temporizador de seguridad: si el video no finaliza en 6.5s, avanza automáticamente
-    const timer = window.setTimeout(() => {
-      onComplete();
-    }, 6500);
-
-    return () => window.clearTimeout(timer);
-  }, [onComplete]);
-
-  const handleEnded = () => {
-    // Pausa breve de 500ms en el logo final antes de la transición al formulario
-    window.setTimeout(() => {
-      onComplete();
-    }, 500);
-  };
-
-  return (
-    <div
-      onClick={onComplete}
-      className="relative z-10 w-full cursor-pointer select-none overflow-hidden rounded-3xl"
-      title="Toca para continuar al formulario"
-    >
-      <video
-        ref={videoRef}
-        className="h-72 w-full object-contain sm:h-80 select-none"
-        playsInline
-        autoPlay
-        muted
-        poster="/near-splash-poster.jpg"
-        onEnded={handleEnded}
-      >
-        <source src="/near-splash.webm" type="video/webm" />
-        <source src="/near-splash.mp4" type="video/mp4" />
-        Tu navegador no soporta reproducción de video.
-      </video>
-    </div>
   );
 }
