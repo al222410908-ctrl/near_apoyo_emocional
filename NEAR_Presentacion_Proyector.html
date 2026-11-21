@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NEAR · Preventive Emotional AI (English Presentation)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@600;700;800;900&family=Fraunces:opsz,wght@9..144,700;9..144,800;9..144,900&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      /* Warm Editorial & Botanical Palette — Zero generic AI neon/purple/cyan */
+      --sand: #F4EFE6;
+      --ivory: #FFFDF9;
+      --forest: #284B3C;
+      --terracotta: #B85A3A;
+      --ochre: #C88A2B;
+      --espresso: #1E1A17;
+      --taupe: #5C5248;
+      --border: #DED6C6;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Figtree', system-ui, sans-serif;
+      background-color: var(--sand);
+      color: var(--espresso);
+      min-height: 100vh;
+      overflow-x: hidden;
+      border-left: 14px solid var(--forest);
+    }
+
+    /* Top Bar */
+    .topbar {
+      position: fixed;
+      top: 0;
+      left: 14px;
+      right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 36px;
+      background: rgba(244, 239, 230, 0.94);
+      backdrop-filter: blur(12px);
+      border-bottom: 2px solid var(--border);
+      border-top: 6px solid var(--terracotta);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-family: 'Fraunces', serif;
+      font-size: 1.4rem;
+      font-weight: 900;
+      color: var(--espresso);
+    }
+
+    .tag-pill {
+      font-family: 'Figtree', sans-serif;
+      font-size: 0.78rem;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      background: var(--forest);
+      color: var(--ivory);
+      padding: 5px 12px;
+      border-radius: 999px;
+    }
+
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn {
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.88rem;
+      font-weight: 800;
+      padding: 8px 16px;
+      border-radius: 12px;
+      border: 2px solid var(--espresso);
+      border-bottom-width: 4px;
+      background: var(--ivory);
+      color: var(--espresso);
+      text-decoration: none;
+      transition: transform 0.12s ease;
+    }
+
+    .btn:active {
+      transform: translateY(2px);
+    }
+
+    .btn.primary {
+      background: var(--terracotta);
+      border-color: var(--espresso);
+      color: var(--ivory);
+    }
+
+    .btn.forest {
+      background: var(--forest);
+      border-color: var(--espresso);
+      color: var(--ivory);
+    }
+
+    /* Slide Layout */
+    .deck {
+      padding-top: 78px;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .slide {
+      display: none;
+      width: 100%;
+      max-width: 1340px;
+      padding: 28px 48px;
+      animation: slideIn 0.3s ease;
+    }
+
+    .slide.active {
+      display: grid;
+      grid-template-columns: 0.95fr 1.05fr;
+      gap: 44px;
+      align-items: center;
+    }
+
+    .slide.active.full {
+      grid-template-columns: 1fr;
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .kicker {
+      display: inline-block;
+      font-size: 0.88rem;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      background: var(--forest);
+      color: var(--ivory);
+      padding: 7px 16px;
+      border-radius: 10px;
+      margin-bottom: 16px;
+    }
+
+    .kicker.terra {
+      background: var(--terracotta);
+    }
+
+    .kicker.ochre {
+      background: var(--ochre);
+    }
+
+    h1 {
+      font-family: 'Fraunces', serif;
+      font-size: 4.2rem;
+      font-weight: 900;
+      line-height: 1.02;
+      color: var(--espresso);
+      margin-bottom: 8px;
+    }
+
+    h2 {
+      font-family: 'Fraunces', serif;
+      font-size: 3.1rem;
+      font-weight: 900;
+      line-height: 1.08;
+      color: var(--espresso);
+      margin-bottom: 8px;
+    }
+
+    .sub-kicker {
+      font-size: 1.25rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--terracotta);
+      margin-bottom: 26px;
+    }
+
+    /* Keyword Cards (Only Keywords!) */
+    .kw-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .kw-card {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      background: var(--ivory);
+      border: 3px solid var(--espresso);
+      border-bottom-width: 7px;
+      border-radius: 22px;
+      padding: 18px 22px;
+    }
+
+    .kw-num {
+      width: 54px;
+      height: 54px;
+      border-radius: 16px;
+      display: grid;
+      place-items: center;
+      font-size: 1.5rem;
+      font-weight: 900;
+      color: var(--ivory);
+      flex-shrink: 0;
+    }
+
+    .kw-title {
+      font-size: 1.45rem;
+      font-weight: 900;
+      color: var(--espresso);
+      letter-spacing: -0.01em;
+    }
+
+    .kw-tags {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--taupe);
+      margin-top: 2px;
+    }
+
+    /* Real App Screenshot Showcase */
+    .shots-stage {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 24px;
+    }
+
+    .phone-shot {
+      background: var(--espresso);
+      padding: 10px;
+      border-radius: 36px;
+      border: 4px solid var(--forest);
+      box-shadow: 0 24px 50px -12px rgba(30, 26, 23, 0.28);
+      transition: transform 0.25s ease;
+    }
+
+    .phone-shot:hover {
+      transform: translateY(-6px);
+    }
+
+    .phone-shot img {
+      display: block;
+      height: 540px;
+      width: auto;
+      border-radius: 26px;
+    }
+
+    .phone-shot.dual img {
+      height: 485px;
+    }
+
+    /* Database 6-Card Visual Grid */
+    .db-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      margin-top: 18px;
+    }
+
+    .db-card {
+      background: var(--ivory);
+      border: 3px solid var(--espresso);
+      border-bottom-width: 8px;
+      border-radius: 24px;
+      padding: 22px;
+    }
+
+    .db-badge {
+      display: inline-block;
+      font-family: monospace;
+      font-size: 1rem;
+      font-weight: 900;
+      padding: 4px 12px;
+      border-radius: 8px;
+      color: var(--ivory);
+      margin-bottom: 12px;
+    }
+
+    .db-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: var(--espresso);
+    }
+
+    .db-list li::before {
+      content: "▸ ";
+      color: var(--terracotta);
+    }
+
+    @media (max-width: 1024px) {
+      .slide.active {
+        grid-template-columns: 1fr;
+      }
+      .db-grid {
+        grid-template-columns: 1fr;
+      }
+      .phone-shot img, .phone-shot.dual img {
+        height: 400px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span>NEAR · UTVT</span>
+      <span class="tag-pill">ENGLISH VISUAL DECK</span>
+    </div>
+    <div class="controls">
+      <a class="btn forest" href="/NEAR_English_Presentation_UTVT.pptx" download>⬇ Download .PPTX (English)</a>
+      <span id="counter" style="font-weight:900; margin:0 8px;">1 / 7</span>
+      <button class="btn" onclick="prev()">← Prev</button>
+      <button class="btn primary" onclick="next()">Next →</button>
+      <button class="btn" onclick="fullscreen()">⛶ Fullscreen</button>
+    </div>
+  </header>
+
+  <main class="deck">
+    <!-- SLIDE 1: COVER + 2 REAL SCREENSHOTS -->
+    <section class="slide active">
+      <div>
+        <span class="kicker">UTVT · IT ENGINEERING PROJECT</span>
+        <h1>NEAR</h1>
+        <div class="sub-kicker">PREVENTIVE EMOTIONAL AI</div>
+
+        <div class="kw-stack">
+          <div class="kw-card">
+            <div class="kw-num" style="background:var(--terracotta);">01</div>
+            <div>
+              <div class="kw-title">VOICE & TEXT AI</div>
+              <div class="kw-tags">24/7 Empathetic Companion</div>
+            </div>
+          </div>
+          <div class="kw-card">
+            <div class="kw-num" style="background:var(--forest);">02</div>
+            <div>
+              <div class="kw-title">100% PREVENTIVE</div>
+              <div class="kw-tags">Non-Clinical • Zero Diagnosis</div>
+            </div>
+          </div>
+          <div class="kw-card">
+            <div class="kw-num" style="background:var(--ochre);">03</div>
+            <div>
+              <div class="kw-title">GAMIFIED HABITS</div>
+              <div class="kw-tags">Daily Streaks • XP • 2-Min Capsules</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="shots-stage">
+        <div class="phone-shot dual" style="border-color:var(--terracotta);">
+          <img src="/slides/shot1_welcome.png" alt="Near Welcome Screen" />
+        </div>
+        <div class="phone-shot dual" style="border-color:var(--forest);">
+          <img src="/slides/shot2_ai_stage.png" alt="Near AI Unified Stage" />
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 2: UNIFIED VOICE & CHAT AI -->
+    <section class="slide">
+      <div>
+        <span class="kicker terra">MOCKUP 01 · CORE AI HUB</span>
+        <h2>UNIFIED VOICE & CHAT</h2>
+        <div class="sub-kicker" style="color:var(--forest);">ONE SINGLE INTERACTIVE STAGE</div>
+
+        <div class="kw-stack">
+          <div class="kw-card">
+            <div class="kw-num" style="background:var(--terracotta);">🎙️</div>
+            <div>
+              <div class="kw-title">LIVE VOICE BUBBLE</div>
+              <div class="kw-tags">Speaking • Listening • Typewriter Sync</div>
+            </div>
+          </div>
+          <div class="kw-card">
+            <div class="kw-num" style="background:var(--forest);">🎛️</div>
+            <div>
+              <div class="kw-title">3 AI PERSONALITIES</div>
+              <div class="kw-tags">Warm • Direct • Serene Listener</div>
+            </div>
+          </div>
+          <div class="kw-card">
+            <div class="kw-num" style="background:var(--ochre);">☀️</div>
+            <div>
+              <div class="kw-title">INSTANT MOOD SYNC (+15 XP)</div>
+              <div class="kw-tags">Calm • Hopeful • Tired • Anxious • Overwhelmed</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="shots-stage">
+        <div class="phone-shot" style="border-color:var(--terracotta);">
+          <img src="/slides/shot2_ai_stage.png" alt="Unified Voice & Chat Stage" />
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 3: GAMIFIED CAPSULES & AI VOICE GUIDE -->
+    <section class="slide">
+      <div>
+        <span class="kicker">MOCKUP 02 · GAMIFIED LEARNING</span>
+        <h2>2-MIN CAPSULES</h2>
+        <div class="sub-kicker">DUOLINGO-STYLE RETENTION</div>
+
+        <div class="kw-stack">
+          <div class="kw-card">
+            <div class="kw-num" style="background:var(--forest);">🎓</div>
+            <div>
+              <div class="kw-title">5 PREVENTIVE UNITS</div>
+              <div class="kw-tags">Exam Stress • Mental Block • Boundaries</div>
+            </div>
+          </div>
+          <div class="kw-card">
+            <div class="kw-num" style="background:var(--terracotta);">🔊</div>
+            <div>
+              <div class="kw-title">AI VOICE ACTIVITY GUIDE</div>
+              <div class="kw-tags">Near Reads & Explains Every Step Aloud</div>
+            </div>
+          </div>
+          <div class="kw-card">
+            <div class="kw-num" style="background:var(--ochre);">🧭</div>
+            <div>
+              <div class="kw-title">ACADEMIC BALANCE RADAR</div>
+              <div class="kw-tags">Energy • Deadlines • Focus • Sleep</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="shots-stage">
+        <div class="phone-shot dual" style="border-color:var(--forest);">
+          <img src="/slides/shot3_capsules.png" alt="5 Preventive Capsules" />
+        </div>
+        <div class="phone-shot dual" style="border-color:var(--terracotta);">
+          <img src="/slides/shot4_modal.png" alt="Interactive Capsule Modal" />
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 4: COGNITIVE & CALM LAB -->
+    <section class="slide">
+      <div>
+        <span class="kicker ochre">MOCKUP 03 · WELLNESS LAB</span>
+        <h2>COGNITIVE & CALM LAB</h2>
+        <div class="sub-kicker" style="color:var(--forest);">ONE FOCUSED TOOL AT A TIME</div>
+
+        <div class="kw-stack">
+          <div class="kw-card">
+            <div class="kw-num" style="background:var(--terracotta);">🪄</div>
+            <div>
+              <div class="kw-title">THOUGHT REFRAMER (+20 XP)</div>
+              <div class="kw-tags">Pressure Thought → 5-Min Preventive Action</div>
+            </div>
+          </div>
+          <div class="kw-card">
+            <div class="kw-num" style="background:var(--forest);">⏱️</div>
+            <div>
+              <div class="kw-title">25/5 COMPASSIONATE POMODORO</div>
+              <div class="kw-tags">25m Study Focus + 5m Mandatory Break</div>
+            </div>
+          </div>
+          <div class="kw-card">
+            <div class="kw-num" style="background:var(--ochre);">🌬️</div>
+            <div>
+              <div class="kw-title">4-7-8 HAPTIC BREATHING</div>
+              <div class="kw-tags">Vibration Sync • Rain, Waves & Forest Audio</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="shots-stage">
+        <div class="phone-shot" style="border-color:var(--ochre);">
+          <img src="/slides/shot5_lab.png" alt="Cognitive & Calm Lab" />
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 5: STUDENT PROFILE, DAILY QUESTS & SOS -->
+    <section class="slide">
+      <div>
+        <span class="kicker">MOCKUP 04 · PROFILE & SAFETY</span>
+        <h2>PROGRESS & SOS</h2>
+        <div class="sub-kicker">RETENTION + CRISIS BRIDGE</div>
+
+        <div class="kw-stack">
+          <div class="kw-card">
+            <div class="kw-num" style="background:var(--forest);">🎁</div>
+            <div>
+              <div class="kw-title">3 DAILY QUESTS & XP LEVELS</div>
+              <div class="kw-tags">Mood Check-In • AI Dialogue • Capsule</div>
+            </div>
+          </div>
+          <div class="kw-card">
+            <div class="kw-num" style="background:var(--ochre);">🔥</div>
+            <div>
+              <div class="kw-title">7-DAY STREAK & ANALYTICS</div>
+              <div class="kw-tags">Weekly Charts • Academic Trigger Patterns</div>
+            </div>
+          </div>
+          <div class="kw-card">
+            <div class="kw-num" style="background:var(--terracotta);">🆘</div>
+            <div>
+              <div class="kw-title">24/7 SOS CRISIS PROTOCOL</div>
+              <div class="kw-tags">Línea de la Vida (800 911 2000) • 911 • Contact</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="shots-stage">
+        <div class="phone-shot" style="border-color:var(--forest);">
+          <img src="/slides/shot6_profile.png" alt="Student Profile & Daily Quests" />
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 6: DATABASE SCHEMA (MONGODB — KEYWORDS ONLY) -->
+    <section class="slide full">
+      <div>
+        <span class="kicker">MONGODB ATLAS · DATA SAMPLING</span>
+        <h2>DATABASE SCHEMA · 5 CORE COLLECTIONS</h2>
+
+        <div class="db-grid">
+          <div class="db-card">
+            <span class="db-badge" style="background:var(--forest);">01 · users</span>
+            <ul class="db-list">
+              <li>Student Name / Alias</li>
+              <li>Major & School (UTVT)</li>
+              <li>AI Tone & Theme Config</li>
+            </ul>
+          </div>
+
+          <div class="db-card">
+            <span class="db-badge" style="background:var(--terracotta);">02 · mood_entries</span>
+            <ul class="db-list">
+              <li>Daily Mood State (1–5)</li>
+              <li>Academic Trigger Tag</li>
+              <li>Short Note & Timestamp</li>
+            </ul>
+          </div>
+
+          <div class="db-card">
+            <span class="db-badge" style="background:var(--ochre);">03 · chat_messages</span>
+            <ul class="db-list">
+              <li>Voice / Text Transcript</li>
+              <li>AI Preventive Suggestion</li>
+              <li>1-Tap History Wipe</li>
+            </ul>
+          </div>
+
+          <div class="db-card">
+            <span class="db-badge" style="background:var(--forest);">04 · user_progress</span>
+            <ul class="db-list">
+              <li>Active Streak Days</li>
+              <li>Calm Seeds (XP) & Level</li>
+              <li>Completed Capsules (1–5)</li>
+            </ul>
+          </div>
+
+          <div class="db-card">
+            <span class="db-badge" style="background:var(--terracotta);">05 · safety_contacts</span>
+            <ul class="db-list">
+              <li>Trusted Contact Name</li>
+              <li>Speed-Dial Phone Number</li>
+              <li>24/7 Official Hotlines</li>
+            </ul>
+          </div>
+
+          <div class="db-card" style="background:var(--forest); color:var(--ivory);">
+            <span class="db-badge" style="background:var(--terracotta);">🔒 ARCO PRIVACY</span>
+            <ul class="db-list" style="color:var(--ivory);">
+              <li>1-Tap Anonymous Mode</li>
+              <li>Full JSON Data Export</li>
+              <li>Zero Medical Records</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 7: LIVE PROTOTYPE & TEAM -->
+    <section class="slide full" style="text-align:center;">
+      <div style="max-width:920px; margin:0 auto;">
+        <span class="kicker">PRODUCTION DEPLOYMENT · VERCEL</span>
+        <h1>LIVE CLOUD PROTOTYPE</h1>
+        <div class="sub-kicker">1-TAP DEMO MODE · MOBILE & DESKTOP</div>
+
+        <div class="kw-card" style="justify-content:center; padding:32px; margin:24px 0; border-color:var(--terracotta);">
+          <div>
+            <div style="font-size:0.95rem; font-weight:900; color:var(--forest); letter-spacing:0.12em;">OFFICIAL LIVE URL</div>
+            <a href="https://near-apoyo-emocional.vercel.app" target="_blank" style="font-family:'Fraunces',serif; font-size:2.7rem; font-weight:900; color:var(--terracotta); text-decoration:none;">
+              near-apoyo-emocional.vercel.app ↗
+            </a>
+            <div class="kw-tags" style="margin-top:10px;">REACT 19 • TYPESCRIPT • WEB SPEECH AI • MONGODB • PWA</div>
+          </div>
+        </div>
+
+        <div class="kw-card" style="background:var(--forest); color:var(--ivory); justify-content:center; padding:22px;">
+          <div>
+            <div style="font-size:1rem; font-weight:900; color:#F4EFE6; letter-spacing:0.08em;">UTVT DEVELOPMENT TEAM · IT ENGINEERING (GROUP D-72)</div>
+            <div style="font-size:1.18rem; font-weight:800; margin-top:6px;">
+              Alan Alcántara • Yuliana Betancourt • Sebastián Méndez • Dylan Alonso • Miguel Ángel López
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    let idx = 0;
+    const slides = document.querySelectorAll('.slide');
+    const counter = document.getElementById('counter');
+
+    function show(n) {
+      slides.forEach((s, i) => s.classList.toggle('active', i === n));
+      counter.textContent = (n + 1) + ' / ' + slides.length;
+    }
+
+    function next() {
+      idx = (idx + 1) % slides.length;
+      show(idx);
+    }
+
+    function prev() {
+      idx = (idx - 1 + slides.length) % slides.length;
+      show(idx);
+    }
+
+    function fullscreen() {
+      if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+      else document.exitFullscreen();
+    }
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ') next();
+      if (e.key === 'ArrowLeft') prev();
+    });
+  </script>
+</body>
+</html>
