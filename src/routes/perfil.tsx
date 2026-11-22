@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState, type ReactNode } from "react";
-import { BookHeart, ChevronRight, Download, EyeOff, FileText, Flame, Leaf, LogOut, MessageCircle, Moon, Pencil, Phone, Sun, Trash2, UserRound, Volume2 } from "lucide-react";
+import { BookHeart, ChevronRight, Download, EyeOff, FileText, Flame, Leaf, LogOut, MessageCircle, Moon, Pencil, Phone, Sparkles, Sun, Trash2, UserRound, Volume2 } from "lucide-react";
 import { toast } from "sonner";
 import { AppScreen } from "@/components/near/AppScreen";
 import { NearFriendlyAvatar } from "@/components/near/NearFriendlyAvatar";
@@ -236,6 +236,47 @@ function Profile() {
                 </div>
               </button>
             ))}
+          </div>
+        </div>
+      </Section>
+
+      <Section title="Modelo de IA y Voz Amigable">
+        <div className="space-y-3 p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="flex items-center gap-1.5 text-sm font-semibold text-heading">
+                <Sparkles className="size-4 text-amber-500" />
+                <span>Motor de IA Preventivo</span>
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Near Neural 2.0 (Gratuito y prudente para pruebas)
+              </p>
+            </div>
+            <span className="rounded-full bg-emerald-500/15 px-2.5 py-0.5 text-[10px] font-bold text-emerald-700 dark:text-emerald-400">
+              Activo
+            </span>
+          </div>
+
+          <div className="rounded-2xl border border-border bg-background p-3 text-xs leading-relaxed text-muted-foreground">
+            Las respuestas están diseñadas bajo principios de Primeros Auxilios Psicológicos (PAP) y contención universitaria ética. No reemplaza terapia médica.
+          </div>
+
+          <div className="flex items-center justify-between pt-1">
+            <span className="text-xs font-semibold text-heading">Prueba de voz amigable</span>
+            <Button
+              type="button"
+              variant="soft"
+              size="sm"
+              className="gap-1.5 rounded-full text-xs font-bold"
+              onClick={() => {
+                const sample = `Hola ${settings.anonymousMode ? "" : user.name}, soy Near. Estoy aquí para acompañarte a tu propio ritmo, con empatía y sin juzgarte.`;
+                tts.speak(sample, "friendly-preview");
+                toast.success("Reproduciendo voz amigable en español");
+              }}
+            >
+              <Volume2 className="size-3.5" />
+              <span>Escuchar voz</span>
+            </Button>
           </div>
         </div>
       </Section>

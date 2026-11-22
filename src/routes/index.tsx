@@ -9,7 +9,6 @@ import {
   UserPlus,
   ArrowRight,
   LogOut,
-  RotateCcw,
 } from "lucide-react";
 import { useState, useRef, useEffect, type FormEvent } from "react";
 import { toast } from "sonner";
@@ -202,19 +201,13 @@ function RootLandingScreen() {
           <div className="pointer-events-none absolute -top-20 -left-16 size-72 rounded-full bg-sky-400/15 blur-3xl" />
           <div className="pointer-events-none absolute top-1/3 -right-20 size-72 rounded-full bg-rose-400/15 blur-3xl" />
 
-          {/* Encabezado con Logo Oficial de Near y botón discreto para repetir la intro */}
+          {/* Encabezado con Logo Oficial de Near */}
           <header className="relative z-10 mx-auto flex w-full max-w-sm items-center justify-between pb-3">
             <NearLogo showSubtitle={true} />
-
-            <button
-              type="button"
-              onClick={() => setShowSplash(true)}
-              className="inline-flex items-center gap-1.5 rounded-full border border-border/80 bg-surface/90 px-3 py-1 text-[11px] font-bold text-heading shadow-2xs backdrop-blur transition-all active:scale-95 hover:bg-surface-2"
-              title="Volver a reproducir la animación de inicio"
-            >
-              <RotateCcw className="size-3 text-primary" />
-              <span>Ver intro</span>
-            </button>
+            <div className="inline-flex items-center gap-1 rounded-full border border-border/80 bg-surface/80 px-2.5 py-1 text-[11px] font-semibold text-muted-foreground">
+              <ShieldCheck className="size-3.5 text-emerald-600" />
+              <span>UTVT TIC</span>
+            </div>
           </header>
 
           {/* Tarjeta Central del Formulario */}

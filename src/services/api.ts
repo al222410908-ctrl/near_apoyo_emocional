@@ -8,6 +8,7 @@
 import type { ChatMessage, CompanionStyle, MoodEntry } from "@/types";
 import { generateReply } from "./companion";
 import { detectCrisis } from "./safety";
+import { generatePrudentAIResponse } from "./aiCompanion";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000/api/v1";
 
@@ -16,6 +17,7 @@ export interface SendMessagePayload {
   content: string;
   style: CompanionStyle;
   userId?: string;
+  apiKey?: string;
 }
 
 export interface SendMessageResponse {
@@ -28,7 +30,7 @@ export interface SendMessageResponse {
 
 export const apiService = {
   /**
-   * Envía un mensaje al backend de FastAPI o ejecuta el fallback local si está offline.
+   * Envía un mensaje al backend de FastAPI o ejecuta el motor de IA prudente si está offline.
    */
   async sendMessage(payload: SendMessagePayload): Promise<SendMessageResponse> {
     // 1. Evaluación preventiva en el cliente (seguridad ante todo)
@@ -38,6 +40,11 @@ export const apiService = {
         action: "sos",
         crisisAlert: true,
         riskScore: 1.0,
+        suggestions: [
+          "Llamar a Línea de la Vida (800 911 2000)",
+          "Contactar a SAPTEL (55 5259 8121)",
+          "Hablar con un tutor",
+        ],
       };
     }
 
@@ -47,7 +54,6 @@ export const apiService = {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          // Authorization: `Bearer ${token}` si se maneja JWT
         },
         body: JSON.stringify({
           session_id: payload.sessionId,
@@ -63,20 +69,27 @@ export const apiService = {
           action: data.accion || null,
           riskScore: data.analisis_ia?.puntaje_riesgo,
           crisisAlert: data.analisis_ia?.alerta_crisis ?? false,
+          suggestions: data.sugerencias,
         };
       }
     } catch {
-      // Backend no disponible (modo desarrollo local / offline): fallback transparente
+      // Backend no disponible: se ejecuta el motor de IA dinámico integrado
     }
 
-    // 3. Fallback inteligente usando el motor local de Near
-    const local = generateReply(payload.content, payload.style);
+    // 3. Motor de IA prudente y empático (Gemini gratuito o Simulación Neural de Near)
+    const aiResult = await generatePrudentAIResponse(
+      payload.content,
+      payload.style,
+      payload.userId,
+      payload.apiKey
+    );
+
     return {
-      reply: local.text,
-      action: local.action,
-      suggestions: local.suggestions,
-      crisisAlert: false,
-      riskScore: 0.1,
+      reply: aiResult.reply,
+      action: aiResult.action,
+      suggestions: aiResult.suggestions,
+      crisisAlert: aiResult.crisisAlert,
+      riskScore: aiResult.riskScore,
     };
   },
 

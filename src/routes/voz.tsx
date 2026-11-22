@@ -9,6 +9,7 @@ import { useNear } from "@/context/NearContext";
 import { useSpeechRecognition, useSpeechSynthesis } from "@/hooks/useSpeech";
 import { detectCrisis } from "@/services/safety";
 import { generateReply } from "@/services/companion";
+import { apiService } from "@/services/api";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/voz")({
@@ -45,7 +46,7 @@ const PHASE_LABEL: Record<Phase, string> = {
 };
 
 function VoiceScreen() {
-  const { settings, addMessage, addXp, showPill } = useNear();
+  const { user, settings, addMessage, addXp, showPill } = useNear();
   const [phase, setPhase] = useState<Phase>("idle");
   const [userLine, setUserLine] = useState("");
   const [nearLine, setNearLine] = useState(
@@ -58,7 +59,7 @@ function VoiceScreen() {
   const tts = useSpeechSynthesis(settings.voiceRate);
 
   const respond = useCallback(
-    (heard: string) => {
+    async (heard: string) => {
       setUserLine(heard);
       addMessage({ role: "user", text: heard });
 
@@ -78,18 +79,38 @@ function VoiceScreen() {
         setPhase("idle");
         return;
       }
+
       setPhase("thinking");
-      const t = window.setTimeout(() => {
-        const reply = generateReply(heard, settings.companionStyle);
-        addMessage({ role: "near", text: reply.text, action: reply.action });
-        setNearLine(reply.text);
+
+      try {
+        const response = await apiService.sendMessage({
+          content: heard,
+          style: settings.companionStyle,
+          userId: user?.name,
+        });
+
+        if (response.crisisAlert) {
+          setCrisis(true);
+          setPhase("idle");
+          addMessage({ role: "near", text: response.reply, kind: "safety" });
+          return;
+        }
+
+        addMessage({ role: "near", text: response.reply, action: response.action ?? undefined });
+        setNearLine(response.reply);
         setPhase("speaking");
-        const spoke = tts.speak(reply.text, "voice", () => setPhase("idle"));
-        if (!spoke) timers.current.push(window.setTimeout(() => setPhase("idle"), 4000));
-      }, 1100);
-      timers.current.push(t);
+
+        const spoke = tts.speak(response.reply, "voice", () => setPhase("idle"));
+        if (!spoke) timers.current.push(window.setTimeout(() => setPhase("idle"), 4500));
+      } catch {
+        const fallback = generateReply(heard, settings.companionStyle);
+        addMessage({ role: "near", text: fallback.text, action: fallback.action });
+        setNearLine(fallback.text);
+        setPhase("speaking");
+        tts.speak(fallback.text, "voice", () => setPhase("idle"));
+      }
     },
-    [addMessage, addXp, rewarded, settings.companionStyle, showPill, tts],
+    [addMessage, addXp, rewarded, settings.companionStyle, showPill, tts, user?.name],
   );
 
   const fallbackRef = useRef<() => void>(() => {});

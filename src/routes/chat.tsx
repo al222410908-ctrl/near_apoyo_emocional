@@ -59,7 +59,7 @@ const STYLE_LABELS: Record<CompanionStyle, string> = {
 };
 
 function ChatScreen() {
-  const { messages, addMessage, clearMessages, restoreMessages, settings, updateSettings, addXp, showPill } = useNear();
+  const { user, messages, addMessage, clearMessages, restoreMessages, settings, updateSettings, addXp, showPill } = useNear();
   const [text, setText] = useState("");
   const [typing, setTyping] = useState(false);
   const [showToneBar, setShowToneBar] = useState(false);
@@ -103,6 +103,7 @@ function ChatScreen() {
       const response = await apiService.sendMessage({
         content: value,
         style: settings.companionStyle,
+        userId: user?.name,
       });
       if (response.crisisAlert) {
         addMessage({ role: "near", text: response.reply, kind: "safety" });
