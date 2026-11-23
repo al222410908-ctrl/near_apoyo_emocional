@@ -44,6 +44,129 @@ export function cleanTextForSpeech(text: string): string {
 }
 
 /**
+ * Divide el texto en fragmentos naturales basados en puntuación (puntos, comas, etc.)
+ * para que el motor de voz neural en streaming suene continuo y sin latencia.
+ */
+export function splitIntoSpeechChunks(text: string, maxLen = 140): string[] {
+  const clean = cleanTextForSpeech(text);
+  if (!clean) return [];
+  const parts = clean.split(/(?<=[.?!,;:\n])\s+/);
+  const chunks: string[] = [];
+  let current = "";
+  for (const part of parts) {
+    if (!part.trim()) continue;
+    if ((current + " " + part).trim().length <= maxLen) {
+      current = (current + " " + part).trim();
+    } else {
+      if (current) chunks.push(current);
+      if (part.length > maxLen) {
+        const words = part.split(/\s+/);
+        let subCurrent = "";
+        for (const w of words) {
+          if ((subCurrent + " " + w).trim().length <= maxLen) {
+            subCurrent = (subCurrent + " " + w).trim();
+          } else {
+            if (subCurrent) chunks.push(subCurrent);
+            subCurrent = w;
+          }
+        }
+        current = subCurrent;
+      } else {
+        current = part;
+      }
+    }
+  }
+  if (current) chunks.push(current);
+  return chunks.length > 0 ? chunks : [clean];
+}
+
+/**
+ * Reproduce audio natural en español de México (es-MX) con entonación humana real
+ * a través del streaming de voz neural de Google en HTML5 Audio.
+ */
+export function playNaturalSpeechAudio(
+  text: string,
+  onEnd?: () => void,
+  onError?: () => void,
+): { stop: () => void } {
+  if (typeof window === "undefined") {
+    onEnd?.();
+    return { stop: () => {} };
+  }
+
+  const chunks = splitIntoSpeechChunks(text);
+  if (chunks.length === 0) {
+    onEnd?.();
+    return { stop: () => {} };
+  }
+
+  let currentIndex = 0;
+  let currentAudio: HTMLAudioElement | null = null;
+  let stopped = false;
+
+  const playNext = () => {
+    if (stopped) return;
+    if (currentIndex >= chunks.length) {
+      onEnd?.();
+      return;
+    }
+
+    const chunk = chunks[currentIndex++];
+    const encoded = encodeURIComponent(chunk);
+    const url = `https://translate.google.com/translate_tts?ie=UTF-8&tl=es-MX&client=tw-ob&q=${encoded}`;
+
+    try {
+      const audio = new Audio();
+      currentAudio = audio;
+      audio.preload = "auto";
+      audio.src = url;
+
+      audio.onended = () => {
+        playNext();
+      };
+
+      audio.onerror = () => {
+        if (!stopped) {
+          stopped = true;
+          onError?.();
+        }
+      };
+
+      const playPromise = audio.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(() => {
+          if (!stopped) {
+            stopped = true;
+            onError?.();
+          }
+        });
+      }
+    } catch {
+      if (!stopped) {
+        stopped = true;
+        onError?.();
+      }
+    }
+  };
+
+  playNext();
+
+  return {
+    stop: () => {
+      stopped = true;
+      if (currentAudio) {
+        try {
+          currentAudio.pause();
+          currentAudio.src = "";
+        } catch {
+          // ignore
+        }
+      }
+    },
+  };
+}
+
+/**
  * Selecciona la voz en español más dulce, cálida y amigable disponible en el dispositivo.
  * Prioriza voces neuronales/naturales de México (como Microsoft Sabina, Dalia, Paulina o Google).
  */
@@ -147,13 +270,16 @@ export function useSpeechRecognition(opts: { onFinal?: (text: string) => void; o
 }
 
 /**
- * Text-to-speech optimizado con voz amigable, precarga asíncrona de voces
- * y prevención de pausas inesperadas del navegador.
+ * Text-to-speech híbrido de alta fidelidad:
+ * - Modo "natural" (predeterminado): Usa streaming neural en español mexicano con tono cálido,
+ *   y conmuta automáticamente a la voz de sistema si la red no estuviera disponible.
+ * - Modo "browser": Utiliza la síntesis interna del navegador seleccionando la voz más humana.
  */
-export function useSpeechSynthesis(rate = 1) {
+export function useSpeechSynthesis(rate = 1, engine: "natural" | "browser" = "natural") {
   const [speakingId, setSpeakingId] = useState<string | null>(null);
   const voicesRef = useRef<SpeechSynthesisVoice[]>([]);
   const heartbeatRef = useRef<number | null>(null);
+  const naturalAudioRef = useRef<{ stop: () => void } | null>(null);
 
   // Precarga asíncrona de voces para evitar que devuelva array vacío en Chrome/Edge/Safari
   useEffect(() => {
@@ -173,11 +299,15 @@ export function useSpeechSynthesis(rate = 1) {
     return () => {
       if (heartbeatRef.current) clearInterval(heartbeatRef.current);
       synth.cancel();
+      if (naturalAudioRef.current) {
+        naturalAudioRef.current.stop();
+        naturalAudioRef.current = null;
+      }
     };
   }, []);
 
-  const speak = useCallback(
-    (text: string, id = "near", onEnd?: () => void) => {
+  const speakBrowser = useCallback(
+    (cleanText: string, id: string, onEnd?: () => void) => {
       if (typeof window === "undefined" || !("speechSynthesis" in window)) {
         onEnd?.();
         return false;
@@ -187,20 +317,11 @@ export function useSpeechSynthesis(rate = 1) {
       synth.cancel();
       if (heartbeatRef.current) clearInterval(heartbeatRef.current);
 
-      // Limpiar texto de emojis y markdown para que la voz fluya con calidez
-      const cleanText = cleanTextForSpeech(text);
-      if (!cleanText) {
-        onEnd?.();
-        return false;
-      }
-
       const u = new SpeechSynthesisUtterance(cleanText);
       u.lang = "es-MX";
-      // Cadencia calmada y empática (0.93x) con tono amigable (1.05x)
       u.rate = Math.max(0.7, Math.min(1.2, rate * 0.93));
       u.pitch = 1.05;
 
-      // Obtener o buscar la mejor voz disponible
       const currentVoices = voicesRef.current.length > 0 ? voicesRef.current : synth.getVoices();
       const bestVoice = pickFriendlyVoice(currentVoices);
       if (bestVoice) {
@@ -227,7 +348,6 @@ export function useSpeechSynthesis(rate = 1) {
 
       setSpeakingId(id);
 
-      // Heartbeat para prevenir que navegadores basados en Chromium pausen el audio tras 15s
       heartbeatRef.current = window.setInterval(() => {
         if (synth.speaking && !synth.paused) {
           synth.pause();
@@ -237,7 +357,6 @@ export function useSpeechSynthesis(rate = 1) {
         }
       }, 7000);
 
-      // Pequeño retardo de 50ms para evitar conflicto con el cancel() previo en Windows/Chrome
       window.setTimeout(() => {
         try {
           synth.speak(u);
@@ -252,7 +371,58 @@ export function useSpeechSynthesis(rate = 1) {
     [rate],
   );
 
+  const speak = useCallback(
+    (text: string, id = "near", onEnd?: () => void) => {
+      // Detener cualquier audio previo
+      if (naturalAudioRef.current) {
+        naturalAudioRef.current.stop();
+        naturalAudioRef.current = null;
+      }
+      if (typeof window !== "undefined" && "speechSynthesis" in window) {
+        window.speechSynthesis.cancel();
+      }
+      if (heartbeatRef.current) {
+        clearInterval(heartbeatRef.current);
+        heartbeatRef.current = null;
+      }
+
+      const cleanText = cleanTextForSpeech(text);
+      if (!cleanText) {
+        onEnd?.();
+        return false;
+      }
+
+      setSpeakingId(id);
+
+      // Si el motor seleccionado es "natural", intentamos reproducción neural es-MX
+      if (engine === "natural") {
+        naturalAudioRef.current = playNaturalSpeechAudio(
+          cleanText,
+          () => {
+            setSpeakingId(null);
+            naturalAudioRef.current = null;
+            onEnd?.();
+          },
+          () => {
+            // Fallback transparente a síntesis del navegador si falla la red
+            naturalAudioRef.current = null;
+            speakBrowser(cleanText, id, onEnd);
+          },
+        );
+        return true;
+      }
+
+      // Motor del navegador directo
+      return speakBrowser(cleanText, id, onEnd);
+    },
+    [engine, speakBrowser],
+  );
+
   const cancel = useCallback(() => {
+    if (naturalAudioRef.current) {
+      naturalAudioRef.current.stop();
+      naturalAudioRef.current = null;
+    }
     if (typeof window !== "undefined" && "speechSynthesis" in window) {
       window.speechSynthesis.cancel();
     }

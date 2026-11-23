@@ -3,6 +3,7 @@ import { useState, type ReactNode } from "react";
 import { BookHeart, ChevronRight, Download, EyeOff, FileText, Flame, Leaf, LogOut, MessageCircle, Moon, Pencil, Phone, Sparkles, Sun, Trash2, UserRound, Volume2 } from "lucide-react";
 import { toast } from "sonner";
 import { AppScreen } from "@/components/near/AppScreen";
+import { GeminiConnectDialog } from "@/components/near/GeminiConnectDialog";
 import { NearFriendlyAvatar } from "@/components/near/NearFriendlyAvatar";
 import { PrivacyNoticeDialog } from "@/components/near/PrivacyNoticeDialog";
 import { Button } from "@/components/ui/button";
@@ -62,7 +63,7 @@ function Profile() {
   const near = useNear();
   const { user, settings, updateSettings, streak, checkIns, moods, messages, exportData, clearMessages, logout, emergencyContact, setEmergencyContact } = near;
   const navigate = useNavigate();
-  const tts = useSpeechSynthesis(settings.voiceRate);
+  const tts = useSpeechSynthesis(settings.voiceRate, settings.voiceEngine ?? "natural");
   if (!user) return null;
 
   const initials = user.name.slice(0, 2).toUpperCase();
@@ -241,28 +242,66 @@ function Profile() {
       </Section>
 
       <Section title="Modelo de IA y Voz Amigable">
-        <div className="space-y-3 p-4">
+        <div className="space-y-3.5 p-4">
           <div className="flex items-center justify-between">
             <div>
               <p className="flex items-center gap-1.5 text-sm font-semibold text-heading">
                 <Sparkles className="size-4 text-amber-500" />
-                <span>Motor de IA Preventivo</span>
+                <span>Google Gemini API</span>
               </p>
               <p className="text-xs text-muted-foreground">
-                Near Neural 2.0 (Gratuito y prudente para pruebas)
+                {settings.geminiApiKey
+                  ? "Conectado · Respuestas verídicas y contextuales"
+                  : "Usa el motor autónomo local · Conecta Gemini gratis"}
               </p>
             </div>
-            <span className="rounded-full bg-emerald-500/15 px-2.5 py-0.5 text-[10px] font-bold text-emerald-700 dark:text-emerald-400">
-              Activo
-            </span>
+            <GeminiConnectDialog />
           </div>
 
           <div className="rounded-2xl border border-border bg-background p-3 text-xs leading-relaxed text-muted-foreground">
-            Las respuestas están diseñadas bajo principios de Primeros Auxilios Psicológicos (PAP) y contención universitaria ética. No reemplaza terapia médica.
+            Diseñado bajo principios de Primeros Auxilios Psicológicos (PAP) y protocolo universitario UTVT TIC. Near nunca juzga ni emite diagnósticos clínicos.
+          </div>
+
+          <div className="space-y-1.5 pt-1">
+            <p className="text-xs font-semibold text-heading">Motor de Voz</p>
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  updateSettings({ voiceEngine: "natural" });
+                  toast.success("Voz Natural HD activada");
+                }}
+                className={cn(
+                  "rounded-2xl border p-2.5 text-left transition-all",
+                  (settings.voiceEngine ?? "natural") === "natural"
+                    ? "border-primary bg-primary-tint/70 text-heading shadow-soft ring-2 ring-primary/25"
+                    : "border-border bg-background hover:bg-surface-2",
+                )}
+              >
+                <span className="block text-xs font-bold">Voz Natural HD</span>
+                <span className="block text-[10px] text-muted-foreground">Google Neural es-MX (Calidez humana)</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  updateSettings({ voiceEngine: "browser" });
+                  toast.success("Voz del Sistema activada");
+                }}
+                className={cn(
+                  "rounded-2xl border p-2.5 text-left transition-all",
+                  settings.voiceEngine === "browser"
+                    ? "border-primary bg-primary-tint/70 text-heading shadow-soft ring-2 ring-primary/25"
+                    : "border-border bg-background hover:bg-surface-2",
+                )}
+              >
+                <span className="block text-xs font-bold">Voz de Sistema</span>
+                <span className="block text-[10px] text-muted-foreground">Síntesis local del navegador</span>
+              </button>
+            </div>
           </div>
 
           <div className="flex items-center justify-between pt-1">
-            <span className="text-xs font-semibold text-heading">Prueba de voz amigable</span>
+            <span className="text-xs font-semibold text-heading">Probar entonación</span>
             <Button
               type="button"
               variant="soft"
@@ -271,11 +310,11 @@ function Profile() {
               onClick={() => {
                 const sample = `Hola ${settings.anonymousMode ? "" : user.name}, soy Near. Estoy aquí para acompañarte a tu propio ritmo, con empatía y sin juzgarte.`;
                 tts.speak(sample, "friendly-preview");
-                toast.success("Reproduciendo voz amigable en español");
+                toast.success("Reproduciendo voz con entonación amigable");
               }}
             >
               <Volume2 className="size-3.5" />
-              <span>Escuchar voz</span>
+              <span>Escuchar muestra</span>
             </Button>
           </div>
         </div>

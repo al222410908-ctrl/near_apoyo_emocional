@@ -22,6 +22,7 @@ import { toast } from "sonner";
 import { AppScreen } from "@/components/near/AppScreen";
 import { NearMark } from "@/components/near/Logo";
 import { SafetyCard } from "@/components/near/SafetyCard";
+import { GeminiConnectDialog } from "@/components/near/GeminiConnectDialog";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { useNear } from "@/context/NearContext";
@@ -67,7 +68,7 @@ function ChatScreen() {
   const [rewardedSession, setRewardedSession] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const timer = useRef<number | null>(null);
-  const tts = useSpeechSynthesis(settings.voiceRate);
+  const tts = useSpeechSynthesis(settings.voiceRate, settings.voiceEngine ?? "natural");
   const stt = useSpeechRecognition({ onFinal: (t) => setText((prev) => (prev ? `${prev} ${t}` : t)) });
 
   useEffect(() => {
@@ -104,6 +105,8 @@ function ChatScreen() {
         content: value,
         style: settings.companionStyle,
         userId: user?.name,
+        apiKey: settings.geminiApiKey,
+        history: messages.slice(-6).map((m) => ({ role: m.role, text: m.text })),
       });
       if (response.crisisAlert) {
         addMessage({ role: "near", text: response.reply, kind: "safety" });
@@ -190,6 +193,8 @@ function ChatScreen() {
               {typing ? "Analizando con empatía…" : "IA Preventiva · Sesión confidencial"}
             </p>
           </div>
+
+          <GeminiConnectDialog />
 
           <Link
             to="/voz"

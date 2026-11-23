@@ -46,12 +46,16 @@ export interface EmergencyContact {
   phone: string;
 }
 
+export type VoiceEngineId = "natural" | "browser";
+
 export interface Settings {
   companionStyle: CompanionStyle;
   voiceRate: number;
   theme: ThemeId;
   anonymousMode: boolean;
   avatarId?: AvatarStyleId;
+  geminiApiKey?: string;
+  voiceEngine?: VoiceEngineId;
 }
 
 export interface NearState {

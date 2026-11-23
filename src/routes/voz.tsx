@@ -5,6 +5,7 @@ import { Lock, MessageCircleHeart, Mic, MicOff, Sparkles, X } from "lucide-react
 import { toast } from "sonner";
 import { AppScreen } from "@/components/near/AppScreen";
 import { SafetyCard } from "@/components/near/SafetyCard";
+import { GeminiConnectDialog } from "@/components/near/GeminiConnectDialog";
 import { useNear } from "@/context/NearContext";
 import { useSpeechRecognition, useSpeechSynthesis } from "@/hooks/useSpeech";
 import { detectCrisis } from "@/services/safety";
@@ -56,7 +57,7 @@ function VoiceScreen() {
   const [rewarded, setRewarded] = useState(false);
   const timers = useRef<number[]>([]);
   const demoIdx = useRef(0);
-  const tts = useSpeechSynthesis(settings.voiceRate);
+  const tts = useSpeechSynthesis(settings.voiceRate, settings.voiceEngine ?? "natural");
 
   const respond = useCallback(
     async (heard: string) => {
@@ -87,6 +88,7 @@ function VoiceScreen() {
           content: heard,
           style: settings.companionStyle,
           userId: user?.name,
+          apiKey: settings.geminiApiKey,
         });
 
         if (response.crisisAlert) {
@@ -176,6 +178,7 @@ function VoiceScreen() {
         </div>
 
         <div className="flex items-center gap-2">
+          <GeminiConnectDialog />
           <Link
             to="/chat"
             className="flex items-center gap-1.5 rounded-xl border border-b-[3px] border-border bg-surface/85 px-3 py-1.5 text-xs font-bold text-heading backdrop-blur transition-transform active:translate-y-0.5"

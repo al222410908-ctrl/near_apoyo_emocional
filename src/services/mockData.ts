@@ -128,7 +128,7 @@ export const DEFAULT_STATE: NearState = {
   signedIn: false,
   onboarded: false,
   goals: [],
-  settings: { companionStyle: "calido", voiceRate: 1, theme: "claro", anonymousMode: false, avatarId: "brote" },
+  settings: { companionStyle: "calido", voiceRate: 1, theme: "claro", anonymousMode: false, avatarId: "brote", voiceEngine: "natural" },
   moods: [],
   checkIns: [],
   messages: [],

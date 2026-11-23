@@ -18,6 +18,7 @@ export interface SendMessagePayload {
   style: CompanionStyle;
   userId?: string;
   apiKey?: string;
+  history?: { role: "user" | "near"; text: string }[];
 }
 
 export interface SendMessageResponse {
@@ -81,7 +82,8 @@ export const apiService = {
       payload.content,
       payload.style,
       payload.userId,
-      payload.apiKey
+      payload.apiKey,
+      payload.history
     );
 
     return {
