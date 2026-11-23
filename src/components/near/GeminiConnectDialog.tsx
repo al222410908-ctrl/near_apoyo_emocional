@@ -117,7 +117,7 @@ export function GeminiConnectDialog({ trigger }: GeminiConnectDialogProps) {
             <Input
               id="gemini-key"
               type="password"
-              placeholder="AIzaSy..."
+              placeholder="AQ.Ab8RN6... o AIzaSy..."
               value={apiKey}
               onChange={(e) => setApiKey(e.target.value)}
               className="h-11 rounded-xl border-input bg-background font-mono text-xs placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-sky-500"
@@ -132,11 +132,11 @@ export function GeminiConnectDialog({ trigger }: GeminiConnectDialogProps) {
             <span className="text-muted-foreground">Estado del modelo:</span>
             {hasKey ? (
               <span className="inline-flex items-center gap-1 font-bold text-emerald-600 dark:text-emerald-400">
-                <CheckCircle2 className="size-3.5" /> Gemini 1.5 Flash Conectado
+                <CheckCircle2 className="size-3.5" /> Gemini 3.5 / 3.8 Flash + Voz TTS Activo
               </span>
             ) : (
-              <span className="inline-flex items-center gap-1 font-semibold text-amber-600 dark:text-amber-400">
-                <AlertCircle className="size-3.5" /> Motor Autónomo de Near (Offline)
+              <span className="inline-flex items-center gap-1 font-semibold text-emerald-600 dark:text-emerald-400">
+                <CheckCircle2 className="size-3.5" /> Cloud LLM en Vivo Activo
               </span>
             )}
           </div>

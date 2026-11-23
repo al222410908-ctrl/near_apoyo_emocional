@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { getActiveGeminiKey, synthesizeGeminiVoice } from "@/services/aiCompanion";
 
 /* Minimal typings for the Web Speech API (not in lib.dom for every browser). */
 interface SpeechRecognitionLike {
@@ -104,7 +105,7 @@ export function playNaturalSpeechAudio(
   let currentAudio: HTMLAudioElement | null = null;
   let stopped = false;
 
-  const playNext = () => {
+  const playStreamChunks = () => {
     if (stopped) return;
     if (currentIndex >= chunks.length) {
       onEnd?.();
@@ -122,7 +123,7 @@ export function playNaturalSpeechAudio(
       audio.src = url;
 
       audio.onended = () => {
-        playNext();
+        playStreamChunks();
       };
 
       audio.onerror = () => {
@@ -149,7 +150,37 @@ export function playNaturalSpeechAudio(
     }
   };
 
-  playNext();
+  // Si hay una API Key de Gemini activa, usar la síntesis de voz humana nativa de Gemini 3.8 TTS (Aoede)
+  const activeKey = getActiveGeminiKey();
+  if (activeKey) {
+    synthesizeGeminiVoice(cleanTextForSpeech(text), activeKey)
+      .then((wavDataUrl) => {
+        if (stopped) return;
+        if (wavDataUrl) {
+          const audio = new Audio(wavDataUrl);
+          currentAudio = audio;
+          audio.onended = () => {
+            if (!stopped) onEnd?.();
+          };
+          audio.onerror = () => {
+            if (!stopped) playStreamChunks();
+          };
+          const p = audio.play();
+          if (p !== undefined) {
+            p.catch(() => {
+              if (!stopped) playStreamChunks();
+            });
+          }
+        } else {
+          playStreamChunks();
+        }
+      })
+      .catch(() => {
+        if (!stopped) playStreamChunks();
+      });
+  } else {
+    playStreamChunks();
+  }
 
   return {
     stop: () => {

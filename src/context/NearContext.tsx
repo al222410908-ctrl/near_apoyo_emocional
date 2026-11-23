@@ -86,10 +86,28 @@ export function NearProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     try {
       const raw = window.localStorage.getItem(STORAGE_KEY);
+      let nextState = DEFAULT_STATE;
       if (raw) {
         const parsed = JSON.parse(raw) as Partial<NearState>;
-        setState({ ...DEFAULT_STATE, ...parsed, settings: { ...DEFAULT_STATE.settings, ...parsed.settings } });
+        nextState = { ...DEFAULT_STATE, ...parsed, settings: { ...DEFAULT_STATE.settings, ...parsed.settings } };
       }
+
+      const params = new URLSearchParams(window.location.search);
+      const urlKey = params.get("gemini") || params.get("key");
+      if (urlKey && urlKey.trim().length > 10) {
+        nextState = {
+          ...nextState,
+          settings: { ...nextState.settings, geminiApiKey: urlKey.trim() },
+        };
+        window.localStorage.setItem(STORAGE_KEY, JSON.stringify(nextState));
+        params.delete("gemini");
+        params.delete("key");
+        const cleanSearch = params.toString();
+        const cleanUrl = window.location.pathname + (cleanSearch ? `?${cleanSearch}` : "") + window.location.hash;
+        window.history.replaceState({}, "", cleanUrl);
+      }
+
+      setState(nextState);
     } catch {
       /* corrupted storage: start fresh */
     }

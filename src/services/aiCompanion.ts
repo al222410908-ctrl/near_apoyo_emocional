@@ -3,9 +3,10 @@
  * Provee respuestas reales, dinámicas, verídicas y contextualizadas generadas por IA en vivo.
  * Integra:
  * 1. Protocolo de Seguridad y Crisis (detectCrisis) que intercepta de inmediato cualquier ideación de riesgo.
- * 2. Motor de IA Gratuito en Vivo (OpenAI/Pollinations Cloud LLM + Google Gemini API) con base de conocimiento
- *    de Near y de la Universidad Tecnológica del Valle de Toluca (UTVT).
- * 3. Memoria conversacional completa para mantener el hilo real del diálogo sin repetir respuestas predefinidas.
+ * 2. Conexión nativa con Google Gemini API (modelos activos: gemini-flash-lite-latest, gemini-3.5-flash, gemini-3.5-flash-lite, gemini-3.8-flash)
+ *    y síntesis de voz humana nativa de Gemini (gemini-3.8-flash-lite-tts).
+ * 3. Motor de IA Gratuito en Vivo (OpenAI/Pollinations Cloud LLM) como respaldo automático sin necesidad de clave.
+ * 4. Memoria conversacional completa para mantener el hilo real del diálogo sin repetir respuestas predefinidas.
  */
 
 import type { CompanionStyle } from "@/types";
@@ -28,7 +29,49 @@ export interface ChatHistoryItem {
 const SAFETY_CRISIS_REPLY =
   "Escucho que estás pasando por un momento muy difícil y doloroso. Tu vida y tu tranquilidad son lo más importante. Por favor, comunícate en este instante con un profesional de la Línea de la Vida (800 911 2000). Es gratis y confidencial las 24 horas. No estás solo/a.";
 
-const GEMINI_MODELS = ["gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-pro"];
+/**
+ * Modelos activos en Google AI Studio (verificados con API v1beta)
+ */
+const GEMINI_MODELS = [
+  "gemini-flash-lite-latest",
+  "gemini-3.5-flash",
+  "gemini-3.5-flash-lite",
+  "gemini-3.8-flash",
+  "gemini-3.6-flash",
+];
+
+const GEMINI_TTS_MODELS = [
+  "gemini-3.8-flash-lite-tts",
+  "gemini-3.8-flash-tts",
+];
+
+/**
+ * Obtiene la API key de Gemini guardada en el navegador o en variables de entorno.
+ */
+export function getActiveGeminiKey(explicitKey?: string): string | undefined {
+  if (explicitKey && explicitKey.trim().length > 10) {
+    return explicitKey.trim();
+  }
+  if (typeof window !== "undefined") {
+    try {
+      const raw = window.localStorage.getItem("near:v1");
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        const storedKey = parsed?.settings?.geminiApiKey;
+        if (storedKey && typeof storedKey === "string" && storedKey.trim().length > 10) {
+          return storedKey.trim();
+        }
+      }
+    } catch {
+      // ignore
+    }
+  }
+  const envKey = typeof import.meta !== "undefined" ? import.meta.env?.VITE_GEMINI_API_KEY : undefined;
+  if (envKey && typeof envKey === "string" && envKey.trim().length > 10) {
+    return envKey.trim();
+  }
+  return undefined;
+}
 
 /**
  * Base de Conocimiento de Near y de la Universidad Tecnológica del Valle de Toluca (UTVT)
@@ -96,7 +139,7 @@ export async function testGeminiApiKey(apiKey: string): Promise<{ ok: boolean; m
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           contents: [{ role: "user", parts: [{ text: "Responde: OK" }] }],
-          generationConfig: { maxOutputTokens: 10 },
+          generationConfig: { maxOutputTokens: 15 },
         }),
       });
 
@@ -112,7 +155,65 @@ export async function testGeminiApiKey(apiKey: string): Promise<{ ok: boolean; m
 }
 
 /**
- * 1. Motor Google Gemini API (cuando el usuario configura su clave de Google AI Studio)
+ * Síntesis de Voz Humana Nativa de Google Gemini (gemini-3.8-flash-lite-tts).
+ * Devuelve un data URL audio/wav listo para reproducir con entonación humana cálida.
+ */
+export async function synthesizeGeminiVoice(text: string, explicitKey?: string): Promise<string | null> {
+  const apiKey = getActiveGeminiKey(explicitKey);
+  if (!apiKey || !text.trim()) return null;
+
+  for (const model of GEMINI_TTS_MODELS) {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 9000);
+
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+      const response = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [
+            {
+              parts: [
+                {
+                  text: `Lee en español de México con tono cálido, amigable y empático: ${text}`,
+                },
+              ],
+            },
+          ],
+          generationConfig: {
+            responseModalities: ["AUDIO"],
+            speechConfig: {
+              voiceConfig: {
+                prebuiltVoiceConfig: {
+                  voiceName: "Aoede",
+                },
+              },
+            },
+          },
+        }),
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeoutId);
+
+      if (response.ok) {
+        const data = await response.json();
+        const inline = data?.candidates?.[0]?.content?.parts?.[0]?.inlineData;
+        if (inline?.data && inline?.mimeType) {
+          return `data:${inline.mimeType};base64,${inline.data}`;
+        }
+      }
+    } catch {
+      // Intentar siguiente modelo TTS o pasar a fallback
+    }
+  }
+
+  return null;
+}
+
+/**
+ * 1. Motor Google Gemini API (cuando el usuario tiene su clave de Google AI Studio)
  */
 async function callGeminiApi(
   prompt: string,
@@ -141,6 +242,9 @@ async function callGeminiApi(
 
   for (const model of GEMINI_MODELS) {
     try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 12000);
+
       const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey.trim()}`;
       const response = await fetch(url, {
         method: "POST",
@@ -152,10 +256,13 @@ async function callGeminiApi(
           contents,
           generationConfig: {
             temperature: 0.7,
-            maxOutputTokens: 250,
+            maxOutputTokens: 300,
           },
         }),
+        signal: controller.signal,
       });
+
+      clearTimeout(timeoutId);
 
       if (response.ok) {
         const data = await response.json();
@@ -252,7 +359,7 @@ function detectSuggestedAction(replyText: string): "respiracion" | "sonidos" | n
 /**
  * Función principal que genera la respuesta de Near IA:
  * 1. Filtro ético de emergencia (detectCrisis).
- * 2. Google Gemini API si hay clave configurada.
+ * 2. Google Gemini API (modelos 3.5 / 3.8 Flash) si hay clave configurada.
  * 3. Motor de IA Gratuito en Vivo (LLM en la nube sin clave) con historial y conocimiento real.
  */
 export async function generatePrudentAIResponse(
@@ -275,11 +382,10 @@ export async function generatePrudentAIResponse(
     };
   }
 
-  // 2. Si el usuario configuró una clave de Google Gemini, usar Gemini API
-  const effectiveKey =
-    apiKey || (typeof import.meta !== "undefined" ? import.meta.env?.VITE_GEMINI_API_KEY : undefined);
+  // 2. Si hay clave de Google Gemini activa, usar Gemini API (gemini-flash-lite-latest / gemini-3.5-flash)
+  const effectiveKey = getActiveGeminiKey(apiKey);
 
-  if (effectiveKey && effectiveKey.trim().length > 10) {
+  if (effectiveKey) {
     const geminiReply = await callGeminiApi(trimmed, style, effectiveKey, userName, history);
     if (geminiReply) {
       return {
