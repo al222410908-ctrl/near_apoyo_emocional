@@ -143,11 +143,6 @@ export const welcomeMessage = (name: string): ChatMessage => ({
   role: "near",
   text: `Hola${name ? `, ${name}` : ""}. Este es tu espacio seguro. Puedes escribir lo que sientas, sin prisa y sin juicios. ¿Cómo llegas hoy?`,
   createdAt: new Date().toISOString(),
-  suggestions: [
-    "Siento mucha presión por un examen",
-    "Necesito calmarme",
-    "Solo quiero desahogarme un rato",
-  ],
 });
 
 /** Demo history so the prototype shows a living streak, chart and journal right away. */

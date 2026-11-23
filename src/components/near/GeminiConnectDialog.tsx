@@ -62,10 +62,10 @@ export function GeminiConnectDialog({ trigger }: GeminiConnectDialogProps) {
         {trigger || (
           <button
             type="button"
-            className="inline-flex items-center gap-1.5 rounded-full border border-border/80 bg-surface/90 px-2.5 py-1 text-[11px] font-bold text-heading shadow-2xs backdrop-blur transition-all active:scale-95 hover:bg-surface-2"
+            className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-1 text-[11px] font-bold text-emerald-700 shadow-2xs backdrop-blur transition-all active:scale-95 hover:bg-emerald-500/20 dark:text-emerald-400"
           >
-            <Sparkles className={`size-3 ${hasKey ? "text-emerald-500" : "text-amber-500"}`} />
-            <span>{hasKey ? "Gemini IA Activo" : "Vincular Gemini"}</span>
+            <Sparkles className="size-3 text-emerald-500" />
+            <span>{hasKey ? "Gemini Pro Activo" : "IA en Vivo"}</span>
           </button>
         )}
       </DialogTrigger>
@@ -73,15 +73,15 @@ export function GeminiConnectDialog({ trigger }: GeminiConnectDialogProps) {
       <DialogContent className="max-w-[calc(100%-2rem)] rounded-3xl bg-[#FFFDF9] p-5 sm:max-w-md dark:bg-[#1E1C1A]">
         <DialogHeader className="text-left space-y-1">
           <div className="flex items-center gap-2">
-            <span className="flex size-9 items-center justify-center rounded-2xl bg-sky-500/10 text-sky-600 dark:text-sky-400">
+            <span className="flex size-9 items-center justify-center rounded-2xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
               <Sparkles className="size-5" />
             </span>
             <DialogTitle className="text-lg font-bold text-heading">
-              Vincular Google Gemini API (Gratis)
+              Motor de IA en Vivo (Sin respuestas predefinidas)
             </DialogTitle>
           </div>
           <DialogDescription className="text-xs text-muted-foreground">
-            Conecta una clave gratuita de Gemini para que Near responda con conocimiento en tiempo real, adaptado a la comunidad universitaria de la UTVT.
+            Near IA ya está conectada a un modelo gratuito en la nube en tiempo real con conocimiento de la UTVT. Opcionalmente puedes agregar tu propia clave de Google Gemini.
           </DialogDescription>
         </DialogHeader>
 

@@ -27,8 +27,7 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTr
 import { Button } from "@/components/ui/button";
 import { useNear } from "@/context/NearContext";
 import { useSpeechRecognition, useSpeechSynthesis } from "@/hooks/useSpeech";
-import { CHAT_SUGGESTIONS, COMPANION_STYLES } from "@/services/mockData";
-import { generateReply } from "@/services/companion";
+import { COMPANION_STYLES } from "@/services/mockData";
 import { apiService } from "@/services/api";
 import { cn } from "@/lib/utils";
 import type { ChatMessage, CompanionStyle } from "@/types";
@@ -64,7 +63,6 @@ function ChatScreen() {
   const [text, setText] = useState("");
   const [typing, setTyping] = useState(false);
   const [showToneBar, setShowToneBar] = useState(false);
-  const [showPrompts, setShowPrompts] = useState(true);
   const [rewardedSession, setRewardedSession] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const timer = useRef<number | null>(null);
@@ -106,7 +104,7 @@ function ChatScreen() {
         style: settings.companionStyle,
         userId: user?.name,
         apiKey: settings.geminiApiKey,
-        history: messages.slice(-6).map((m) => ({ role: m.role, text: m.text })),
+        history: messages.slice(-8).map((m) => ({ role: m.role, text: m.text })),
       });
       if (response.crisisAlert) {
         addMessage({ role: "near", text: response.reply, kind: "safety" });
@@ -115,17 +113,10 @@ function ChatScreen() {
           role: "near",
           text: response.reply,
           action: response.action ?? undefined,
-          suggestions: response.suggestions ?? undefined,
         });
       }
     } catch {
-      const fallback = generateReply(value, settings.companionStyle);
-      addMessage({
-        role: "near",
-        text: fallback.text,
-        action: fallback.action,
-        suggestions: fallback.suggestions,
-      });
+      toast.error("No se pudo conectar con Near IA. Revisa tu conexión a internet.");
     } finally {
       setTyping(false);
     }
@@ -150,12 +141,6 @@ function ChatScreen() {
     if (stt.listening) return stt.stop();
     if (!stt.start()) toast("Tu navegador no permite dictado por voz", { description: "Prueba en Chrome o escribe tu mensaje." });
   };
-
-  const lastNearMessage = [...messages].reverse().find((m) => m.role === "near");
-  const activeSuggestions =
-    lastNearMessage?.suggestions && lastNearMessage.suggestions.length > 0
-      ? lastNearMessage.suggestions
-      : CHAT_SUGGESTIONS;
 
   return (
     <div className="flex min-h-screen flex-col bg-sanctuary">
@@ -295,48 +280,7 @@ function ChatScreen() {
       </div>
 
       {/* Bottom Sticky AI Command Dock */}
-      <div className="sticky bottom-0 z-20 border-t border-border bg-surface/95 px-3 pt-2 pb-3 backdrop-blur-xl">
-        {/* Collapsible Suggestions Header + Chips */}
-        {!typing && activeSuggestions.length > 0 && (
-          <div className="mb-2">
-            <div className="mb-1.5 flex items-center justify-between px-1">
-              <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                <Sparkles className="size-3 text-primary" /> Respuestas sugeridas
-              </span>
-              <button
-                type="button"
-                onClick={() => setShowPrompts((p) => !p)}
-                className="inline-flex items-center gap-0.5 text-[10px] font-semibold text-muted-foreground hover:text-heading"
-              >
-                <span>{showPrompts ? "Ocultar" : "Mostrar"}</span>
-                <ChevronDown className={cn("size-3 transition-transform", !showPrompts && "rotate-180")} />
-              </button>
-            </div>
-
-            <AnimatePresence>
-              {showPrompts && (
-                <motion.div
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: "auto", opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  className="no-scrollbar -mx-3 flex gap-1.5 overflow-x-auto px-3 pb-1"
-                >
-                  {activeSuggestions.map((s) => (
-                    <button
-                      key={s}
-                      type="button"
-                      onClick={() => send(s)}
-                      className="shrink-0 rounded-xl border border-b-[3px] border-border border-b-neutral-300 bg-background px-3 py-1.5 text-xs font-semibold text-heading transition-all hover:border-primary/40 hover:bg-primary-tint/30 active:translate-y-0.5 dark:border-b-neutral-700"
-                    >
-                      {s}
-                    </button>
-                  ))}
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-        )}
-
+      <div className="sticky bottom-0 z-20 border-t border-border bg-surface/95 px-3 pt-2.5 pb-3 backdrop-blur-xl">
         {stt.listening && (
           <p className="mb-2 rounded-xl bg-secondary-tint/60 px-3 py-1.5 text-xs font-medium text-secondary">
             🎙️ Escuchando tu voz… {stt.interim && <span className="text-heading italic">“{stt.interim}”</span>}

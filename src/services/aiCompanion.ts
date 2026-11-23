@@ -1,11 +1,11 @@
 /**
  * Near AI Companion Service
- * Provee respuestas empáticas, verídicas y contextualizadas para estudiantes universitarios.
+ * Provee respuestas reales, dinámicas, verídicas y contextualizadas generadas por IA en vivo.
  * Integra:
  * 1. Protocolo de Seguridad y Crisis (detectCrisis) que intercepta de inmediato cualquier ideación de riesgo.
- * 2. Conexión nativa con Google Gemini API (Gemini 1.5 Flash / 2.0 Flash) con base de conocimiento institucional de Near y la UTVT.
- * 3. Memoria conversacional para mantener el hilo de la charla y recordar el nombre del estudiante.
- * 4. Motor Empático Autónomo de Near (Simulación Neural Local) para funcionamiento continuo sin internet o sin clave.
+ * 2. Motor de IA Gratuito en Vivo (OpenAI/Pollinations Cloud LLM + Google Gemini API) con base de conocimiento
+ *    de Near y de la Universidad Tecnológica del Valle de Toluca (UTVT).
+ * 3. Memoria conversacional completa para mantener el hilo real del diálogo sin repetir respuestas predefinidas.
  */
 
 import type { CompanionStyle } from "@/types";
@@ -16,8 +16,8 @@ export interface AIResponseResult {
   action?: "respiracion" | "sonidos" | "sos" | null;
   riskScore: number;
   crisisAlert: boolean;
-  suggestions: string[];
-  modelUsed: "gemini" | "near-neural";
+  suggestions?: string[];
+  modelUsed: "gemini" | "live-ai" | "safety";
 }
 
 export interface ChatHistoryItem {
@@ -28,13 +28,7 @@ export interface ChatHistoryItem {
 const SAFETY_CRISIS_REPLY =
   "Escucho que estás pasando por un momento muy difícil y doloroso. Tu vida y tu tranquilidad son lo más importante. Por favor, comunícate en este instante con un profesional de la Línea de la Vida (800 911 2000). Es gratis y confidencial las 24 horas. No estás solo/a.";
 
-const CRISIS_SUGGESTIONS = [
-  "Llamar a Línea de la Vida (800 911 2000)",
-  "Contactar a SAPTEL (55 5259 8121)",
-  "Hablar con un tutor o familiar",
-];
-
-const GEMINI_MODELS = ["gemini-1.5-flash", "gemini-2.0-flash", "gemini-1.5-pro"];
+const GEMINI_MODELS = ["gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-pro"];
 
 /**
  * Base de Conocimiento de Near y de la Universidad Tecnológica del Valle de Toluca (UTVT)
@@ -42,87 +36,100 @@ const GEMINI_MODELS = ["gemini-1.5-flash", "gemini-2.0-flash", "gemini-1.5-pro"]
 function buildKnowledgePrompt(style: CompanionStyle, userName?: string): string {
   const styleInstruction =
     style === "directo"
-      ? "Adopta un tono directo: conciso, estructurado, enfocado en ordenar los pendientes y dar un micro-paso práctico realizable hoy."
+      ? "Adopta un tono directo: práctico, claro, estructurado y enfocado en resolver o dar pasos accionables concretos."
       : style === "silencioso"
-        ? "Adopta un tono silencioso: muy breve, pausado, brindando espacio y contención sin saturar."
-        : "Adopta un tono cálido: dulce, profundamente empático, validando que lo que siente tiene sentido y acompañando con ternura.";
+        ? "Adopta un tono sereno y breve: pausado, cálido, de pocas palabras pero mucha presencia empática."
+        : "Adopta un tono cálido y amigable: cercano, empático, natural y reconfortante, como un compañero comprensivo.";
 
-  return `Eres Near, la inteligencia artificial de apoyo emocional y salud mental preventiva de la Universidad Tecnológica del Valle de Toluca (UTVT) en México.
-Tu interlocutor es un estudiante universitario llamado ${userName || "estudiante"}.
+  return `Eres Near, la inteligencia artificial de apoyo emocional, orientación estudiantil y bienestar preventivo de la Universidad Tecnológica del Valle de Toluca (UTVT, ubicada en Lerma / Santa María Atarasquillo, Estado de México).
+El estudiante con quien conversas se llama ${userName || "estudiante"}.
 
-CONOCIMIENTO INTEGRAL DE NEAR Y DE LA UTVT:
-1. Contexto Académico y Estudiantil:
-   - Los estudiantes pertenecen a carreras tecnológicas como TIC (Tecnologías de la Información y Comunicación: Desarrollo de Software, Redes, Ciberseguridad).
-   - Suelen enfrentar estrés por exámenes parciales, proyectos integradores de programación, entregas de cuatrimestre, desveladas, presión familiar y miedo a reprobar materias.
-2. Módulos y herramientas dentro de la plataforma Near que puedes recomendar cuando sea oportuno:
-   - "Laboratorio de Calma": Guía de respiración 4-7-8 (inhalar en 4s, retener en 7s, exhalar en 8s) y enraizamiento somático 5-4-3-2-1 para reducir ansiedad física.
-   - "Paisajes Sonoros": Lluvia suave, olas del mar, bosque templado y fogata relajante para estudiar o descansar.
-   - "Bitácora Anímica": Registro diario del estado de ánimo con rueda emocional y detonantes.
-   - "Cápsulas Preventivas": Micro-aprendizajes para vencer el síndrome del impostor en programación y la parálisis por perfeccionismo.
-3. Protocolo Ético de Emergencia:
-   - Si detectas intención de autolesión o crisis severa, prioriza la seguridad y refiere a la Línea de la Vida (800 911 2000, 24/7) y a SAPTEL (55 5259 8121).
+BASE DE CONOCIMIENTO VERÍDICA QUE DOMINAS:
+1. Contexto Universitario UTVT:
+   - Carreras como TIC (Tecnologías de la Información y Comunicación: Desarrollo de Software Multiplataforma, Infraestructura de Redes Digitales, Entornos Virtuales), Mecatrónica, Negocios, Procesos Industriales, Enfermería, etc.
+   - Retos reales de los alumnos: proyectos integradores por cuatrimestre, estadías profesionales, exámenes parciales, depuración de código, bases de datos (MongoDB, SQL), servidores, estrés por entregas, desvelos, transporte y presión académica o familiar.
+2. Conocimiento Psicológico y Científico Verídico (Primeros Auxilios Psicológicos - PAP):
+   - Fisiología del estrés y ansiedad: activación del sistema nervioso simpático y cómo regularlo activando el sistema parasimpático y el nervio vago.
+   - Técnica de respiración 4-7-8 (inhalar 4s, retener 7s, exhalar 8s) disponible en el módulo "Respiración" de Near.
+   - Técnica de grounding / enraizamiento sensorial 5-4-3-2-1 para bajar picos de ansiedad.
+   - Paisajes sonoros (lluvia, bosque, olas, fogata) disponibles en el módulo "Sonidos" de Near para enfoque o descanso.
+   - Hábitos de estudio: técnica Pomodoro, división de tareas complejas en micro-pasos, higiene del sueño y manejo del síndrome del impostor.
+3. Líneas Oficiales en México (para casos de crisis):
+   - Línea de la Vida: 800 911 2000 (24/7, gratuita).
+   - SAPTEL: 55 5259 8121.
 
-REGLAS DE COMUNICACIÓN VERÍDICA Y HUMANA:
+REGLAS OBLIGATORIAS PARA RESPONDER:
 - ${styleInstruction}
-- Habla en español de México natural, empático, sin modismos forzados ni tecnicismos médicos.
-- Responde de forma CONCISA: 1 o máximo 2 párrafos breves (máximo 50 a 65 palabras en total). Esto es VITAL porque tu respuesta será leída por un sintetizador de voz amigable.
-- Valida la emoción del estudiante antes de ofrecer soluciones.
-- NO uses asteriscos de formato markdown (como **negritas** ni *cursivas*) ni listas con viñetas ni emojis excesivos, para que la locución de voz suene completamente natural y fluida.
-- Eres un apoyo preventivo entre pares; no diagnostiques enfermedades psiquiátricas ni prometas curas médicas.`;
+- Responde SIEMPRE de manera específica y directa a lo que el usuario acaba de preguntar o contar. NUNCA uses frases genéricas repetitivas ni plantillas predefinidas.
+- Si el usuario te hace una pregunta de conocimiento, técnica, académica o sobre un consejo concreto, dale una respuesta verídica, útil y bien explicada.
+- Si el usuario se está desahogando emocionalmente, valida específicamente su situación y hazle una pregunta o sugerencia personalizada sobre lo que mencionó.
+- Habla en español de México natural y fluido.
+- Mantén una extensión ágil de 2 a 4 oraciones (alrededor de 45 a 85 palabras) para que sea muy cómodo de leer y escuchar por voz.
+- NO uses asteriscos de Markdown (**negritas**), ni numerales (#), ni tablas, para que el motor de voz lo lea de forma 100% humana y natural.`;
 }
 
 /**
- * Prueba una clave API de Gemini enviando una consulta mínima de verificación.
+ * Limpia cualquier residuo de markdown para que tanto el chat como la voz se escuchen limpios.
+ */
+function sanitizeAIOutput(raw: string): string {
+  return raw
+    .replace(/\*{1,3}(.*?)\*{1,3}/g, "$1")
+    .replace(/#+\s*/g, "")
+    .replace(/`{1,3}(.*?)(`{1,3}|$)/g, "$1")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
+/**
+ * Prueba una clave API de Google Gemini enviando una consulta mínima de verificación.
  */
 export async function testGeminiApiKey(apiKey: string): Promise<{ ok: boolean; message: string }> {
   if (!apiKey || apiKey.trim().length < 15) {
     return { ok: false, message: "La clave debe tener al menos 15 caracteres." };
   }
 
-  try {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey.trim()}`;
-    const response = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        contents: [
-          {
-            role: "user",
-            parts: [{ text: "Responde únicamente: OK" }],
-          },
-        ],
-        generationConfig: { maxOutputTokens: 10 },
-      }),
-    });
+  for (const model of GEMINI_MODELS) {
+    try {
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey.trim()}`;
+      const response = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [{ role: "user", parts: [{ text: "Responde: OK" }] }],
+          generationConfig: { maxOutputTokens: 10 },
+        }),
+      });
 
-    if (response.ok) {
-      return { ok: true, message: "¡Conexión con Gemini verificada con éxito!" };
+      if (response.ok) {
+        return { ok: true, message: `¡Conexión con Google Gemini (${model}) verificada!` };
+      }
+    } catch {
+      // probar siguiente modelo
     }
-    const errData = await response.json().catch(() => null);
-    const msg = errData?.error?.message || `Error del servidor (${response.status})`;
-    return { ok: false, message: msg };
-  } catch (e) {
-    return { ok: false, message: "No se pudo conectar con el servidor de Google Gemini." };
   }
+
+  return { ok: false, message: "No se pudo validar la clave. Verifica que sea una API Key activa de Google AI Studio." };
 }
 
 /**
- * Consulta la API de Google Gemini con memoria y base de conocimiento.
+ * 1. Motor Google Gemini API (cuando el usuario configura su clave de Google AI Studio)
  */
 async function callGeminiApi(
   prompt: string,
   style: CompanionStyle,
   apiKey: string,
   userName?: string,
-  history: ChatHistoryItem[] = []
+  history: ChatHistoryItem[] = [],
 ): Promise<string | null> {
   const systemInstruction = buildKnowledgePrompt(style, userName);
 
-  // Formatear los últimos 4 mensajes del historial para que Gemini mantenga contexto
-  const recentHistory = history.slice(-4).map((item) => ({
-    role: item.role === "user" ? "user" : "model",
-    parts: [{ text: item.text }],
-  }));
+  const recentHistory = history
+    .filter((item) => item.text && item.text.trim().length > 0)
+    .slice(-8)
+    .map((item) => ({
+      role: item.role === "user" ? "user" : "model",
+      parts: [{ text: item.text }],
+    }));
 
   const contents = [
     ...recentHistory,
@@ -144,8 +151,8 @@ async function callGeminiApi(
           },
           contents,
           generationConfig: {
-            temperature: 0.65,
-            maxOutputTokens: 160,
+            temperature: 0.7,
+            maxOutputTokens: 250,
           },
         }),
       });
@@ -154,12 +161,11 @@ async function callGeminiApi(
         const data = await response.json();
         const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
         if (text && typeof text === "string" && text.trim().length > 0) {
-          // Limpiar asteriscos y formato markdown que puedan haber escapado
-          return text.replace(/\*+/g, "").replace(/#+/g, "").trim();
+          return sanitizeAIOutput(text);
         }
       }
     } catch {
-      // Intentar con el siguiente modelo si este falla
+      // Intentar siguiente modelo de Gemini
     }
   }
 
@@ -167,113 +173,94 @@ async function callGeminiApi(
 }
 
 /**
- * Motor Empático Autónomo de Near (Simulación Neural Preventiva Local).
- * Responde con conocimiento de la UTVT cuando Gemini no tiene clave o no hay internet.
+ * 2. Motor de IA Gratuito en Vivo sin necesidad de API Key (Pollinations OpenAI-compatible Cloud LLM)
+ * Funciona de inmediato para todos los usuarios con memoria conversacional y conocimiento real.
  */
-function generateEmpatheticLocalResponse(
-  text: string,
+async function callFreeLiveLLM(
+  prompt: string,
   style: CompanionStyle,
-  userName?: string
-): { reply: string; action?: "respiracion" | "sonidos" | null; suggestions: string[] } {
-  const lower = text.toLowerCase();
-  const namePrefix = userName ? `${userName}, ` : "";
+  userName?: string,
+  history: ChatHistoryItem[] = [],
+): Promise<string | null> {
+  const systemPrompt = buildKnowledgePrompt(style, userName);
 
-  // 1. Exámenes, proyectos de programación, entregas de cuatrimestre
-  if (/examen|parcial|final|calificaci|reprobar|estudi|tarea|entrega|proyecto|materia|profesor|profe|programaci|codigo|base de datos/.test(lower)) {
-    if (style === "directo") {
-      return {
-        reply: `${namePrefix}la presión académica en la UTVT puede sentirse muy pesada cuando se juntan los proyectos y parciales. Vamos a ordenar prioridades: ¿cuál es el pendiente que más te preocupa hoy y cómo podemos dividirlo en un solo micro-paso de diez minutos?`,
-        action: "respiracion",
-        suggestions: ["Dividir pendientes en pasos", "Hacer respiración 4-7-8", "Desahogarme un rato"],
-      };
+  const recentMessages = history
+    .filter((item) => item.text && item.text.trim().length > 0)
+    .slice(-8)
+    .map((item) => ({
+      role: item.role === "user" ? ("user" as const) : ("assistant" as const),
+      content: item.text,
+    }));
+
+  const messages = [
+    { role: "system" as const, content: systemPrompt },
+    ...recentMessages,
+    { role: "user" as const, content: prompt },
+  ];
+
+  const modelsToTry = ["openai", "mistral"];
+
+  for (const model of modelsToTry) {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 14000);
+
+      const response = await fetch("https://text.pollinations.ai/openai", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model,
+          messages,
+          temperature: 0.7,
+        }),
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeoutId);
+
+      if (response.ok) {
+        const data = await response.json();
+        const content = data?.choices?.[0]?.message?.content;
+        if (content && typeof content === "string" && content.trim().length > 0) {
+          return sanitizeAIOutput(content);
+        }
+      }
+    } catch {
+      // Probar siguiente modelo en caso de timeout o red
     }
-    if (style === "silencioso") {
-      return {
-        reply: `Esa carga escolar pesa mucho. Respira conmigo un segundo; aquí estoy escuchándote.`,
-        action: "respiracion",
-        suggestions: ["Hacer pausa de 2 min", "Organizar mis temas"],
-      };
-    }
-    return {
-      reply: `${namePrefix}entiendo lo pesado que se siente tener tantas entregas y parciales encima. Recuerda que una nota o un código con errores no define tu capacidad como persona. Tómate un respiro hondo y vamos paso a pasito. ¿Qué parte sientes más difícil ahorita?`,
-      action: "respiracion",
-      suggestions: ["Hacer respiración 4-7-8", "Contarte qué me preocupa", "Tomar una pausa de calma"],
-    };
   }
 
-  // 2. Ansiedad, pánico, pecho apretado, nerviosismo
-  if (/ansied|nervio|panico|pecho|asfixi|miedo|desesperad|estres|agobi/.test(lower)) {
-    return {
-      reply: `${namePrefix}lo que sientes en tu cuerpo en este momento es real, pero estás a salvo aquí. Coloca una mano sobre tu pecho, siente cómo sube y baja, e intentemos juntos una respiración lenta: inhala en cuatro, retén en siete y suelta en ocho.`,
-      action: "respiracion",
-      suggestions: ["Hacer respiración 4-7-8", "Poner sonidos de lluvia", "Platicar con calma"],
-    };
-  }
-
-  // 3. Cansancio, agotamiento, sueño, insomnio
-  if (/cansad|agotad|no dormi|sueno|insomnio|desvel|noche|exhaust|sin energia/.test(lower)) {
-    return {
-      reply: `${namePrefix}tu mente y tu cuerpo te están pidiendo una pausa bien merecida. A veces forzarse a seguir solo desgasta más. ¿Qué te parece si ponemos unos minutos de lluvia suave o sonidos de bosque para que descanses la mirada?`,
-      action: "sonidos",
-      suggestions: ["Poner sonidos de lluvia", "Hacer pausa de relajación", "Registrar en bitácora"],
-    };
-  }
-
-  // 4. Tristeza, soledad, vacío, desánimo
-  if (/triste|sol[oa]\b|llorar|vacio|extran|nadie|desanim/.test(lower)) {
-    return {
-      reply: `${namePrefix}lamento mucho que estés sintiendo este dolor. No estás solo/a en este momento; permítete sentir sin juzgarte, porque la tristeza también necesita su espacio. Aquí estoy para escucharte con todo el tiempo del mundo.`,
-      action: null,
-      suggestions: ["Solo quiero desahogarme", "Hacer una pausa tranquila", "Gracias por escucharme"],
-    };
-  }
-
-  // 5. Saludo inicial
-  if (/^(hola|buen[oa]s|hey|que tal)/.test(lower)) {
-    return {
-      reply: `¡Hola ${namePrefix}! Qué gusto tenerte por aquí en Near. Este es tu espacio seguro y confidencial de la UTVT. ¿Cómo te has sentido el día de hoy?`,
-      action: null,
-      suggestions: ["Tengo un poco de estrés", "Necesito calmarme", "Solo venía a saludar"],
-    };
-  }
-
-  // 6. Agradecimiento
-  if (/gracias|me ayudo|alivio|muchas gracias/.test(lower)) {
-    return {
-      reply: `Me alegra mucho acompañarte, ${userName || "amigo/a"}. Recuerda que este refugio siempre está disponible para ti cada vez que necesites un respiro.`,
-      action: null,
-      suggestions: ["Hacer una respiración", "Ver mi bitácora", "Hasta pronto"],
-    };
-  }
-
-  // 7. Respuesta empática prudente general
-  if (style === "directo") {
-    return {
-      reply: `${namePrefix}te leo con atención. Si pudieras cambiar una sola cosa de lo que está ocurriendo hoy, ¿cuál sería? A veces nombrarlo claramente ayuda a encontrar claridad.`,
-      action: null,
-      suggestions: ["Quiero desahogarme más", "Hacer una pausa guiada", "Ordenar mis pendientes"],
-    };
-  }
-
-  return {
-    reply: `${namePrefix}gracias por compartirlo conmigo. Todo lo que sientes importa y no tienes que guardártelo solo/a. Te escucho con calma: ¿quieres contarme un poco más sobre lo que está pasando por tu mente?`,
-    action: null,
-    suggestions: ["Contarte más a fondo", "Hacer respiración 4-7-8", "Poner sonidos de calma"],
-  };
+  return null;
 }
 
 /**
- * Función principal que orquesta la generación de respuesta:
- * 1. Filtro estricto de crisis / autolesión.
- * 2. Consulta a Google Gemini con Base de Conocimiento UTVT (si hay API Key).
- * 3. Fallback inteligente al Motor Empático de Near.
+ * Detecta si la respuesta de la IA sugiere abrir el módulo de respiración o sonidos.
+ */
+function detectSuggestedAction(replyText: string): "respiracion" | "sonidos" | null {
+  const lower = replyText.toLowerCase();
+  if (/4-7-8|inhala|exhala|ejercicio de respiraci/.test(lower)) {
+    return "respiracion";
+  }
+  if (/paisaje sonoro|sonidos de lluvia|sonidos de bosque|m[úu]sica de calma/.test(lower)) {
+    return "sonidos";
+  }
+  return null;
+}
+
+/**
+ * Función principal que genera la respuesta de Near IA:
+ * 1. Filtro ético de emergencia (detectCrisis).
+ * 2. Google Gemini API si hay clave configurada.
+ * 3. Motor de IA Gratuito en Vivo (LLM en la nube sin clave) con historial y conocimiento real.
  */
 export async function generatePrudentAIResponse(
   userText: string,
   style: CompanionStyle,
   userName?: string,
   apiKey?: string,
-  history: ChatHistoryItem[] = []
+  history: ChatHistoryItem[] = [],
 ): Promise<AIResponseResult> {
   const trimmed = userText.trim();
 
@@ -284,48 +271,45 @@ export async function generatePrudentAIResponse(
       action: "sos",
       riskScore: 1.0,
       crisisAlert: true,
-      suggestions: CRISIS_SUGGESTIONS,
-      modelUsed: "near-neural",
+      modelUsed: "safety",
     };
   }
 
-  // 2. Si hay clave de Gemini (proporcionada en settings o en env), usar Gemini
+  // 2. Si el usuario configuró una clave de Google Gemini, usar Gemini API
   const effectiveKey =
     apiKey || (typeof import.meta !== "undefined" ? import.meta.env?.VITE_GEMINI_API_KEY : undefined);
 
   if (effectiveKey && effectiveKey.trim().length > 10) {
     const geminiReply = await callGeminiApi(trimmed, style, effectiveKey, userName, history);
     if (geminiReply) {
-      const lower = geminiReply.toLowerCase();
-      const action = lower.includes("respir")
-        ? "respiracion"
-        : lower.includes("sonido") || lower.includes("lluvia") || lower.includes("bosque")
-          ? "sonidos"
-          : null;
-
       return {
         reply: geminiReply,
-        action,
+        action: detectSuggestedAction(geminiReply),
         riskScore: 0.1,
         crisisAlert: false,
-        suggestions: [
-          action === "respiracion" ? "Hacer respiración 4-7-8" : "Contarte un poco más",
-          "Poner sonidos de calma",
-          "Me siento un poco mejor",
-        ],
         modelUsed: "gemini",
       };
     }
   }
 
-  // 3. Motor Empático Autónomo de Near (Fallback con conocimiento UTVT)
-  const local = generateEmpatheticLocalResponse(trimmed, style, userName);
+  // 3. Motor de IA Gratuito en Vivo (funciona automáticamente sin necesidad de API Key)
+  const liveReply = await callFreeLiveLLM(trimmed, style, userName, history);
+  if (liveReply) {
+    return {
+      reply: liveReply,
+      action: detectSuggestedAction(liveReply),
+      riskScore: 0.1,
+      crisisAlert: false,
+      modelUsed: "live-ai",
+    };
+  }
+
+  // 4. Solo si el dispositivo del usuario no tiene conexión a internet en absoluto
   return {
-    reply: local.reply,
-    action: local.action,
-    riskScore: 0.1,
+    reply: `Perdona ${userName ? `${userName}, ` : ""}en este instante parece que no hay conexión a internet para procesar tu mensaje con la IA en vivo. Verifica tu red e inténtalo de nuevo; aquí sigo contigo.`,
+    action: null,
+    riskScore: 0.0,
     crisisAlert: false,
-    suggestions: local.suggestions,
-    modelUsed: "near-neural",
+    modelUsed: "live-ai",
   };
 }
